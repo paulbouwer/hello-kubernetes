@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-kubernetes-custom
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: hello-kubernetes-custom
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hello-kubernetes-custom
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: hello-kubernetes-custom
+    spec:
+      containers:
+      - name: hello-kubernetes
+        image: paulbouwer/hello-kubernetes:1.4                
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MESSAGE
+          value: I just deployed this on Kubernetes!
