@@ -1,21 +1,21 @@
 FROM node:8.1.0-alpine
 
-ARG BUILD_DATE
+ARG IMAGE_CREATE_DATE
 ARG IMAGE_VERSION
-ARG VCS_REF
+ARG IMAGE_SOURCE_REVISION
 
-# Metadata as defined at http://label-schema.org
-LABEL maintainer="Paul Bouwer" \
-      org.label-schema.schema-version="1.0" \
-      org.label-schema.vendor="Paul Bouwer" \
-      org.label-schema.name="Hello Kubernetes!" \
-      org.label-schema.version=$IMAGE_VERSION \
-      org.label-schema.license="MIT" \
-      org.label-schema.description="Provides a demo image to deploy to a Kubernetes cluster. It displays a message, the name of the pod and details of the node it's deployed to." \
-      org.label-schema.build-date=$BUILD_DATE \
-      org.label-schema.vcs-url="https://github.com/paulbouwer/hello-kubernetes.git" \
-      org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.usage="https://github.com/paulbouwer/hello-kubernetes/README.md"
+# Metadata as defined in OCI image spec annotations - https://github.com/opencontainers/image-spec/blob/master/annotations.md
+LABEL org.opencontainers.image.title="Hello Kubernetes!" \
+      org.opencontainers.image.description="Provides a demo image to deploy to a Kubernetes cluster. It displays a message, the name of the pod and details of the node it's deployed to." \
+      org.opencontainers.image.created=$IMAGE_CREATE_DATE \
+      org.opencontainers.image.version=$IMAGE_VERSION \
+      org.opencontainers.image.authors="Paul Bouwer" \
+      org.opencontainers.image.url="https://hub.docker.com/r/paulbouwer/hello-kubernetes/" \
+      org.opencontainers.image.documentation="https://github.com/paulbouwer/hello-kubernetes/README.md" \
+      org.opencontainers.image.vendor="Paul Bouwer" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.source="https://github.com/paulbouwer/hello-kubernetes.git" \
+      org.opencontainers.image.revision=$IMAGE_SOURCE_REVISION 
 
 # Create app directory
 RUN mkdir -p /usr/src/app

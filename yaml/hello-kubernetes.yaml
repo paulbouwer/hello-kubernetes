@@ -16,6 +16,9 @@ metadata:
   name: hello-kubernetes
 spec:
   replicas: 3
+  selector:
+    matchLabels:
+      app: hello-kubernetes
   template:
     metadata:
       labels:
@@ -23,6 +26,6 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.4                
+        image: paulbouwer/hello-kubernetes:1.5
         ports:
         - containerPort: 8080

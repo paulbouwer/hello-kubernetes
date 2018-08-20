@@ -9,6 +9,8 @@ app.set('view engine', 'handlebars');
 app.use(express.static('static'));
 app.use(morgan('combined'));
 
+// Configuration
+var port = process.env.PORT || 8080;
 var message = process.env.MESSAGE || "Hello world!";
 
 app.get('/', function (req, res) {
@@ -20,6 +22,7 @@ app.get('/', function (req, res) {
     });
 });
 
-app.listen(8080, function () {
-  console.log('Listening on port 8080 - http://' + os.hostname() + ':8080');
-})
+// Set up listener
+app.listen(port, function () {
+  console.log("Listening on: http://%s:%s", os.hostname(), port);
+});
