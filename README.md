@@ -160,7 +160,7 @@ spec:
         - containerPort: 80
         env:
         - name: PORT
-          value: 80
+          value: "80"
 ```
 
 
