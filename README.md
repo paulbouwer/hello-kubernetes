@@ -13,7 +13,7 @@ The default "Hello world!" message displayed can be overridden using the `MESSAG
 
 It is available on DockerHub as:
 
-- [paulbouwer/hello-kubernetes:1.6](https://hub.docker.com/r/paulbouwer/hello-kubernetes/)
+- [paulbouwer/hello-kubernetes:1.7](https://hub.docker.com/r/paulbouwer/hello-kubernetes/)
 
 ## Deploy
 
@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.6
+        image: paulbouwer/hello-kubernetes:1.7
         ports:
         - containerPort: 8080
 ```
@@ -102,7 +102,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.6
+        image: paulbouwer/hello-kubernetes:1.7
         ports:
         - containerPort: 8080
         env:
@@ -137,7 +137,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.6
+        image: paulbouwer/hello-kubernetes:1.7
         ports:
         - containerPort: 80
         env:
@@ -152,18 +152,18 @@ If you'd like to build the image yourself, then you can do so as follows. The `b
 
 Bash
 ```bash
-$ docker build --no-cache --build-arg IMAGE_VERSION="1.6" --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" -f Dockerfile -t "hello-kubernetes:1.6" .
+$ docker build --no-cache --build-arg IMAGE_VERSION="1.7" --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" -f Dockerfile -t "hello-kubernetes:1.7" app
 ```
 
 Powershell
 ```powershell
-PS> docker build --no-cache --build-arg IMAGE_VERSION="1.6" --build-arg IMAGE_CREATE_DATE="$(Get-Date((Get-Date).ToUniversalTime()) -UFormat '%Y-%m-%dT%H:%M:%SZ')" --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" -f Dockerfile -t "hello-kubernetes:1.6" .
+PS> docker build --no-cache --build-arg IMAGE_VERSION="1.7" --build-arg IMAGE_CREATE_DATE="$(Get-Date((Get-Date).ToUniversalTime()) -UFormat '%Y-%m-%dT%H:%M:%SZ')" --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" -f Dockerfile -t "hello-kubernetes:1.7" app
 ```
 
 ## Develop Application
 
 If you have [VS Code](https://code.visualstudio.com/) and the [Visual Studio Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to build a container based node.js 13 development environment. 
 
-Port `8080` has been configured to be forwarded to your host. If you run `npm start` in the VS Code Remote Containers terminal, you will be able to access the website on `http://localhost:8080`. You can change the port in the `.devcontainer\devcontainer.json` file under the `appPort` key.
+Port `8080` has been configured to be forwarded to your host. If you run `npm start` in the `app` folder in the VS Code Remote Containers terminal, you will be able to access the website on `http://localhost:8080`. You can change the port in the `.devcontainer\devcontainer.json` file under the `appPort` key.
 
 See [here](https://code.visualstudio.com/docs/remote/containers) for more details on working with this setup.
