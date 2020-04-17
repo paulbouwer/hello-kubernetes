@@ -13,7 +13,7 @@ The default "Hello world!" message displayed can be overridden using the `MESSAG
 
 It is available on DockerHub as:
 
-- [paulbouwer/hello-kubernetes:1.7](https://hub.docker.com/r/paulbouwer/hello-kubernetes/)
+- [paulbouwer/hello-kubernetes:1.8](https://hub.docker.com/r/paulbouwer/hello-kubernetes/)
 
 ## Deploy
 
@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.7
+        image: paulbouwer/hello-kubernetes:1.8
         ports:
         - containerPort: 8080
 ```
@@ -102,7 +102,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.7
+        image: paulbouwer/hello-kubernetes:1.8
         ports:
         - containerPort: 8080
         env:
@@ -137,7 +137,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.7
+        image: paulbouwer/hello-kubernetes:1.8
         ports:
         - containerPort: 80
         env:
@@ -152,12 +152,12 @@ If you'd like to build the image yourself, then you can do so as follows. The `b
 
 Bash
 ```bash
-$ docker build --no-cache --build-arg IMAGE_VERSION="1.7" --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" -f Dockerfile -t "hello-kubernetes:1.7" app
+$ docker build --no-cache --build-arg IMAGE_VERSION="1.8" --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" -f Dockerfile -t "hello-kubernetes:1.8" app
 ```
 
 Powershell
 ```powershell
-PS> docker build --no-cache --build-arg IMAGE_VERSION="1.7" --build-arg IMAGE_CREATE_DATE="$(Get-Date((Get-Date).ToUniversalTime()) -UFormat '%Y-%m-%dT%H:%M:%SZ')" --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" -f Dockerfile -t "hello-kubernetes:1.7" app
+PS> docker build --no-cache --build-arg IMAGE_VERSION="1.8" --build-arg IMAGE_CREATE_DATE="$(Get-Date((Get-Date).ToUniversalTime()) -UFormat '%Y-%m-%dT%H:%M:%SZ')" --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" -f Dockerfile -t "hello-kubernetes:1.8" app
 ```
 
 ## Develop Application
