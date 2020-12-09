@@ -145,6 +145,36 @@ spec:
           value: "80"
 ```
 
+## Cutomize URL context path
+
+If you have an ingress that routes to a custom context path then you can customize the URL context path. The css files and the images will be loaded properly in that case.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-kubernetes-custom
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-kubernetes-custom
+  template:
+    metadata:
+      labels:
+        app: hello-kubernetes-custom
+    spec:
+      containers:
+      - name: hello-kubernetes
+        image: paulbouwer/hello-kubernetes:1.8
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MESSAGE
+          value: I just deployed this on Kubernetes!
+        - name: 
+          value: "/api/v1/hello-kubernetes/"
+```
 
 ## Build Container Image
 
