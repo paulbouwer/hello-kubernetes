@@ -172,7 +172,7 @@ spec:
         env:
         - name: MESSAGE
           value: I just deployed this on Kubernetes!
-        - name: 
+        - name: CONTEXT_PATH
           value: "/api/v1/hello-kubernetes/"
 ```
 
