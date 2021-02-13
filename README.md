@@ -1,6 +1,9 @@
 # Hello Kubernetes!
 
+![Docker Image Version (latest by date)](https://img.shields.io/docker/v/paulbouwer/hello-kubernetes) ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/paulbouwer/hello-kubernetes) ![Docker Pulls](https://img.shields.io/docker/pulls/paulbouwer/hello-kubernetes)
+
 This container image can be deployed on a Kubernetes cluster. When accessed via a web browser on port `8080`, it will display:
+
 - a default **Hello world!** message
 - the pod name
 - node os information
@@ -8,12 +11,6 @@ This container image can be deployed on a Kubernetes cluster. When accessed via 
 ![Hello world! from the hello-kubernetes image](hello-kubernetes.png)
 
 The default "Hello world!" message displayed can be overridden using the `MESSAGE` environment variable. The default port of 8080 can be overriden using the `PORT` environment variable.
-
-## DockerHub
-
-It is available on DockerHub as:
-
-- [paulbouwer/hello-kubernetes:1.8](https://hub.docker.com/r/paulbouwer/hello-kubernetes/)
 
 ## Deploy
 
@@ -51,7 +48,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.8
+        image: paulbouwer/hello-kubernetes:1.9
         ports:
         - containerPort: 8080
 ```
@@ -102,7 +99,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.8
+        image: paulbouwer/hello-kubernetes:1.9
         ports:
         - containerPort: 8080
         env:
@@ -137,7 +134,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.8
+        image: paulbouwer/hello-kubernetes:1.9
         ports:
         - containerPort: 80
         env:
@@ -166,7 +163,7 @@ spec:
     spec:
       containers:
       - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.8
+        image: paulbouwer/hello-kubernetes:1.9
         ports:
         - containerPort: 8080
         env:
@@ -182,12 +179,12 @@ If you'd like to build the image yourself, then you can do so as follows. The `b
 
 Bash
 ```bash
-$ docker build --no-cache --build-arg IMAGE_VERSION="1.8" --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" -f Dockerfile -t "hello-kubernetes:1.8" app
+$ docker build --no-cache --build-arg IMAGE_VERSION="1.9" --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" -f Dockerfile -t "hello-kubernetes:1.9" app
 ```
 
 Powershell
 ```powershell
-PS> docker build --no-cache --build-arg IMAGE_VERSION="1.8" --build-arg IMAGE_CREATE_DATE="$(Get-Date((Get-Date).ToUniversalTime()) -UFormat '%Y-%m-%dT%H:%M:%SZ')" --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" -f Dockerfile -t "hello-kubernetes:1.8" app
+PS> docker build --no-cache --build-arg IMAGE_VERSION="1.9" --build-arg IMAGE_CREATE_DATE="$(Get-Date((Get-Date).ToUniversalTime()) -UFormat '%Y-%m-%dT%H:%M:%SZ')" --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" -f Dockerfile -t "hello-kubernetes:1.9" app
 ```
 
 ## Develop Application
