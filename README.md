@@ -14,6 +14,8 @@ This container image can be deployed on a Kubernetes cluster. It runs a static w
 
 You can deploy `hello-kubernetes` to your Kubernetes cluster using [Helm 3](https://helm.sh/docs/intro/install/). You can find all the `hello-kubernetes` Helm chart installation and configuration options in the [Deploy using Helm](docs/deploy-using-helm.md) guide.
 
+Ensure that you are in the chart directory in the repo, since you are referencing a local helm chart.
+
 ```bash
 cd deploy/helm
 ```
