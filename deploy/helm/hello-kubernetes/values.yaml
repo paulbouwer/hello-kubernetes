@@ -1,0 +1,36 @@
+# Provide a custom message
+message: ""
+
+ingress:
+  enabled: false
+  pathPrefix: ""
+
+service:
+  name: "hello-kubernetes"
+  type: LoadBalancer
+  port: 80
+
+serviceAccount:
+  name: "hello-kubernetes"
+
+deployment:
+  replicaCount: 2
+  name: "hello-kubernetes"
+  container:
+    image:
+      repository: "paulbouwer/hello-kubernetes"
+      tag: "1.9" # uses chart appVersion if not provided
+      pullPolicy: IfNotPresent
+    port: 8080
+
+  # Currently only linux images on amd64 architecture are supported - support for arm64 and windows/amd64 coming ...
+  nodeSelector:
+    kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+
+  resources: {}
+
+  tolerations: []
+
+  affinity: {}
+
