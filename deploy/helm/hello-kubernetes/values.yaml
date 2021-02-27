@@ -1,0 +1,37 @@
+replicaCount: 2
+
+serviceAccount:
+  name: "hello-kubernetes"
+
+service:
+  name: "hello-kubernetes"
+  type: LoadBalancer
+  port: 80
+
+deployment:
+  name: "hello-kubernetes"
+  container:
+    image:
+      repository: "paulbouwer/hello-kubernetes"
+      tag: "1.9" # uses chart appVersion if not provided
+      pullPolicy: IfNotPresent
+    port: 8080
+
+  # Currently only linux images on amd64 architecture are supported - support for arm64 and windows/amd64 coming ...
+  nodeSelector:
+    kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+
+  resources: {}
+
+  tolerations: []
+
+  affinity: {}
+
+customisation:
+
+  # Provide a custom message
+  message: ""
+
+  # Provide a static assets path prefix if using an ingress
+  staticAssetsPathPrefix: ""
