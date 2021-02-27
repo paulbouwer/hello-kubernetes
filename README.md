@@ -2,7 +2,7 @@
 
 [![Docker Image Version (latest by date)](https://img.shields.io/docker/v/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes) [![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes) [![Docker Pulls](https://img.shields.io/docker/pulls/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes)
 
-This container image can be deployed on a Kubernetes cluster. When accessed via a web browser on port `8080`, it will display:
+This container image can be deployed on a Kubernetes cluster. It runs a static web site, that displays the following:
 
 - a default **Hello world!** message
 - the pod name
@@ -10,167 +10,48 @@ This container image can be deployed on a Kubernetes cluster. When accessed via 
 
 ![Hello world! from the hello-kubernetes image](hello-kubernetes.png)
 
-The default "Hello world!" message displayed can be overridden using the `MESSAGE` environment variable. The default port of 8080 can be overriden using the `PORT` environment variable.
-
 ## Deploy
 
-### Standard Configuration
-
-Deploy to your Kubernetes cluster using the hello-kubernetes.yaml, which contains definitions for the service and deployment objects:
-
-```yaml
-# hello-kubernetes.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-kubernetes
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 8080
-  selector:
-    app: hello-kubernetes
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hello-kubernetes
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: hello-kubernetes
-  template:
-    metadata:
-      labels:
-        app: hello-kubernetes
-    spec:
-      containers:
-      - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.9
-        ports:
-        - containerPort: 8080
-```
+You can deploy `hello-kubernetes` to your Kubernetes cluster using [Helm 3](https://helm.sh/docs/intro/install/). You can find all the `hello-kubernetes` Helm chart installation and configuration options in the [Deploy using Helm](docs/deploy-using-helm.md) guide.
 
 ```bash
-$ kubectl apply -f yaml/hello-kubernetes.yaml
+cd deploy/helm
 ```
 
-This will display a **Hello world!** message when you hit the service endpoint in a browser. You can get the service endpoint ip address by executing the following command and grabbing the returned external ip address value:
+### Example 1: Default
+
+Deploy into `hello-kubernetes-default` namespace with default "Hello world!" message. The `hello-kubernetes` app is exposed via a public Load Balancer on port 80 by default - note that this only works in cloud provider based Kubernetes offerings.
 
 ```bash
-$ kubectl get service hello-kubernetes
+helm install --create-namespace --namespace hello-kubernetes-default hello-world ./hello-kubernetes
+
+# get the LoadBalancer ip address.
+kubectl get svc hello-kubernetes -n hello-kubernetes-default -o 'jsonpath={ .status.loadBalancer.ingress[0].ip }'
 ```
 
-### Customise Message
+### Example 2: Custom message
 
-You can customise the message displayed by the `hello-kubernetes` container. Deploy using the hello-kubernetes.custom-message.yaml, which contains definitions for the service and deployment objects.
-
-In the definition for the deployment, add an `env` variable with the name of `MESSAGE`. The value you provide will be displayed as the custom message.
-
-```yaml
-# hello-kubernetes.custom-message.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-kubernetes-custom
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 8080
-  selector:
-    app: hello-kubernetes-custom
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hello-kubernetes-custom
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: hello-kubernetes-custom
-  template:
-    metadata:
-      labels:
-        app: hello-kubernetes-custom
-    spec:
-      containers:
-      - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.9
-        ports:
-        - containerPort: 8080
-        env:
-        - name: MESSAGE
-          value: I just deployed this on Kubernetes!
-```
+Deploy into `hello-kubernetes-custom` namespace with "I just deployed this on Kubernetes!" message. The `hello-kubernetes` app is exposed via a public Load Balancer on port 80 by default - note that this only works in cloud provider based Kubernetes offerings.
 
 ```bash
-$ kubectl apply -f yaml/hello-kubernetes.custom-message.yaml
+helm install --create-namespace --namespace hello-kubernetes-custom hello-custom ./hello-kubernetes \
+  --set message="I just deployed this on Kubernetes!"
+
+# get the LoadBalancer ip address.
+kubectl get svc hello-kubernetes -n hello-kubernetes-custom -o 'jsonpath={ .status.loadBalancer.ingress[0].ip }'
 ```
 
-### Specify Custom Port
+### Example 3: Ingress
 
-By default, the `hello-kubernetes` app listens on port `8080`. If you have a requirement for the app to listen on another port, you can specify the port via an env variable with the name of PORT. Remember to also update the `containers.ports.containerPort` value to match.
+Deploy into `hello-kubernetes-ingress` namespace. This example assumes that an ingress has been deployed into the cluster and that the ingress has a path of `/app/hello-kubernetes/` mapped to the `hello-kubernetes` service.
 
-Here is an example:
+The `hello-kubernetes` app can be reached on the ip address of the ingress at the `/app/hello-kubernetes/` path.
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hello-kubernetes-custom
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: hello-kubernetes-custom
-  template:
-    metadata:
-      labels:
-        app: hello-kubernetes-custom
-    spec:
-      containers:
-      - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.9
-        ports:
-        - containerPort: 80
-        env:
-        - name: PORT
-          value: "80"
-```
-
-## Cutomize URL context path
-
-If you have an ingress that routes to a custom context path then you can customize the URL context path. The css files and the images will be loaded properly in that case.
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hello-kubernetes-custom
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: hello-kubernetes-custom
-  template:
-    metadata:
-      labels:
-        app: hello-kubernetes-custom
-    spec:
-      containers:
-      - name: hello-kubernetes
-        image: paulbouwer/hello-kubernetes:1.9
-        ports:
-        - containerPort: 8080
-        env:
-        - name: MESSAGE
-          value: I just deployed this on Kubernetes!
-        - name: CONTEXT_PATH
-          value: "/api/v1/hello-kubernetes/"
+```bash
+helm install --create-namespace --namespace hello-kubernetes-ingress hello-ingress ./hello-kubernetes \
+  --set ingress.enabled=true \
+  --set ingress.pathPrefix="/app/hello-kubernetes/" \
+  --set service.type="ClusterIP"
 ```
 
 ## Build Container Image

@@ -1,14 +1,20 @@
-replicaCount: 2
+# Provide a custom message
+message: ""
 
-serviceAccount:
-  name: "hello-kubernetes"
+ingress:
+  enabled: false
+  pathPrefix: ""
 
 service:
   name: "hello-kubernetes"
   type: LoadBalancer
   port: 80
 
+serviceAccount:
+  name: "hello-kubernetes"
+
 deployment:
+  replicaCount: 2
   name: "hello-kubernetes"
   container:
     image:
@@ -28,10 +34,3 @@ deployment:
 
   affinity: {}
 
-customisation:
-
-  # Provide a custom message
-  message: ""
-
-  # Provide a static assets path prefix if using an ingress
-  staticAssetsPathPrefix: ""

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ .Values.deployment.name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.deployment.replicaCount }}
   selector:
     matchLabels:
       {{- include "hello-kubernetes.selectorLabels" . | nindent 6 }}
@@ -34,13 +34,13 @@ spec:
           - name: PORT
             value: "{{ .Values.deployment.container.port }}"
           {{- end }}
-          {{- if .Values.customisation.message }}
+          {{- if .Values.message }}
           - name: MESSAGE
-            value: "{{ .Values.customisation.message }}"
+            value: "{{ .Values.message }}"
           {{- end }}
-          {{- if .Values.customisation.staticAssetsPathPrefix }}
+          {{- if .Values.ingress.enabled }}
           - name: CONTEXT_PATH
-            value: "{{ .Values.customisation.staticAssetsPathPrefix }}"
+            value: "{{ .Values.ingress.pathPrefix }}"
           {{- end }}
           {{- with .Values.deployment.resources }}
           resources:
