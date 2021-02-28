@@ -39,7 +39,7 @@ spec:
             value: "{{ .Values.message }}"
           {{- end }}
           {{- if .Values.ingress.enabled }}
-          - name: CONTEXT_PATH
+          - name: PATH_PREFIX
             value: "{{ .Values.ingress.pathPrefix }}"
           {{- end }}
           {{- with .Values.deployment.resources }}

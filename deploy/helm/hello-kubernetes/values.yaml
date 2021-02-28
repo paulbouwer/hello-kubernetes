@@ -19,7 +19,7 @@ deployment:
   container:
     image:
       repository: "paulbouwer/hello-kubernetes"
-      tag: "1.9" # uses chart appVersion if not provided
+      tag: "" # uses chart appVersion if not provided
       pullPolicy: IfNotPresent
     port: 8080
 

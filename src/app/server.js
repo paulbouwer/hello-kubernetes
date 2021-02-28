@@ -12,7 +12,7 @@ app.use(morgan('combined'));
 // Configuration
 var port = process.env.PORT || 8080;
 var message = process.env.MESSAGE || "Hello world!";
-var contextPath = process.env.CONTEXT_PATH || "/";
+var pathPrefix = (process.env.PATH_PREFIX ? process.env.PATH_PREFIX.replace(/[\\/]+$/, "") : "");
 
 app.get('/', function (req, res) {
     res.render('home', {
@@ -20,7 +20,7 @@ app.get('/', function (req, res) {
       platform: os.type(),
       release: os.release(),
       hostName: os.hostname(),
-      contextPath: contextPath
+      pathPrefix: pathPrefix
     });
 });
 
