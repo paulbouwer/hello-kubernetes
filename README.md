@@ -2,7 +2,7 @@
 
 [![Docker Image Version (latest by date)](https://img.shields.io/docker/v/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes) [![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes) [![Docker Pulls](https://img.shields.io/docker/pulls/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes)
 
-This container image can be deployed on a Kubernetes cluster. It runs a static web site, that displays the following:
+This container image can be deployed on a Kubernetes cluster. It runs a web app, that displays the following:
 
 - a default **Hello world!** message
 - the pod name
@@ -56,28 +56,12 @@ helm install --create-namespace --namespace hello-kubernetes-ingress hello-ingre
   --set service.type="ClusterIP"
 ```
 
-## Build Container Image
+## Additional
 
-If you'd like to build the image yourself, then you can do so as follows. The `build-arg` parameters provides metadata as defined in [OCI image spec annotations](https://github.com/opencontainers/image-spec/blob/master/annotations.md).
+### Building your own images
 
-Bash
-```bash
-$ cd src/app
-$ export HELLO_KUBERNETES_VERSION=1.10
-$ docker build --no-cache --build-arg IMAGE_VERSION="${HELLO_KUBERNETES_VERSION}" --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" -f Dockerfile -t "hello-kubernetes:${HELLO_KUBERNETES_VERSION}" .
-```
+If you'd like to build the `hello-kubernetes` container image yourself and reference from your own registry or DockerHub repository, then you can get more details on how to do this in the [Build and push container images](docs/build-and-push-container-images.md) documentation.
 
-Powershell
-```powershell
-PS> cd src\app
-PS> $HELLO_KUBERNETES_VERSION="1.10"
-PS> docker build --no-cache --build-arg IMAGE_VERSION="${HELLO_KUBERNETES_VERSION}" --build-arg IMAGE_CREATE_DATE="$(Get-Date((Get-Date).ToUniversalTime()) -UFormat '%Y-%m-%dT%H:%M:%SZ')" --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" -f Dockerfile -t "hello-kubernetes:${HELLO_KUBERNETES_VERSION}" .
-```
+### Development environment
 
-## Develop Application
-
-If you have [VS Code](https://code.visualstudio.com/) and the [Visual Studio Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment.
-
-Port `8080` has been configured to be forwarded to your host. If you run `npm start` in the `src/app` folder in the **VS Code Remote Containers** terminal, you will be able to access the website on `http://localhost:8080`. You can change the port in the `.devcontainer/devcontainer.json` file under the `appPort` key.
-
-See the **Visual Studio Code Remote Containers** [guidance](https://code.visualstudio.com/docs/remote/containers) for more details on working with this setup.
+If you have [VS Code](https://code.visualstudio.com/) and the [Visual Studio Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment. You can read more about how to use this in the [Development environments](docs/development-environment.md) documentation.
