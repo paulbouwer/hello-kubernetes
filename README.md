@@ -2,7 +2,7 @@
 
 [![Docker Image Version (latest by date)](https://img.shields.io/docker/v/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes) [![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes) [![Docker Pulls](https://img.shields.io/docker/pulls/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes)
 
-This container image can be deployed on a Kubernetes cluster. It runs a static web site, that displays the following:
+This container image can be deployed on a Kubernetes cluster. It runs a web app, that displays the following:
 
 - a default **Hello world!** message
 - the pod name
@@ -12,9 +12,9 @@ This container image can be deployed on a Kubernetes cluster. It runs a static w
 
 ## Deploy
 
-You can deploy `hello-kubernetes` to your Kubernetes cluster using [Helm 3](https://helm.sh/docs/intro/install/). You can find all the `hello-kubernetes` Helm chart installation and configuration options in the [Deploy using Helm](docs/deploy-using-helm.md) guide.
+You can deploy `hello-kubernetes` to your Kubernetes cluster using [Helm 3](https://helm.sh/docs/intro/install/). The Helm chart installation and configuration options can be found in the [Deploy using Helm](docs/deploy-using-helm.md) guide.
 
-Ensure that you are in the chart directory in the repo, since you are referencing a local helm chart.
+When running through the following examples, ensure that you are in the chart directory in the repo, since you are referencing a local helm chart.
 
 ```bash
 cd deploy/helm
@@ -22,7 +22,7 @@ cd deploy/helm
 
 ### Example 1: Default
 
-Deploy into `hello-kubernetes-default` namespace with default "Hello world!" message. The `hello-kubernetes` app is exposed via a public Load Balancer on port 80 by default - note that this only works in cloud provider based Kubernetes offerings.
+Deploy the `hello-kubernetes` app into the `hello-kubernetes-default` namespace with the default "Hello world!" message. The app is exposed via a public Load Balancer on port 80 by default - note that this only works in cloud provider based Kubernetes offerings.
 
 ```bash
 helm install --create-namespace --namespace hello-kubernetes-default hello-world ./hello-kubernetes
@@ -33,7 +33,7 @@ kubectl get svc hello-kubernetes -n hello-kubernetes-default -o 'jsonpath={ .sta
 
 ### Example 2: Custom message
 
-Deploy into `hello-kubernetes-custom` namespace with "I just deployed this on Kubernetes!" message. The `hello-kubernetes` app is exposed via a public Load Balancer on port 80 by default - note that this only works in cloud provider based Kubernetes offerings.
+Deploy the `hello-kubernetes` app into the `hello-kubernetes-custom` namespace with an "I just deployed this on Kubernetes!" message. The app is exposed via a public Load Balancer on port 80 by default - note that this only works in cloud provider based Kubernetes offerings.
 
 ```bash
 helm install --create-namespace --namespace hello-kubernetes-custom hello-custom ./hello-kubernetes \
@@ -45,9 +45,9 @@ kubectl get svc hello-kubernetes -n hello-kubernetes-custom -o 'jsonpath={ .stat
 
 ### Example 3: Ingress
 
-Deploy into `hello-kubernetes-ingress` namespace. This example assumes that an ingress has been deployed into the cluster and that the ingress has a path of `/app/hello-kubernetes/` mapped to the `hello-kubernetes` service.
+Deploy the `hello-kubernetes` app into the `hello-kubernetes-ingress` namespace. This example assumes that an ingress has been deployed into the cluster and that the ingress has a path of `/app/hello-kubernetes/` mapped to the `hello-kubernetes` service.
 
-The `hello-kubernetes` app can be reached on the ip address of the ingress at the `/app/hello-kubernetes/` path.
+The `hello-kubernetes` app can be reached on the ip address of the ingress via the `/app/hello-kubernetes/` path.
 
 ```bash
 helm install --create-namespace --namespace hello-kubernetes-ingress hello-ingress ./hello-kubernetes \
@@ -56,24 +56,12 @@ helm install --create-namespace --namespace hello-kubernetes-ingress hello-ingre
   --set service.type="ClusterIP"
 ```
 
-## Build Container Image
+## Additional
 
-If you'd like to build the image yourself, then you can do so as follows. The `build-arg` parameters provides metadata as defined in [OCI image spec annotations](https://github.com/opencontainers/image-spec/blob/master/annotations.md).
+### Building your own images
 
-Bash
-```bash
-$ docker build --no-cache --build-arg IMAGE_VERSION="1.9" --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" -f Dockerfile -t "hello-kubernetes:1.9" app
-```
+If you'd like to build the `hello-kubernetes` container image yourself and reference from your own registry or DockerHub repository, then you can get more details on how to do this in the [Build and push container images](docs/build-and-push-container-images.md) documentation.
 
-Powershell
-```powershell
-PS> docker build --no-cache --build-arg IMAGE_VERSION="1.9" --build-arg IMAGE_CREATE_DATE="$(Get-Date((Get-Date).ToUniversalTime()) -UFormat '%Y-%m-%dT%H:%M:%SZ')" --build-arg IMAGE_SOURCE_REVISION="$(git rev-parse HEAD)" -f Dockerfile -t "hello-kubernetes:1.9" app
-```
+### Development environment
 
-## Develop Application
-
-If you have [VS Code](https://code.visualstudio.com/) and the [Visual Studio Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to build a container based node.js 13 development environment. 
-
-Port `8080` has been configured to be forwarded to your host. If you run `npm start` in the `app` folder in the VS Code Remote Containers terminal, you will be able to access the website on `http://localhost:8080`. You can change the port in the `.devcontainer\devcontainer.json` file under the `appPort` key.
-
-See [here](https://code.visualstudio.com/docs/remote/containers) for more details on working with this setup.
+If you have [VS Code](https://code.visualstudio.com/) and the [Visual Studio Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment. You can read more about how to use this in the [Development environments](docs/development-environment.md) documentation.

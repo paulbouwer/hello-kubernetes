@@ -1,6 +1,6 @@
 # Deploy using Helm
 
-A Helm chart to deploy the `hello-kubernetes` application. This chart will deploy the following resources:
+The `hello-kubernetes` Helm chart can be used to deploy the `hello-kubernetes` application. The chart will deploy the following resources:
 
 - ServiceAccount
 - Service
@@ -9,7 +9,6 @@ A Helm chart to deploy the `hello-kubernetes` application. This chart will deplo
 ## Prerequisites
 
 - [Helm 3](https://v3.helm.sh/)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (authenticated to your Kubernetes cluster)
 - [Kubernetes](https://kubernetes.io/) cluster
 
 ## Configuration and installation
@@ -38,7 +37,7 @@ The following table lists the configuration parameters of the hello-kubernetes c
 
 ### Installing the chart
 
-Ensure that you are in the chart directory in the repo, since you are referencing a local helm chart.
+Ensure that you are in the chart directory in the repo, since the instructions reference a local helm chart.
 
 ```bash
 cd deploy/helm
@@ -62,7 +61,7 @@ helm install --create-namespace --namespace hello-kubernetes-custom hello-custom
 
 ### Upgrading the chart
 
-Ensure that you are in the chart directory in the repo, since you are referencing a local helm chart.
+Ensure that you are in the chart directory in the repo, since the instructions reference a local helm chart.
 
 ```bash
 cd deploy/helm
