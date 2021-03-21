@@ -34,8 +34,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && echo ". /etc/bash_completion" >> ~/.bashrc \
     && mkdir -p ~/completions \
     #
-    # Install eslint globally
-    && npm install -g eslint \
+    # Install node packages globally
+    && npm install -g eslint pino-pretty \
     #
     # Add add sudo support for non-root user
     && apt-get install -y sudo \

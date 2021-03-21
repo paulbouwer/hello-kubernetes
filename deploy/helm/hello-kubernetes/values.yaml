@@ -1,8 +1,10 @@
 # Provide a custom message
 message: ""
 
+# Remember to set service.type=ClusterIP if you are using an ingress
 ingress:
-  enabled: false
+  configured: false
+  rewritePath: true
   pathPrefix: ""
 
 service:

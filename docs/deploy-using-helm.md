@@ -18,7 +18,8 @@ The following table lists the configuration parameters of the hello-kubernetes c
 | Parameter | Type | Default | Description |
 | --------- | ---- | ------- | ----------- |
 | `message` | `string` | `""` | A custom message to display instead of the default. |
-| `ingress.enabled` | `bool` | `false` | Indicate whether an ingress is being used. |
+| `ingress.configured` | `bool` | `false` | Indicates whether an ingress has been configured in the cluster. <br/>Note: this chart will not install or configure an ingress. You will need to install an ingress controller and add ingress record to the app namespace. |
+| `ingress.rewritePath` | `bool` | `true` | Indicates whether pathPrefix is rewritten by the ingress. <br/> If this is set to `true` then the hello-kubernetes static assets and services will be served from `/`, otherwise, they will be served from `/$pathPrefix`. |
 | `ingress.pathPrefix` | `string` | `""` | The path prefix configured in the ingress for the hello-kubernetes service.<br/> Must be provided when ingress is used. |
 | `service.type` | `string` | `"LoadBalancer"` | The service type. |
 | `service.port` | `int` | `80` | The port exposed by the service. |

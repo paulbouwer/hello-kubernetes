@@ -64,7 +64,6 @@ make push-image
 #   - paulbouwer.azurecr.io/paulbouwer/hello-kubernetes:1.10.0
 #   - paulbouwer.azurecr.io/paulbouwer/hello-kubernetes:1.10
 #   - paulbouwer.azurecr.io/paulbouwer/hello-kubernetes:1
-
 export REGISTRY=paulbouwer.azurecr.io
 make push-image
 ```
