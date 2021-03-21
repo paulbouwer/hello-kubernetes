@@ -1,7 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.deployment.name }}
+  name: {{ include "hello-kubernetes.name" . }}
+  labels:
+    {{- include "hello-kubernetes.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.deployment.replicaCount }}
   selector:
@@ -12,7 +14,7 @@ spec:
       labels:
         {{- include "hello-kubernetes.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name }}
+      serviceAccountName: {{ include "hello-kubernetes.name" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.deployment.container.image.repository }}:{{ .Values.deployment.container.image.tag | default .Chart.AppVersion }}"

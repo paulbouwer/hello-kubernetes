@@ -6,16 +6,11 @@ ingress:
   pathPrefix: ""
 
 service:
-  name: "hello-kubernetes"
   type: LoadBalancer
   port: 80
 
-serviceAccount:
-  name: "hello-kubernetes"
-
 deployment:
   replicaCount: 2
-  name: "hello-kubernetes"
   container:
     image:
       repository: "paulbouwer/hello-kubernetes"
