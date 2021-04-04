@@ -60,7 +60,7 @@ helm install --create-namespace --namespace hello-kubernetes ingress ./hello-kub
 
 ### Deploying
 
-If you'd like to explore the various Helm chart configuration options, then read the [Deploy with Helm](docs/deploy-with-helm.md) documentation. You can also discover more about the ingress configuration options in the [Deploy with ingress](docs/depoly-with-ingress.md) documentation
+If you'd like to explore the various Helm chart configuration options, then read the [Deploy with Helm](docs/deploy-using-helm.md) documentation. You can also discover more about the ingress configuration options in the [Deploy with ingress](docs/deploy-with-ingress.md) documentation
 
 ### Building your own images
 
