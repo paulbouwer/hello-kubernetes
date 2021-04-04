@@ -1,10 +1,10 @@
 # Development environment
 
-If you have [VS Code](https://code.visualstudio.com/) and the [Visual Studio Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment for this repo.
+If you have [VS Code](https://code.visualstudio.com/) and the [VS Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment for this repo.
 
 ## Terminal
 
-The following utilities will be avaialble in the VS Code Terminal:
+The VS Code Terminal will run a Bash shell and make the following utilities will be available:
 
 - curl
 - Docker cli
@@ -12,6 +12,11 @@ The following utilities will be avaialble in the VS Code Terminal:
 - jq
 - kubectl 
 - vim
+
+The following host folders will be mounted into the VS Code dev container:
+
+- `/var/run/docker.sock` - allow for docker builds
+- `~/.kube` - allow for access to kubeconfig file
 
 ## Application development
 

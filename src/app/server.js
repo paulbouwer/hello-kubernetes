@@ -1,30 +1,68 @@
-var express = require('express');
-var exphbs  = require('express-handlebars');
-var app = express();
-var os = require("os");
-var morgan  = require('morgan');
+const express = require('express');
+const exphbs  = require('express-handlebars');
+const os = require("os");
 
+const pino = require('pino');
+const expressPino = require('express-pino-logger');
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+const expressLogger = expressPino({ logger });
+
+const app = express();
+app.use(expressLogger);
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
-app.use(express.static('static'));
-app.use(morgan('combined'));
 
 // Configuration
-var port = process.env.PORT || 8080;
-var message = process.env.MESSAGE || "Hello world!";
-var pathPrefix = (process.env.PATH_PREFIX ? process.env.PATH_PREFIX.replace(/[\\/]+$/, "") : "");
 
-app.get('/', function (req, res) {
+var port = process.env.PORT || 8080;
+var message = process.env.MESSAGE || 'Hello world!';
+var renderPathPrefix = (
+  process.env.RENDER_PATH_PREFIX ? 
+    '/' + process.env.RENDER_PATH_PREFIX.replace(/^[\\/]+/, '').replace(/[\\/]+$/, '') :
+    ''
+);
+var handlerPathPrefix = (
+  process.env.HANDLER_PATH_PREFIX ? 
+    '/' + process.env.HANDLER_PATH_PREFIX.replace(/^[\\/]+/, '').replace(/[\\/]+$/, '') :
+    ''
+);
+
+logger.debug();
+logger.debug('Configuration');
+logger.debug('-----------------------------------------------------');
+logger.debug('PORT=' + process.env.PORT);
+logger.debug('MESSAGE=' + process.env.MESSAGE);
+logger.debug('RENDER_PATH_PREFIX=' + process.env.RENDER_PATH_PREFIX);
+logger.debug('HANDLER_PATH_PREFIX=' + process.env.HANDLER_PATH_PREFIX);
+
+// Handlers
+
+logger.debug();
+logger.debug('Handlers');
+logger.debug('-----------------------------------------------------');
+
+logger.debug('Handler: static assets');
+logger.debug('Serving from base path "' + handlerPathPrefix + '"');
+app.use(handlerPathPrefix, express.static('static'))
+
+logger.debug('Handler: /');
+logger.debug('Serving from base path "' + handlerPathPrefix + '"');
+app.get(handlerPathPrefix + '/', function (req, res) {
     res.render('home', {
       message: message,
       platform: os.type(),
       release: os.release(),
       hostName: os.hostname(),
-      pathPrefix: pathPrefix
+      renderPathPrefix: renderPathPrefix
     });
 });
 
-// Set up listener
+// Server
+
+logger.debug();
+logger.debug('Server');
+logger.debug('-----------------------------------------------------');
+
 app.listen(port, function () {
-  console.log("Listening on: http://%s:%s", os.hostname(), port);
+  logger.info("Listening on: http://%s:%s", os.hostname(), port);
 });
