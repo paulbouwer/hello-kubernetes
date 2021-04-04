@@ -10,7 +10,7 @@ This container image can be deployed on a Kubernetes cluster. It runs a web app,
 
 ![Hello world! from the hello-kubernetes image](hello-kubernetes.png)
 
-## Deploy
+## Quick start
 
 You can deploy `hello-kubernetes` to your Kubernetes cluster using [Helm 3](https://helm.sh/docs/intro/install/). The Helm chart installation and configuration options can be found in the [Deploy using Helm](docs/deploy-using-helm.md) guide.
 
@@ -56,7 +56,11 @@ helm install --create-namespace --namespace hello-kubernetes ingress ./hello-kub
   --set service.type="ClusterIP"
 ```
 
-## Additional
+## Documentation
+
+### Deploying
+
+If you'd like to explore the various Helm chart configuration options, then read the [Deploy with Helm](docs/deploy-with-helm.md) documentation. You can also discover more about the ingress configuration options in the [Deploy with ingress](docs/depoly-with-ingress.md) documentation
 
 ### Building your own images
 
@@ -64,4 +68,4 @@ If you'd like to build the `hello-kubernetes` container image yourself and refer
 
 ### Development environment
 
-If you have [VS Code](https://code.visualstudio.com/) and the [Visual Studio Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment. You can read more about how to use this in the [Development environments](docs/development-environment.md) documentation.
+If you have [VS Code](https://code.visualstudio.com/) and the [VS Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment. You can read more about how to use this in the [Development environments](docs/development-environment.md) documentation.

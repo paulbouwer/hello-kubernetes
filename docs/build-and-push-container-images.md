@@ -6,9 +6,9 @@ The `hello-kubernetes` container image can be built and pushed to your own regis
 
 - [make](https://www.gnu.org/software/make/)
 - [Docker cli](https://www.docker.com/)
-- Docker registry
+- Container registry
 
-If you are using the [Visual Studio Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) based development environment, all of these prerequisites will be available in the terminal.
+If you are using the [VS Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) based development environment, all of the prerequisites will be available in the terminal.
 
 ## Makefile configuration
 
