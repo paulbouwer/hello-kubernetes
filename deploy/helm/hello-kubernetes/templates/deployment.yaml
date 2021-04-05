@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hello-kubernetes.name" . }}
+  labels:
+    {{- include "hello-kubernetes.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "hello-kubernetes.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hello-kubernetes.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "hello-kubernetes.name" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.deployment.container.image.repository }}:{{ .Values.deployment.container.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.deployment.container.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.deployment.container.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          env:
+          {{- if ne (.Values.deployment.container.port | int) (8080 | int) }}
+          - name: PORT
+            value: "{{ .Values.deployment.container.port }}"
+          {{- end }}
+          {{- if .Values.message }}
+          - name: MESSAGE
+            value: "{{ .Values.message }}"
+          {{- end }}
+          {{- if .Values.ingress.configured }}
+          - name: HANDLER_PATH_PREFIX
+            {{- if .Values.ingress.rewritePath }}
+            value: ""
+            {{- else }}
+            value: "{{ .Values.ingress.pathPrefix }}"
+            {{- end }}
+          - name: RENDER_PATH_PREFIX
+            value: "{{ .Values.ingress.pathPrefix }}"
+          {{- end }}
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: KUBERNETES_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: KUBERNETES_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: CONTAINER_IMAGE
+            value: "{{ .Values.deployment.container.image.repository }}:{{ .Values.deployment.container.image.tag | default .Chart.AppVersion }}"
+          {{- with .Values.deployment.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,8 +1,12 @@
 // For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
 // https://github.com/microsoft/vscode-dev-containers/tree/master/containers/javascript-node-12
 {
-	"name": "Node.js 13",
+	"name": "Development environment - hello-kubernetes",
 	"dockerFile": "Dockerfile",
+	"mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.kube,target=/root/.kube,type=bind"
+  ],
 
 	// Use 'settings' to set *default* container specific settings.json values on container create. 
 	// You can edit these settings after create using File > Preferences > Settings > Remote.
