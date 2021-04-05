@@ -1,0 +1,55 @@
+name: "When a release tag is created, build and publish a new version of the container image"
+
+on:
+
+  create
+
+jobs:
+
+  build-and-push-container-image:
+
+    runs-on: ubuntu-latest
+
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    env:
+      CONTAINER_REGISTRY: docker.io
+      CONTAINER_IMAGE: paulbouwer/hello-kubernetes
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build image and version variables
+        run: |
+          echo "IMAGE=$CONTAINER_REGISTRY/$CONTAINER_IMAGE" >> $GITHUB_ENV
+          echo "IMAGE_VERSION=$(cat src/app/package.json | jq -r .version)" >> $GITHUB_ENV
+          
+      - name: Build additional image tag variables
+        run: |
+          echo "IMAGE_MAJOR_VERSION=$(echo $IMAGE_VERSION | cut -d '.' -f1)" >> $GITHUB_ENV
+          echo "IMAGE_MINOR_VERSION=$(echo $IMAGE_VERSION | cut -d '.' -f2)" >> $GITHUB_ENV
+
+      - name: Build image
+        run: | 
+          docker build --tag "$IMAGE:$IMAGE_VERSION" \
+            --build-arg IMAGE_VERSION="$IMAGE_VERSION" \
+            --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" \
+            --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" \
+            --file src/app/Dockerfile src/app
+
+      - name: Create additional image tags
+        run: |
+          docker tag $IMAGE:$IMAGE_VERSION $IMAGE:$IMAGE_MAJOR_VERSION
+          docker tag $IMAGE:$IMAGE_VERSION $IMAGE:$IMAGE_MAJOR_VERSION.$IMAGE_MINOR_VERSION
+
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push image and tags to registry
+        run: |
+          docker push $IMAGE:$IMAGE_VERSION
+          docker push $IMAGE:$IMAGE_MAJOR_VERSION
+          docker push $IMAGE:$IMAGE_MAJOR_VERSION.$IMAGE_MINOR_VERSION
+
