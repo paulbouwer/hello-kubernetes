@@ -4,13 +4,19 @@
 <div id="info">
   <table>
     <tr>
+      <th>namespace:</th>
+      <td>{{ namespace }}</td>
+    </tr>
+    <tr>
       <th>pod:</th>
-      <td>{{ hostName }}</td>
+      <td>{{ pod }}</td>
     </tr>
     <tr>
       <th>node:</th>
-      <td>{{ platform }} ({{ release }})</td>
+      <td>{{ node }}</td>
     </tr>
   </table>
-
+</div>
+<div id="footer">
+  {{ container }}
 </div>

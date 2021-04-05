@@ -5,8 +5,8 @@
 This container image can be deployed on a Kubernetes cluster. It runs a web app, that displays the following:
 
 - a default **Hello world!** message
-- the pod name
-- node os information
+- namespace, pod, and node details
+- container image details
 
 ![Hello world! from the hello-kubernetes image](hello-kubernetes.png)
 
