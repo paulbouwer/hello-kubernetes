@@ -14,8 +14,7 @@ spec:
       labels:
         {{- include "hello-kubernetes.selectorLabels" . | nindent 8 }}
       annotations:
-        foo/bar: baz
-        baz/bam: bap
+        team: api-sre
     spec:
       serviceAccountName: {{ include "hello-kubernetes.name" . }}
       containers:
