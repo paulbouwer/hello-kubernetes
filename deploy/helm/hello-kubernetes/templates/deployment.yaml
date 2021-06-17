@@ -18,7 +18,7 @@ spec:
         # Test adding processors and dropping fields that cause a mapping conflict
         # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-autodiscover-hints.html#_co_elastic_logsprocessors
         # https://github.com/elastic/beats/issues/8773#issuecomment-543858157
-        co.elastic.logs/processors.2.drop_fields.fields: "kubernetes.labels.app"
+        co.elastic.logs/processors.3.drop_fields.fields: "kubernetes.labels.app"
     spec:
       serviceAccountName: {{ include "hello-kubernetes.name" . }}
       containers:
