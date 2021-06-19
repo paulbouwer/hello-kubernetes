@@ -13,9 +13,8 @@ spec:
     metadata:
       labels:
         {{- include "hello-kubernetes.selectorLabels" . | nindent 8 }}
-        foo: bar
-      annotations:
         team: api-olympus
+      annotations:
         # Test adding processors and dropping fields that cause a mapping conflict
         # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-autodiscover-hints.html#_co_elastic_logsprocessors
         # https://github.com/elastic/beats/issues/8773#issuecomment-543858157
