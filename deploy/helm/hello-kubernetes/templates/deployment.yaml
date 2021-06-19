@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         {{- include "hello-kubernetes.selectorLabels" . | nindent 8 }}
+        foo: bar
       annotations:
         team: api-olympus
         # Test adding processors and dropping fields that cause a mapping conflict
