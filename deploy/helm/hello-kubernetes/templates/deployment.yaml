@@ -23,7 +23,7 @@ spec:
         #co.elastic.logs/processors.copy_fields.fields.0.to: "type"
         # Use autodiscovery hint to add type field derived from container name exposed by add_kubernetes_metadata processor
         #co.elastic.logs/fields.type: "kubernetes.container.name"
-        co.elastic.logs/processors.add_fields.fields.testing: barp
+        co.elastic.logs/processors.add_fields: '{"fields":{"baz":"bam"}}'
     spec:
       serviceAccountName: {{ include "hello-kubernetes.name" . }}
       containers:
