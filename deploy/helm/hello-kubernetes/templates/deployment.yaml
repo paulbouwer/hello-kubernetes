@@ -27,7 +27,6 @@ spec:
         #co.elastic.logs/fields.xyzbaz: bam
         co.elastic.logs/processors.rename.fields.0.from: container.name
         co.elastic.logs/processors.rename.fields.0.to: type
-        co.elastic.logs/processors.rename.ignore_missing: true
         #co.elastic.logs/processors.0.add_fields.xyzbav: bax
         #co.elastic.logs/processors.1.add_fields.xyzbaw: zax
         #co.elastic.logs/processors.0.add_fields: '{"fields":{"xyzzoo":"zar"}}'
