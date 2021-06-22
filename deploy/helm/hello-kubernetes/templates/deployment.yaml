@@ -25,10 +25,10 @@ spec:
         #co.elastic.logs/fields.type: "kubernetes.container.name"
         #co.elastic.logs/processors.add_fields: '{"fields":{"xyzfoo":"bar"}}'
         #co.elastic.logs/fields.xyzbaz: bam
-        co.elastic.logs/processors.rename.fields.0.from: kubernetes.container.name
-        co.elastic.logs/processors.rename.fields.0.to: type_override
-        co.elastic.logs/processors.decode_json_fields.fields: message
-        co.elastic.logs/processors.decode_json_fields.target: d
+        co.elastic.logs/processors.0.rename.fields.0.from: kubernetes.container.name
+        co.elastic.logs/processors.0.rename.fields.0.to: type_override
+        co.elastic.logs/processors.1.decode_json_fields.fields: message
+        co.elastic.logs/processors.1.decode_json_fields.target: d
         #co.elastic.logs/processors.0.add_fields.xyzbav: bax
         #co.elastic.logs/processors.1.add_fields.xyzbaw: zax
         #co.elastic.logs/processors.0.add_fields: '{"fields":{"xyzzoo":"zar"}}'
