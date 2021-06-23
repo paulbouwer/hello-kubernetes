@@ -9,8 +9,6 @@ spec:
   selector:
     matchLabels:
       {{- include "hello-kubernetes.selectorLabels" . | nindent 6 }}
-  nodeSelector:
-    kubernetes.io/hostname: ip-10-213-70-152.eu-west-2.compute.internal
   template:
     metadata:
       labels:
