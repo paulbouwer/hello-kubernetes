@@ -77,7 +77,6 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-        kubernetes.io/hostname: ip-10-213-70-152.eu-west-2.compute.internal
       {{- with .Values.deployment.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
