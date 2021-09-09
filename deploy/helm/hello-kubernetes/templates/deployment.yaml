@@ -13,26 +13,11 @@ spec:
     metadata:
       labels:
         {{- include "hello-kubernetes.selectorLabels" . | nindent 8 }}
-        team: api-olympus
       annotations:
-        # Test adding processors and dropping fields that cause a mapping conflict
-        # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-autodiscover-hints.html#_co_elastic_logsprocessors
-        # https://github.com/elastic/beats/issues/8773#issuecomment-543858157
-        #co.elastic.logs/processors.drop_fields.fields: "kubernetes.labels.app"
-        #co.elastic.logs/processors.copy_fields.fields.0.from: "kubernetes.container.name"
-        #co.elastic.logs/processors.copy_fields.fields.0.to: "type"
-        # Use autodiscovery hint to add type field derived from container name exposed by add_kubernetes_metadata processor
-        #co.elastic.logs/fields.type: "kubernetes.container.name"
-        #co.elastic.logs/processors.add_fields: '{"fields":{"xyzfoo":"bar"}}'
-        #co.elastic.logs/fields.xyzbaz: bam
-        co.elastic.logs/processors.0.rename.fields.0.from: kubernetes.container.name
-        co.elastic.logs/processors.0.rename.fields.0.to: type_override
+        co.elastic.logs/processors.0.add_fields.target: ''
+        co.elastic.logs/processors.0.add_fields.fields.team: api-sre
         co.elastic.logs/processors.1.decode_json_fields.fields: message
         co.elastic.logs/processors.1.decode_json_fields.target: d
-        #co.elastic.logs/processors.0.add_fields.xyzbav: bax
-        #co.elastic.logs/processors.1.add_fields.xyzbaw: zax
-        #co.elastic.logs/processors.0.add_fields: '{"fields":{"xyzzoo":"zar"}}'
-        #co.elastic.logs/processors.1.add_fields: '{"fields":{"xyzzam":"zap"}}'
     spec:
       serviceAccountName: {{ include "hello-kubernetes.name" . }}
       containers:
