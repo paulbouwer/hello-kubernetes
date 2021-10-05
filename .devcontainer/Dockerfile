@@ -68,6 +68,14 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
     && echo "source ~/completions/kubectl.bash" >> ~/.bashrc \
     && echo "alias k=kubectl" >> ~/.bashrc \
     && echo "complete -o default -F __start_kubectl k" >> ~/.bashrc
+
+# Install trivy
+RUN mkdir /tmp/trivy \
+    && curl -L https://github.com/aquasecurity/trivy/releases/download/v0.19.2/trivy_0.19.2_Linux-64bit.tar.gz | tar xvz -C /tmp/trivy -f - contrib trivy \
+    && chmod +x /tmp/trivy/trivy \
+    && mv /tmp/trivy/trivy /usr/local/bin/trivy \
+    && mkdir -p /trivy/contrib \
+    && mv /tmp/trivy/contrib/* /trivy/contrib/
     
 # Clean up
 RUN apt-get autoremove -y \
