@@ -22,9 +22,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Snyk
-        uses: snyk/actions/setup@master
-
       - name: Build image and version variables
         run: |
           echo "IMAGE=$CONTAINER_REGISTRY/$CONTAINER_IMAGE" >> $GITHUB_ENV
@@ -37,25 +34,16 @@ jobs:
             --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" \
             --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" \
             --file src/app/Dockerfile src/app
-
-      - name: Scan container with Snyk 
-        run: snyk container test --file=src/app/Dockerfile --sarif-file-output=snyk-container-sarif.json "$IMAGE:$IMAGE_VERSION"
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-      - name: Scan application with Snyk 
-        run: snyk test --sarif-file-output=snyk-app-sarif.json src/app
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+            
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "$IMAGE:$IMAGE_VERSION"
+          format: 'template'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
 
       - name: Upload container results to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: snyk-container-sarif.json
-
-      - name: Upload app results to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: snyk-app-sarif.json
+          sarif_file: trivy-results.sarif
