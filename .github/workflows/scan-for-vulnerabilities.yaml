@@ -1,0 +1,59 @@
+name: "When updates are pushed or the defined schedule is triggered, scan the container and application for vulnerabilities"
+
+on:
+
+  push:
+
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+
+  scan-and-report-vulnerabilities:
+    
+    runs-on: ubuntu-latest
+
+    env:
+      CONTAINER_REGISTRY: docker.io
+      CONTAINER_IMAGE: paulbouwer/hello-kubernetes
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Snyk
+        uses: snyk/actions/setup@master
+
+      - name: Build image and version variables
+        run: |
+          echo "IMAGE=$CONTAINER_REGISTRY/$CONTAINER_IMAGE" >> $GITHUB_ENV
+          echo "IMAGE_VERSION=$(cat src/app/package.json | jq -r .version)" >> $GITHUB_ENV
+          
+      - name: Build image
+        run: | 
+          docker build --tag "$IMAGE:$IMAGE_VERSION" \
+            --build-arg IMAGE_VERSION="$IMAGE_VERSION" \
+            --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" \
+            --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" \
+            --file src/app/Dockerfile src/app
+
+      - name: Scan container with Snyk 
+        run: snyk container test --file=src/app/Dockerfile --sarif-file-output=snyk-container-sarif.json "$IMAGE:$IMAGE_VERSION"
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Scan application with Snyk 
+        run: snyk test --sarif-file-output=snyk-app-sarif.json src/app
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Upload container results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: snyk-container-sarif.json
+
+      - name: Upload app results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: snyk-app-sarif.json
