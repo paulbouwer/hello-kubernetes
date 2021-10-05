@@ -36,12 +36,11 @@ jobs:
             --file src/app/Dockerfile src/app
             
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: "$IMAGE:$IMAGE_VERSION"
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.sarif'
+        run: |
+          curl -L https://github.com/aquasecurity/trivy/releases/download/v0.19.2/trivy_0.19.2_Linux-64bit.tar.gz | tar xvzf - contrib trivy
+          chmod 755 trivy
+          mv trivy /usr/local/bin/trivy
+          trivy image --format template --template "@contrib/sarif.tpl" --output trivy-results.sarif $IMAGE:$IMAGE_VERSION
 
       - name: Upload container results to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v1
