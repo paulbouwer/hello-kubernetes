@@ -5,6 +5,13 @@ IMAGE_MAJOR_VERSION = $(shell echo "$(IMAGE_VERSION)" | cut -d '.' -f1 )
 IMAGE_MINOR_VERSION = $(shell echo "$(IMAGE_VERSION)" | cut -d '.' -f2 )
 IMAGE = $(REGISTRY)/$(REPOSITORY)/hello-kubernetes
 
+.PHONY: scan-for-vulns
+scan-for-vulns:
+	trivy image --format template --template "@/trivy/contrib/sarif.tpl" $(IMAGE):$(IMAGE_VERSION)
+
+.PHONY: build-images
+build-images: build-image-linux
+
 .PHONY: build-image-linux
 build-image-linux: 
 	docker build --no-cache \
