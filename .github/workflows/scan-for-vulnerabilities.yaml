@@ -40,11 +40,13 @@ jobs:
 
       - name: Scan container with Snyk 
         run: snyk container test --file=src/app/Dockerfile --sarif-file-output=snyk-container-sarif.json "$IMAGE:$IMAGE_VERSION"
+        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Scan application with Snyk 
         run: snyk test --sarif-file-output=snyk-app-sarif.json src/app
+        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
