@@ -25,11 +25,19 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
+              {{- if and .Values.ingress.configured (not .Values.ingress.rewritePath) }}
+              path: "/{{ .Values.ingress.pathPrefix }}"
+              {{- else }}
               path: /
+              {{- end }}
               port: http
           readinessProbe:
             httpGet:
+              {{- if and .Values.ingress.configured (not .Values.ingress.rewritePath) }}
+              path: "/{{ .Values.ingress.pathPrefix }}"
+              {{- else }}
               path: /
+              {{- end }}
               port: http
           env:
           {{- if ne (.Values.deployment.container.port | int) (8080 | int) }}
