@@ -25,7 +25,7 @@ The following table lists the configuration parameters of the hello-kubernetes c
 | `service.type` | `string` | `"LoadBalancer"` | The service type. |
 | `service.port` | `int` | `80` | The port exposed by the service. |
 | `deployment.replicaCount` | `int` | `2` | The number of replicas for the hello-kubernetes deployment. |
-| `deployment.container.image.repository` | `string` | `paulbouwer/hello-kubernetes` | The container image to run in the  hello-kubernetes pods. |
+| `deployment.container.image.repository` | `string` | `eduardobaitello/hello-kubernetes` | The container image to run in the  hello-kubernetes pods. |
 | `deployment.container.image.tag` | `string` | `""` | The container image tag. If not specified, the chart's appVersion is used. |
 | `deployment.container.image.pullPolicy` | `string` | `"IfNotPresent"` | The pull policy for the container image. |
 | `deployment.container.port` | `int` | `"8080"` | The port that hello-kubernetes app listens on. |

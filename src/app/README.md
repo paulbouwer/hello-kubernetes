@@ -21,7 +21,7 @@ The application can be configured via the following environment variables.
 | KUBERNETES_NAMESPACE | Yes | "-" | The Kubernetes namespace that the app has been deployed to. |
 | KUBERNETES_POD_NAME | Yes | hostname | The name of the Kubernetes pod that the app is deployed into. |
 | KUBERNETES_NODE_NAME | Yes | "-" | The name of the Kubernetes node that the app is deployed on. |
-| CONTAINER_IMAGE | Yes | "paulbouwer/hello-kubernetes:$(cat package.json \| jq -r .version)" | The name and tag of the container image running the app. |
+| CONTAINER_IMAGE | Yes | "eduardobaitello/hello-kubernetes:$(cat package.json \| jq -r .version)" | The name and tag of the container image running the app. |
 
 The application relies on the following files for configuration and operational information.
 
