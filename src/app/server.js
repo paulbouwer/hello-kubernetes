@@ -33,7 +33,7 @@ var podName = process.env.KUBERNETES_POD_NAME || os.hostname();
 var nodeName = process.env.KUBERNETES_NODE_NAME || '-';
 var nodeOS = os.type() + ' ' + os.release();
 var applicationVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
-var containerImage = process.env.CONTAINER_IMAGE || 'paulbouwer/hello-kubernetes:' + applicationVersion
+var containerImage = process.env.CONTAINER_IMAGE || 'eduardobaitello/hello-kubernetes:' + applicationVersion
 var containerImageArch = JSON.parse(fs.readFileSync('info.json', 'utf8')).containerImageArch;
 
 logger.debug();
@@ -60,12 +60,16 @@ app.use(handlerPathPrefix, express.static('static'))
 
 logger.debug('Handler: /');
 logger.debug('Serving from base path "' + handlerPathPrefix + '"');
-app.get(handlerPathPrefix + '/', function (req, res) {
+app.get(handlerPathPrefix + '/*', function (req, res) {
     res.render('home', {
       message: message,
       namespace: namespace,
       pod: podName,
       node: nodeName + ' (' + nodeOS + ')',
+      reqProtocol: req.protocol,
+      reqHostname: req.hostname,
+      reqPath: req.path,
+      reqMethod: req.method,
       container: containerImage + ' (' + containerImageArch + ')',
       renderPathPrefix: renderPathPrefix
     });
