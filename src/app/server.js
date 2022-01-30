@@ -27,7 +27,7 @@ app.set('view engine', 'handlebars');
 // Configuration
 
 var port = process.env.PORT || 8080;
-var message = process.env.MESSAGE || 'Hello world!';
+var message = process.env.MESSAGE || 'Hello Kubernetes!';
 var renderPathPrefix = (
   process.env.RENDER_PATH_PREFIX ? 
     '/' + process.env.RENDER_PATH_PREFIX.replace(/^[\\/]+/, '').replace(/[\\/]+$/, '') :
@@ -86,6 +86,22 @@ app.get(handlerPathPrefix + '/*', function (req, res) {
       container: containerImage + ' (' + containerImageArch + ')',
       renderPathPrefix: renderPathPrefix
     });
+});
+
+// POST Handler
+app.post(handlerPathPrefix + '/*', function (req, res) {
+  const data = {
+    message: message,
+    namespace: namespace,
+    pod: podName,
+    node: nodeName + ' (' + nodeOS + ')',
+    reqProtocol: req.protocol,
+    reqHostname: req.hostname,
+    reqPath: req.path,
+    reqMethod: req.method,
+    container: containerImage + ' (' + containerImageArch + ')',
+  }
+  res.status(200).send(data);
 });
 
 // Server
