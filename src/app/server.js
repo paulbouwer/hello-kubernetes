@@ -41,6 +41,7 @@ var handlerPathPrefix = (
 
 var namespace = process.env.KUBERNETES_NAMESPACE || '-';
 var podName = process.env.KUBERNETES_POD_NAME || os.hostname();
+var podIP = process.env.KUBERNETES_POD_IP || '-';
 var nodeName = process.env.KUBERNETES_NODE_NAME || '-';
 var nodeOS = os.type() + ' ' + os.release();
 var applicationVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
@@ -56,6 +57,7 @@ logger.debug('RENDER_PATH_PREFIX=' + process.env.RENDER_PATH_PREFIX);
 logger.debug('HANDLER_PATH_PREFIX=' + process.env.HANDLER_PATH_PREFIX);
 logger.debug('KUBERNETES_NAMESPACE=' + process.env.KUBERNETES_NAMESPACE);
 logger.debug('KUBERNETES_POD_NAME=' + process.env.KUBERNETES_POD_NAME);
+logger.debug('KUBERNETES_POD_IP=' + process.env.KUBERNETES_POD_IP);
 logger.debug('KUBERNETES_NODE_NAME=' + process.env.KUBERNETES_NODE_NAME);
 logger.debug('CONTAINER_IMAGE=' + process.env.CONTAINER_IMAGE);
 
@@ -78,6 +80,7 @@ app.get(handlerPathPrefix + '/*', function (req, res) {
       message: message,
       namespace: namespace,
       pod: podName,
+      podIP: podIP,
       node: nodeName + ' (' + nodeOS + ')',
       reqProtocol: req.protocol,
       reqHostname: req.hostname,
@@ -94,6 +97,7 @@ app.post(handlerPathPrefix + '/*', function (req, res) {
     message: message,
     namespace: namespace,
     pod: podName,
+    podIP: podIP,
     node: nodeName + ' (' + nodeOS + ')',
     reqProtocol: req.protocol,
     reqHostname: req.hostname,
