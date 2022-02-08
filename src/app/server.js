@@ -1,5 +1,5 @@
 const express = require('express');
-const exphbs  = require('express-handlebars');
+const { engine } = require('express-handlebars');
 const os = require("os");
 const fs = require('fs');
 
@@ -21,8 +21,8 @@ app.get('/health', (req, res) => {
 });
 
 app.use(expressLogger);
-app.engine('handlebars', exphbs({defaultLayout: 'main'}));
-app.set('view engine', 'handlebars');
+app.engine('hbs', engine({ extname: '.hbs', defaultLayout: "main"}));
+app.set('view engine', 'hbs');
 
 // Configuration
 
