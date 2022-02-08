@@ -3,12 +3,14 @@ message: ""
 
 # Remember to set service.type=ClusterIP if you are using an ingress
 ingress:
-  configured: false
+  enabled: false
   rewritePath: true
   pathPrefix: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
 
 service:
-  type: LoadBalancer
+  type: "LoadBalancer"
   port: 80
 
 imageKey:

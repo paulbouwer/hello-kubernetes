@@ -5,12 +5,12 @@ The `hello-kubernetes` Helm chart can be used to deploy the `hello-kubernetes` a
 - ServiceAccount
 - Service
 - Deployment
+- Ingress (Optional)
 
 ## Prerequisites
 
 - [Helm 3](https://v3.helm.sh/)
 
-If you are using the [VS Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) based development environment, all of the prerequisites will be available in the terminal.
 
 ## Configuration and installation
 
@@ -19,14 +19,14 @@ The following table lists the configuration parameters of the hello-kubernetes c
 | Parameter | Type | Default | Description |
 | --------- | ---- | ------- | ----------- |
 | `message` | `string` | `""` | A custom message to display instead of the default. |
-| `ingress.configured` | `bool` | `false` | Indicates whether an ingress has been configured in the cluster. <br/>Note: this chart will not install or configure an ingress. You will need to install an ingress controller and add ingress record to the app namespace. |
+| `ingress.enabled` | `bool` | `false` | Indicates whether an ingress has been configured in the cluster. <br/>Note: this chart will not install or configure an ingress. You will need to install an ingress controller and add ingress record to the app namespace. |
 | `ingress.rewritePath` | `bool` | `true` | Indicates whether pathPrefix is rewritten by the ingress. <br/> If this is set to `true` then the hello-kubernetes dynamic content and static assets will be served from `/`, otherwise, they will be served from `/$pathPrefix`. |
 | `ingress.pathPrefix` | `string` | `""` | The path prefix configured in the ingress for the hello-kubernetes service.<br/> Must be provided when ingress is used. |
 | `service.type` | `string` | `"LoadBalancer"` | The service type. |
 | `service.port` | `int` | `80` | The port exposed by the service. |
+| `imageKey.repository` | `string` | `eduardobaitello/hello-kubernetes` | The container image to run in the  hello-kubernetes pods. |
+| `imageKey.tag` | `string` | `""` | The container image tag. If not specified, the chart's appVersion is used. |
 | `deployment.replicaCount` | `int` | `2` | The number of replicas for the hello-kubernetes deployment. |
-| `deployment.container.image.repository` | `string` | `eduardobaitello/hello-kubernetes` | The container image to run in the  hello-kubernetes pods. |
-| `deployment.container.image.tag` | `string` | `""` | The container image tag. If not specified, the chart's appVersion is used. |
 | `deployment.container.image.pullPolicy` | `string` | `"IfNotPresent"` | The pull policy for the container image. |
 | `deployment.container.port` | `int` | `"8080"` | The port that hello-kubernetes app listens on. |
 | `deployment.nodeSelector` | `object` | `{"kubernetes.io/os":"linux", "kubernetes.io/arch":"amd64"}` | The node selector for the deployment. |

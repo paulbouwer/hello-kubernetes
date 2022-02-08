@@ -40,7 +40,7 @@ spec:
           - name: MESSAGE
             value: "{{ .Values.message }}"
           {{- end }}
-          {{- if .Values.ingress.configured }}
+          {{- if .Values.ingress.enabled }}
           - name: HANDLER_PATH_PREFIX
             {{- if .Values.ingress.rewritePath }}
             value: ""
