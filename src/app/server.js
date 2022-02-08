@@ -9,6 +9,17 @@ const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 const expressLogger = expressPino({ logger });
 
 const app = express();
+
+// Handler for health checks (without logs)
+app.get('/health', (req, res) => {
+  const data = {
+    uptime: process.uptime(),
+    message: 'Ok',
+    date: new Date()
+  }
+  res.status(200).send(data);
+});
+
 app.use(expressLogger);
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
@@ -60,6 +71,8 @@ app.use(handlerPathPrefix, express.static('static'))
 
 logger.debug('Handler: /');
 logger.debug('Serving from base path "' + handlerPathPrefix + '"');
+
+// GET Handler
 app.get(handlerPathPrefix + '/*', function (req, res) {
     res.render('home', {
       message: message,

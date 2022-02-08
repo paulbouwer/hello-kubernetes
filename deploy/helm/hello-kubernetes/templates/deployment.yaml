@@ -25,11 +25,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
           env:
           {{- if ne (.Values.deployment.container.port | int) (8080 | int) }}
