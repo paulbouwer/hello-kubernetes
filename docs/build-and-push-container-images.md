@@ -29,7 +29,7 @@ The `Makefile` in the root folder of the repo provides the functionality to allo
 
 ## Building a container image
 
-You can build the `hello-kubernete` container image as follows:
+You can build the `hello-kubernetes` container image as follows:
 
 ```bash
 # Build the eduardobaitello/hello-kubernetes:$version image
