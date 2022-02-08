@@ -19,7 +19,7 @@ The `Makefile` in the root folder of the repo provides the functionality to allo
 | Name | Default | Description | 
 | ---- | ------- | ----------- |
 | REGISTRY | docker.io | The container registry to push the images to. |
-| REPOSITORY | paulbouwer | The repository (or hierarchy) within the container registry where the image will be located. |
+| REPOSITORY | eduardobaitello | The repository (or hierarchy) within the container registry where the image will be located. |
 | IMAGE_VERSION | the version in src/app/package.json | The image version (label) to use for the built and pushed container images. |
 
 ### Targets
@@ -34,11 +34,11 @@ The `Makefile` in the root folder of the repo provides the functionality to allo
 You can build the `hello-kubernete` container image as follows:
 
 ```bash
-# Build the paulbouwer/hello-kubernetes:$version image
+# Build the eduardobaitello/hello-kubernetes:$version image
 make build-image-linux
 
-# Build the paulbouwer.azurecr.io/paulbouwer/hello-kubernetes:$version image
-export REGISTRY=paulbouwer.azurecr.io
+# Build the eduardobaitello.azurecr.io/eduardobaitello/hello-kubernetes:$version image
+export REGISTRY=eduardobaitello.azurecr.io
 make build-image-linux
 ```
 
@@ -47,23 +47,23 @@ make build-image-linux
 You can push your built `hello-kubernetes` container image to the defined registry as follows:
 
 ```bash
-# Push paulbouwer/hello-kubernetes:$version to docker hub.
+# Push eduardobaitello/hello-kubernetes:$version to docker hub.
 # Will tag $majorversion and $majorversion.$minorversion.
 #
 # Example: The container image will be tagged as follows for $version=1.10.0
-#   - paulbouwer/hello-kubernetes:1.10.0
-#   - paulbouwer/hello-kubernetes:1.10
-#   - paulbouwer/hello-kubernetes:1
+#   - eduardobaitello/hello-kubernetes:1.10.0
+#   - eduardobaitello/hello-kubernetes:1.10
+#   - eduardobaitello/hello-kubernetes:1
 make push-image
 
-# REGISTRY=paulbouwer.azurecr.io
-# Push paulbouwer.azurecr.io/paulbouwer/hello-kubernetes:$version to paulbouwer.azurecr.io.
+# REGISTRY=eduardobaitello.azurecr.io
+# Push eduardobaitello.azurecr.io/eduardobaitello/hello-kubernetes:$version to eduardobaitello.azurecr.io.
 # Will tag $majorversion and $majorversion.$minorversion.
 #
 # Example: The container image will be tagged as follows for $version=1.10.0
-#   - paulbouwer.azurecr.io/paulbouwer/hello-kubernetes:1.10.0
-#   - paulbouwer.azurecr.io/paulbouwer/hello-kubernetes:1.10
-#   - paulbouwer.azurecr.io/paulbouwer/hello-kubernetes:1
-export REGISTRY=paulbouwer.azurecr.io
+#   - eduardobaitello.azurecr.io/eduardobaitello/hello-kubernetes:1.10.0
+#   - eduardobaitello.azurecr.io/eduardobaitello/hello-kubernetes:1.10
+#   - eduardobaitello.azurecr.io/eduardobaitello/hello-kubernetes:1
+export REGISTRY=eduardobaitello.azurecr.io
 make push-image
 ```

@@ -15,7 +15,7 @@ deployment:
   replicaCount: 2
   container:
     image:
-      repository: "paulbouwer/hello-kubernetes"
+      repository: "eduardobaitello/hello-kubernetes"
       tag: "" # uses chart appVersion if not provided
       pullPolicy: IfNotPresent
     port: 8080
