@@ -17,7 +17,7 @@ spec:
       serviceAccountName: {{ include "hello-kubernetes.name" . }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.deployment.container.image.repository }}:{{ .Values.deployment.container.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.imageKey.repository }}:{{ .Values.imageKey.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.deployment.container.image.pullPolicy }}
           ports:
             - name: http
@@ -25,11 +25,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
           env:
           {{- if ne (.Values.deployment.container.port | int) (8080 | int) }}
@@ -40,7 +40,7 @@ spec:
           - name: MESSAGE
             value: "{{ .Values.message }}"
           {{- end }}
-          {{- if .Values.ingress.configured }}
+          {{- if .Values.ingress.enabled }}
           - name: HANDLER_PATH_PREFIX
             {{- if .Values.ingress.rewritePath }}
             value: ""
@@ -58,12 +58,16 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: KUBERNETES_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
           - name: KUBERNETES_NODE_NAME
             valueFrom:
               fieldRef:
                 fieldPath: spec.nodeName
           - name: CONTAINER_IMAGE
-            value: "{{ .Values.deployment.container.image.repository }}:{{ .Values.deployment.container.image.tag | default .Chart.AppVersion }}"
+            value: "{{ .Values.imageKey.repository }}:{{ .Values.imageKey.tag | default .Chart.AppVersion }}"
           {{- with .Values.deployment.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

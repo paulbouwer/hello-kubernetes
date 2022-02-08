@@ -1,0 +1,16 @@
+apiVersion: skaffold/v2beta26
+kind: Config
+build:
+  artifacts:
+  - image: eduardobaitello/hello-kubernetes
+deploy:
+  helm:
+    releases:
+    - name: hello-kubernetes
+      createNamespace: true
+      namespace: hello-kubernetes
+      chartPath: ../../deploy/helm/hello-kubernetes/
+      artifactOverrides:
+        imageKey: "eduardobaitello/hello-kubernetes"
+      imageStrategy:
+        helm: {}

@@ -3,24 +3,28 @@ message: ""
 
 # Remember to set service.type=ClusterIP if you are using an ingress
 ingress:
-  configured: false
+  enabled: false
   rewritePath: true
   pathPrefix: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
 
 service:
-  type: LoadBalancer
+  type: "LoadBalancer"
   port: 80
+
+imageKey:
+  repository: "eduardobaitello/hello-kubernetes"
+  tag: "" # uses chart appVersion if not provided. This value will be overridden if using skaffold
 
 deployment:
   replicaCount: 2
   container:
     image:
-      repository: "paulbouwer/hello-kubernetes"
-      tag: "" # uses chart appVersion if not provided
       pullPolicy: IfNotPresent
     port: 8080
 
-  # Currently only linux images on amd64 architecture are supported - support for arm64 and windows/amd64 coming ...
+  # Currently only linux images on amd64 architecture are supported
   nodeSelector:
     kubernetes.io/os: linux
     kubernetes.io/arch: amd64

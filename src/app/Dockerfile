@@ -1,4 +1,4 @@
-FROM node:16-alpine3.13
+FROM node:17-alpine3.14
 
 ARG IMAGE_CREATE_DATE
 ARG IMAGE_VERSION
@@ -9,12 +9,12 @@ LABEL org.opencontainers.image.title="Hello Kubernetes!" \
       org.opencontainers.image.description="Provides a demo app to deploy to a Kubernetes cluster. It displays a message, the name of the pod and details of the node it is deployed to." \
       org.opencontainers.image.created=$IMAGE_CREATE_DATE \
       org.opencontainers.image.version=$IMAGE_VERSION \
-      org.opencontainers.image.authors="Paul Bouwer" \
-      org.opencontainers.image.url="https://hub.docker.com/r/paulbouwer/hello-kubernetes/" \
-      org.opencontainers.image.documentation="https://github.com/paulbouwer/hello-kubernetes/README.md" \
-      org.opencontainers.image.vendor="Paul Bouwer" \
+      org.opencontainers.image.authors="Eduardo Baitello" \
+      org.opencontainers.image.url="https://hub.docker.com/r/eduardobaitello/hello-kubernetes/" \
+      org.opencontainers.image.documentation="https://github.com/eduardobaitello/hello-kubernetes/README.md" \
+      org.opencontainers.image.vendor="Eduardo Baitello" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.source="https://github.com/paulbouwer/hello-kubernetes.git" \
+      org.opencontainers.image.source="https://github.com/eduardobaitello/hello-kubernetes.git" \
       org.opencontainers.image.revision=$IMAGE_SOURCE_REVISION 
 
 # Create app directory

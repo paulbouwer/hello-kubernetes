@@ -1,6 +1,6 @@
 # Hello Kubernetes!
 
-[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/paulbouwer/hello-kubernetes?sort=semver)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes) [![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/paulbouwer/hello-kubernetes?sort=semver)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes) [![Docker Pulls](https://img.shields.io/docker/pulls/paulbouwer/hello-kubernetes)](https://hub.docker.com/repository/docker/paulbouwer/hello-kubernetes)
+[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/eduardobaitello/hello-kubernetes?sort=semver)](https://hub.docker.com/repository/docker/eduardobaitello/hello-kubernetes) [![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/eduardobaitello/hello-kubernetes?sort=semver)](https://hub.docker.com/repository/docker/eduardobaitello/hello-kubernetes) [![Docker Pulls](https://img.shields.io/docker/pulls/eduardobaitello/hello-kubernetes)](https://hub.docker.com/repository/docker/eduardobaitello/hello-kubernetes)
 
 This container image can be deployed on a Kubernetes cluster. It runs a web app, that displays the following:
 
@@ -51,7 +51,7 @@ The `hello-kubernetes` app can be reached on the ip address of the ingress via t
 
 ```bash
 helm install --create-namespace --namespace hello-kubernetes ingress ./hello-kubernetes \
-  --set ingress.configured=true \
+  --set ingress.enabled=true \
   --set ingress.pathPrefix="/app/hello-kubernetes/" \
   --set service.type="ClusterIP"
 ```
@@ -65,7 +65,3 @@ If you'd like to explore the various Helm chart configuration options, then read
 ### Building your own images
 
 If you'd like to build the `hello-kubernetes` container image yourself and reference from your own registry or DockerHub repository, then you can get more details on how to do this in the [Build and push container images](docs/build-and-push-container-images.md) documentation.
-
-### Development environment
-
-If you have [VS Code](https://code.visualstudio.com/) and the [VS Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment. You can read more about how to use this in the [Development environments](docs/development-environment.md) documentation.
