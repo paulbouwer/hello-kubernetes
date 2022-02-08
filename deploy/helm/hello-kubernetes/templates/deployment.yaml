@@ -58,6 +58,10 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: KUBERNETES_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
           - name: KUBERNETES_NODE_NAME
             valueFrom:
               fieldRef:
