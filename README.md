@@ -4,11 +4,27 @@
 
 This container image can be deployed on a Kubernetes cluster. It runs a web app, that displays the following:
 
-- a default **Hello world!** message
+- a default **Hello Kubernetes!** message
 - namespace, pod, and node details
 - container image details
 
-![Hello world! from the hello-kubernetes image](hello-kubernetes.png)
+![Hello Kubernetes! from the hello-kubernetes image](hello-kubernetes.png)
+
+```
+$ curl http://192.168.49.2:31285/hello-kubernetes -X POST | jq 
+{
+  "message": "Hello Kubernetes!",
+  "namespace": "hello-kubernetes",
+  "pod": "hello-kubernetes-hello-kubernetes-d9d468894-tns46",
+  "podIP": "10.244.0.11",
+  "node": "minikube (Linux 5.13.0-28-generic)",
+  "reqProtocol": "http",
+  "reqHostname": "192.168.49.2",
+  "reqPath": "/",
+  "reqMethod": "POST",
+  "container": "eduardobaitello/hello-kubernetes:2.0.0 (linux/amd64)"
+}
+```
 
 ## Quick start
 
