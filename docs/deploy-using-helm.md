@@ -24,6 +24,7 @@ The following table lists the configuration parameters of the hello-kubernetes c
 | `ingress.pathPrefix` | `string` | `""` | The path prefix configured in the ingress for the hello-kubernetes service.<br/> Must be provided when ingress is used. |
 | `service.type` | `string` | `"LoadBalancer"` | The service type. |
 | `service.port` | `int` | `80` | The port exposed by the service. |
+| `serviceMonitor.enabled` | `bool` | `false` | Create a Prometheus ServiceMonitor. |
 | `imageKey.repository` | `string` | `eduardobaitello/hello-kubernetes` | The container image to run in the  hello-kubernetes pods. |
 | `imageKey.tag` | `string` | `""` | The container image tag. If not specified, the chart's appVersion is used. |
 | `deployment.replicaCount` | `int` | `2` | The number of replicas for the hello-kubernetes deployment. |

@@ -13,6 +13,10 @@ service:
   type: "LoadBalancer"
   port: 80
 
+# Create a Prometheus ServiceMonitor
+serviceMonitor:
+  enabled: false
+
 imageKey:
   repository: "eduardobaitello/hello-kubernetes"
   tag: "" # uses chart appVersion if not provided. This value will be overridden if using skaffold

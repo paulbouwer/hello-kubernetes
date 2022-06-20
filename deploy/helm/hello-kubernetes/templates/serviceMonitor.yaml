@@ -1,0 +1,16 @@
+{{- if .Values.serviceMonitor.enabled -}}
+{{- $fullName := include "hello-kubernetes.name" . -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "hello-kubernetes.labels" . | nindent 4 }}
+spec:
+  endpoints:
+  - interval: 30s
+    port: http
+  selector:
+    matchLabels:
+      {{- include "hello-kubernetes.selectorLabels" . | nindent 6 }}
+{{- end }}
