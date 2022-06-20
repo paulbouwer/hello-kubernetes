@@ -5,11 +5,12 @@ A demo app that can be deployd to a Kubernetes cluster. It displays a message, a
 ## Paths
 
 | Method | Path | Description |
-| -------| ---- | ----------- |
-| GET    | /*          | Displays message, pod and node details |
-| GET    | /health     | Health check endpoint; returns always 200 |
-| GET    | /metrics    | Prometheus metrics endpoint |
-| POST   | /*          | Displays message, pod and node details |
+| -------| -----------| ----------- |
+| GET    | /health    | Health check endpoint; returns always 200 |
+| GET    | /metrics   | Prometheus metrics endpoint |
+| GET    | *          | Displays message, pod and node details |
+| POST   | /random    | Random sleep time, random exit code (200 or 504). Useful for metrics samples |
+| POST   | *          | Displays message, pod and node details |
 
 ## Configuration
 
