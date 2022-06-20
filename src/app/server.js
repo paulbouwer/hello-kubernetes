@@ -10,6 +10,34 @@ const expressLogger = expressPino({ logger });
 
 const app = express();
 
+// Begin of Prometheus metrics
+const promClient = require('prom-client');;
+const collectDefaultMetrics = promClient.collectDefaultMetrics;
+const Registry = promClient.Registry;
+const register = new Registry();
+collectDefaultMetrics({ register });
+
+register.setDefaultLabels({
+  app: 'hello-kubernetes'
+});
+
+const httpRequestDurationMicroseconds = new promClient.Histogram({
+  name: 'http_request_duration_ms',
+  help: 'Duration of HTTP requests in ms',
+  labelNames: ['method', 'path', 'code'],
+  buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
+});
+
+register.registerMetric(httpRequestDurationMicroseconds);
+
+app.get('/metrics', async (req, res) => {
+  // Return all metrics the Prometheus exposition format
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+// End of Prometheus metrics
+
+
 // Handler for health checks (without logs)
 app.get('/health', (req, res) => {
   const data = {
@@ -76,6 +104,8 @@ logger.debug('Serving from base path "' + handlerPathPrefix + '"');
 
 // GET Handler
 app.get(handlerPathPrefix + '/*', function (req, res) {
+    // Start the timer
+    const end = httpRequestDurationMicroseconds.startTimer();
     res.render('home', {
       message: message,
       namespace: namespace,
@@ -89,10 +119,14 @@ app.get(handlerPathPrefix + '/*', function (req, res) {
       container: containerImage + ' (' + containerImageArch + ')',
       renderPathPrefix: renderPathPrefix
     });
+    // End timer and add labels
+    end({ path: req.path, code: res.statusCode, method: req.method });
 });
 
 // POST Handler
 app.post(handlerPathPrefix + '/*', function (req, res) {
+  // Start the timer
+  const end = httpRequestDurationMicroseconds.startTimer();
   const data = {
     message: message,
     namespace: namespace,
@@ -105,6 +139,8 @@ app.post(handlerPathPrefix + '/*', function (req, res) {
     reqMethod: req.method,
     container: containerImage + ' (' + containerImageArch + ')',
   }
+  // End timer and add labels
+  end({ path: req.path, code: res.statusCode, method: req.method });
   res.status(200).send(data);
 });
 

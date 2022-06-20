@@ -13,6 +13,7 @@
     "express-handlebars": "^6.0.2",
     "express-pino-logger": "^7.0.0",
     "handlebars": "^4.7.7",
-    "pino": "^7.6.5"
+    "pino": "^7.6.5",
+    "prom-client": "^14.0.1"
   }
 }
