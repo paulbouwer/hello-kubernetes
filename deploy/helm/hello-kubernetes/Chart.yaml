@@ -2,5 +2,5 @@ apiVersion: v2
 name: hello-kubernetes
 description: A demo application for a Kubernetes cluster.
 type: application
-version: 1.0.0
-appVersion: "2.0.0"
+version: 1.1.0
+appVersion: "2.1.0"
