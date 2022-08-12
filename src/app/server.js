@@ -28,6 +28,10 @@ var handlerPathPrefix = (
     ''
 );
 
+const getTemperature = () => {
+    return parseFloat(fs.readFileSync('/sys/class/thermal/thermal_zone0/temp', { encoding: 'utf8' }))/1000;
+}
+
 var namespace = process.env.KUBERNETES_NAMESPACE || '-';
 var podName = process.env.KUBERNETES_POD_NAME || os.hostname();
 var nodeName = process.env.KUBERNETES_NODE_NAME || '-';
@@ -67,7 +71,8 @@ app.get(handlerPathPrefix + '/', function (req, res) {
       pod: podName,
       node: nodeName + ' (' + nodeOS + ')',
       container: containerImage + ' (' + containerImageArch + ')',
-      renderPathPrefix: renderPathPrefix
+      renderPathPrefix: renderPathPrefix,
+      temperature: getTemperature()
     });
 });
 
