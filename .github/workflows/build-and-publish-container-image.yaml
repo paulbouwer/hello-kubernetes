@@ -17,6 +17,11 @@ jobs:
       CONTAINER_IMAGE: paulbouwer/hello-kubernetes
 
     steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          platforms: linux/amd64,linux/arm64
+          install: true
 
       - name: Checkout code
         uses: actions/checkout@v2
