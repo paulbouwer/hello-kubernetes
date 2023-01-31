@@ -14,9 +14,12 @@ jobs:
 
     env:
       CONTAINER_REGISTRY: docker.io
-      CONTAINER_IMAGE: ${{ github.repository }}
 
     steps:
+      - name: Lowercase env
+        run: |
+          echo "CONTAINER_IMAGE=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
         with:
