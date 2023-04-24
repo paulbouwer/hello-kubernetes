@@ -12,7 +12,7 @@ service:
   port: 80
 
 deployment:
-  replicaCount: 2
+  replicaCount: 3
   container:
     image:
       repository: "paulbouwer/hello-kubernetes"
