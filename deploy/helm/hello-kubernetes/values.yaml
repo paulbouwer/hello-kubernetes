@@ -1,5 +1,5 @@
 # Provide a custom message
-message: "Hello yet again K8s users this is a customized message bla bla bla !!!"
+message: "Hello there !!!"
 
 # Remember to set service.type=ClusterIP if you are using an ingress
 ingress:
@@ -12,7 +12,7 @@ service:
   port: 80
 
 deployment:
-  replicaCount: 1
+  replicaCount: 5
   container:
     image:
       repository: "paulbouwer/hello-kubernetes"
