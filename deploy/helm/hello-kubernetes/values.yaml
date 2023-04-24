@@ -1,5 +1,5 @@
 # Provide a custom message
-message: ""
+message: "Hello K8s users this is a customized message ..."
 
 # Remember to set service.type=ClusterIP if you are using an ingress
 ingress:
