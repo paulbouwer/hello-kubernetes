@@ -1,4 +1,5 @@
-FROM node:16-alpine3.13
+ARG BASE=alpine:3.18
+FROM ${BASE}
 
 ARG IMAGE_CREATE_DATE
 ARG IMAGE_VERSION
@@ -16,6 +17,10 @@ LABEL org.opencontainers.image.title="Hello Kubernetes!" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/paulbouwer/hello-kubernetes.git" \
       org.opencontainers.image.revision=$IMAGE_SOURCE_REVISION 
+
+RUN addgroup -g 1000 node && \
+    adduser -u 1000 -G node -s /bin/sh -D node && \
+    apk add -U --no-cache nodejs npm
 
 # Create app directory
 RUN mkdir -p /usr/src/app
