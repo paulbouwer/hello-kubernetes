@@ -1,5 +1,3 @@
-# Provide a custom message
-message: "test4"
 
 # Remember to set service.type=ClusterIP if you are using an ingress
 ingress:
