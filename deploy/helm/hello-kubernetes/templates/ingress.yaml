@@ -12,7 +12,7 @@ spec:
       paths:
       - backend:
           service:
-            name: hello-kubernetes-hello-world
+            name: {{ include "hello-kubernetes.name" . }}
             port:
               number: 80
         path: /
