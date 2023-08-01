@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  name: hello-kubernetes
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: demo.pavgun-dev.a1ck.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: hello-kubernetes-hello-world
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - demo.pavgun-dev.a1ck.io
+    secretName: demo-tls

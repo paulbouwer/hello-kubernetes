@@ -38,7 +38,10 @@ spec:
           {{- end }}
           {{- if .Values.message }}
           - name: MESSAGE
-            value: "{{ .Values.message }}"
+            valueFrom:
+              secretKeyRef:
+                name: test-secret
+                key: message
           {{- end }}
           {{- if .Values.ingress.configured }}
           - name: HANDLER_PATH_PREFIX
