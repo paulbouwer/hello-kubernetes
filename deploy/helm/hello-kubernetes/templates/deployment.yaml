@@ -40,7 +40,7 @@ spec:
           - name: MESSAGE
             valueFrom:
               secretKeyRef:
-                name: test-secret
+                name: {{ include "hello-kubernetes.name" . }}
                 key: message
           {{- end }}
           {{- if .Values.ingress.configured }}
