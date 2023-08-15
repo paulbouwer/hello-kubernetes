@@ -12,7 +12,7 @@ deployment:
   container:
     image:
       repository: "harbor.pavgun-dev.a1ck.io/demo/hello-kubernetes"
-      tag: "1.10.1" # uses chart appVersion if not provided
+      tag: "1.11.0" # uses chart appVersion if not provided
       pullPolicy: IfNotPresent
     port: 8080
 

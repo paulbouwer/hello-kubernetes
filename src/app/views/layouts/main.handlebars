@@ -3,12 +3,21 @@
 <head>
     <title>Hello Kubernetes!</title>
     <link rel="stylesheet" type="text/css" href="{{ renderPathPrefix }}/css/main.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300" >
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300">
+    <style>
+        .main {
+            text-align: center;
+        }
+        .main img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
 
   <div class="main">
-    <img src="{{ renderPathPrefix }}/images/compliant-kubernetes-logo.png"/>
+    <img src="{{ renderPathPrefix }}/images/compliant-kubernetes-logo.png" alt="Kubernetes Logo">
     <div class="content">
       {{{body}}}
     </div>
