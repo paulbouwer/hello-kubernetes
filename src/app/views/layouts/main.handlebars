@@ -7,17 +7,19 @@
     <style>
         .main {
             text-align: center;
+            position: relative;
         }
-        .main img {
-            max-width: 100%;
+        .main img.kubernetes-logo {
+            max-width: 30%;
             height: auto;
+            margin: 2% auto;
         }
     </style>
 </head>
 <body>
 
   <div class="main">
-    <img src="{{ renderPathPrefix }}/images/test.png" alt="Kubernetes Logo">
+      <img src="{{ renderPathPrefix }}/images/test.png" alt="Kubernetes Logo" class="kubernetes-logo">
     <div class="content">
       {{{body}}}
     </div>

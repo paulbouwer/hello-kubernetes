@@ -1,7 +1,7 @@
 body {
   margin:0;
   padding:0;
-  background-color:#333333;
+  background-color:#a7f1f2;
 }
 
 div.main { 
@@ -17,15 +17,27 @@ div.content {
 }
 
 .content #message {
-  margin: 10px 0 50px 0;
-  padding: 30px 0;  
+  margin: 20px auto; /* Center the box horizontally and add margin */
+  width: fit-content; /* Set width to fit the content */
+  padding: 15px;
   font-family: 'Ubuntu', sans-serif;
   font-weight: 300;
-  font-size: 32pt;
-  background-color: #505050;
-  border-top: 2px solid #909090;
-  border-bottom: 2px solid #909090;
+  font-size: 20px;
+  background-color: #0099FF;
+  border-radius: 10px;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: #333;
 }
+
+
+/* Add a hover effect */
+.content #message:hover {
+  background-color: #f5f5f5;
+  transition: background-color 0.3s ease-in-out;
+}
+
+
 
 .content #footer {
   margin: 50px 0;
@@ -46,6 +58,7 @@ div.content {
 
 .content #info table {
   margin: 10px auto;
+  color: #000000;
 }
 
 .content #info table th {
