@@ -149,7 +149,7 @@ The project is private, so contributors and the people credited in [community.md
 ### Notes
 
 - **Agents need a token with project access** to read and move cards. The workflow's `GITHUB_TOKEN` can't reach a project owned by a personal account, so an agent workflow needs a personal access token with the `project` scope, stored as a secret. Check whether a GitHub App token can reach a user-owned project before relying on one.
-- **Linking PRs and issues has no API.** The Development link can only be set in the web UI, or created up front with `gh issue develop` (see [Branches](#branches)).
+- **Linking a PR to an issue has no API.** On a release branch, the PR link can only be set by hand in the Development section of the PR or the issue (see [Linking the PR to the issue](#linking-the-pr-to-the-issue)). `gh issue develop` links only the branch.
 - **`gh` needs the `project` scope** to read or change the board: `gh auth refresh -h github.com -s project`, run in an interactive terminal.
 - **The `agent` label and the board work together.** A maintainer applies `agent` only to an issue in Ready. The label is what triggers the run (label triggers are what the actions support); the board is what the agent checks and updates.
 
@@ -158,8 +158,8 @@ The project is private, so contributors and the people credited in [community.md
 Release work happens on a release branch (currently `release-1.11`), which merges into `main` when the release ships.
 
 - **PRs target the current release branch**, not `main`. The milestone (e.g. `v1.11`) on the issue says which release branch that is.
-- **Create the branch from the issue**, so GitHub links them (see [Branches](#branches)).
-- **Don't rely on closing keywords.** `Fixes #n` only links and closes an issue on a PR into the default branch, so it does nothing on a release branch. Link through the branch (above), or through the Development section of the PR or issue. Commit messages and PR bodies don't reference issues.
+- **Create the branch from the issue**, so the branch is linked to it (see [Branches](#branches)).
+- **Link the PR to the issue by hand** in the Development section (see [Linking the PR to the issue](#linking-the-pr-to-the-issue)). Closing keywords don't work on a release branch, and the linked branch doesn't link the PR. Commit messages and PR bodies don't reference issues.
 - **Close the issue when its PR merges into the release branch**, by moving it to Done. Add a short comment such as "Merged into `release-1.11` in #52. This ships in 1.11.0.", so a reporter knows it isn't released yet.
 - **The milestone tracks the release.** It stays open while the release branch is in progress, and is closed when the release ships. Release notes are generated from the labels on merged PRs, not from issues.
 - **Merge PRs with a merge commit**, not a squash or rebase. That keeps each signed commit unchanged, along with contributors' commits and `Co-authored-by` trailers. This applies to the final release-branch → `main` PR too.
@@ -197,13 +197,24 @@ Example: [#50](https://github.com/paulbouwer/hello-kubernetes/issues/50).
 
 - **Name:** `{type}/{issue}-{slug}`, e.g. `chore/50-update-devcontainer`. The type matches the issue title's type. The slug is 2 to 4 lowercase words joined with hyphens. Leave the scope out, so there's only one `/`.
 - **Base:** the PR's base branch, which is the release branch for the issue's milestone. When the base moves, rebase or merge it in.
-- **Create it from the issue**, so the branch and its PR are linked to the issue:
+- **Create it from the issue**, so the branch is linked to the issue:
 
   ```bash
   gh issue develop 51 --base release-1.11 --name docs/51-add-project-notes --checkout
   ```
 
-  There's no API for linking an existing PR to an issue. If a branch was created another way, link the PR by hand from the Development section of the PR or the issue.
+  This links the **branch** only. The issue's Development section shows the branch, but a PR opened from it is not linked to the issue (see below).
+
+#### Linking the PR to the issue
+
+GitHub keeps two separate links between an issue and the work for it:
+
+| Link | Created by | Shows the PR in the issue's and PR's Development section | Fires the board's "Pull request linked to issue" |
+|---|---|---|---|
+| Linked branch | `gh issue develop`, or "Create a branch" on the issue | No | No |
+| Linked PR | A closing keyword on a PR into the default branch, or a link made by hand in the Development section | Yes | Yes |
+
+Release-branch PRs don't target the default branch, so the PR link has to be made by hand: on the PR, open **Development** in the sidebar and pick the issue. There's no API for it. This was confirmed on #51: its linked branch listed PR #53, but the issue had no linked PR until it was linked by hand.
 
 ### Commits
 
@@ -267,7 +278,7 @@ Comment on the issue that it's merged and which release it ships in, then move i
 The work is driven from issues, so every PR must link one. Planned, not yet built:
 
 - `.github/pull_request_template.md` with the PR sections above.
-- **A check workflow** that fails a PR with no linked issue. Closing keywords don't link on release branches, so it checks the head branch name (`{type}/{issue}-…`), confirms that the number is an open issue in this repo, and accepts a link made through the Development section. Dependabot PRs are exempt.
+- **A check workflow** that fails a PR with no linked issue. Closing keywords don't link on release branches, and a PR linked by hand can only be checked after someone links it, so the check reads the issue number from the head branch name (`{type}/{issue}-…`), confirms that it's an open issue in this repo, and also accepts a PR linked through the Development section. Dependabot PRs are exempt.
 - **A repository ruleset** on `main` and `release-*` that makes the check required.
 
 ### Epics
@@ -296,7 +307,7 @@ Rules for agents, to be written into `AGENTS.md`:
 1. Only start work on issues in **Ready** on the board that are labelled `agent`.
 2. Move the issue to **In Progress** when starting.
 3. Read the plan for the issue's `area:` label first.
-4. Create the branch with `gh issue develop` from the release branch for the issue's milestone, and open the PR against that release branch, not `main`.
+4. Create the branch with `gh issue develop` from the release branch for the issue's milestone, and open the PR against that release branch, not `main`. Linking the PR to the issue can't be done through the API, so ask the maintainer to link it in the PR's Development section.
 5. Once the PR merges, comment on the issue that it's merged and which release it ships in, then move the issue to **Done**, which closes it.
 6. Never merge anything labelled `security` or `breaking-change` without a human review.
 7. Ignore anything labelled `invalid`.
