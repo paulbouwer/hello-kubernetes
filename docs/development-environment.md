@@ -1,25 +1,79 @@
 # Development environment
 
-If you have [VS Code](https://code.visualstudio.com/) and the [VS Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment for this repo.
+The `.devcontainer` folder defines a container based development environment for this repo. Open it with any tool that supports [dev containers](https://containers.dev/), for example the VS Code [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension or the [devcontainer CLI](https://github.com/devcontainers/cli):
 
-## Terminal
+```bash
+devcontainer up --workspace-folder .
+devcontainer exec --workspace-folder . bash
+```
 
-The VS Code Terminal will run a Bash shell and make the following utilities will be available:
+The container runs as the `vscode` user on Ubuntu 26.04, and builds on both `amd64` and `arm64` hosts.
 
-- curl
-- Docker cli
-- Helm 3.x
-- jq
-- kubectl 
-- vim
+## Tools
 
-The following host folders will be mounted into the VS Code dev container:
+| Tool | Tracks |
+| ---- | ------ |
+| Node.js | latest 24.x |
+| kubectl | latest stable |
+| Helm | latest 4.x |
+| Trivy | latest 0.x |
+| kind | latest 0.x |
+| k3d | latest 5.x |
+| GitHub CLI (`gh`) | latest 2.x |
+| GitHub Copilot CLI (`copilot`) | latest, updates itself |
+| Claude Code (`claude`) | stable channel, updates itself |
+| Docker | via the docker-in-docker feature |
 
-- `/var/run/docker.sock` - allow for docker builds
-- `~/.kube` - allow for access to kubeconfig file
+The development environment is meant to stay current, so tools aren't pinned to exact versions. Rebuilding the container picks up the latest release within each major version. Change a major version with the `*_MAJOR` build arguments in `.devcontainer/Dockerfile`. Every download is checked against the checksum file published with its release.
+
+Version lookups use the GitHub API without a token, which allows 60 requests an hour. A build makes about six, so this only matters if you rebuild many times in a row.
 
 ## Application development
 
-Port `8080` has been configured to be forwarded to your host. If you run `npm start` in the `src/app` folder in the **VS Code Remote Containers** terminal, you will be able to access the website on `http://localhost:8080`. You can change the port in the `.devcontainer/devcontainer.json` file under the `appPort` key.
+Port `8080` is forwarded to your host. Run the app from the `src/app` folder:
 
-See the **Visual Studio Code Remote Containers** [guidance](https://code.visualstudio.com/docs/remote/containers) for more details on working with this setup.
+```bash
+cd src/app
+npm install
+npm start
+```
+
+Then browse to `http://localhost:8080`.
+
+## Kubernetes clusters
+
+Docker runs inside the container (docker-in-docker), so `kind` and `k3d` clusters are created there and are isolated from your host:
+
+```bash
+kind create cluster --name hello-kubernetes
+k3d cluster create hello-kubernetes
+```
+
+Their contexts are written to `~/.kube/config` inside the container. The clusters and contexts are lost when the container is rebuilt.
+
+### Using clusters from your host
+
+Your host's `~/.kube` folder isn't mounted by default. To use clusters defined on your host, mount it read-only in `.devcontainer/devcontainer.json` and rebuild the container:
+
+```jsonc
+"mounts": [
+  "source=${localEnv:HOME}${localEnv:USERPROFILE}/.kube,target=/home/vscode/.kube-host,type=bind,readonly"
+]
+```
+
+Then merge your host contexts into the container's own kubeconfig:
+
+```bash
+mkdir -p ~/.kube
+KUBECONFIG=~/.kube/config:~/.kube-host/config kubectl config view --flatten > /tmp/kubeconfig \
+  && mv /tmp/kubeconfig ~/.kube/config \
+  && chmod 600 ~/.kube/config
+```
+
+This copies the contexts rather than linking them, so `kind`, `k3d` and `kubectl config` only ever write to the container's file and your host config isn't changed. Run it again to pick up changes from your host. Don't add the mounted file to `KUBECONFIG` instead: `kind delete cluster` locks every file listed there and fails on the read-only one.
+
+Contexts that point at `127.0.0.1` on your host, like a local kind cluster, won't be reachable from inside the container. Remote and cloud clusters work.
+
+## Signing in
+
+Sign-ins for `gh`, `copilot` and `claude` are stored inside the container and are lost when it's rebuilt. Sign in again after a rebuild, or pass tokens in from your host, for example `GH_TOKEN` for `gh`.
