@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [ci]
 created: 2026-10-22
-updated: 2026-10-25
+updated: 2026-10-26
 ---
 
 # Testing
@@ -27,7 +27,7 @@ Between them, the two clusters cover the two worked examples in `deploy.md`: NGI
 |---|---|
 | Your locally built image, without pushing to a registry | `kind load docker-image paulbouwer/hello-kubernetes:1.11.0` |
 | #35 `runAsNonRoot` and the new `securityContext` | Label the namespace `pod-security.kubernetes.io/enforce=restricted`. Pods that break the rules are rejected at admission time. That's a much stricter check than #35's company policy. |
-| #30/#44 probes and #38 asset paths behind a sub-path | Install F5's NGINX Ingress Controller using kind's port-mapping setup, then deploy with `ingress.enabled=true` and `pathPrefix` set (no rewrite, the proposed default). |
+| #30/#44 probes and #38 asset paths behind a sub-path | Install F5's NGINX Ingress Controller using kind's port-mapping setup, then deploy with `ingress.enabled=true`, `pathPrefix` set and `rewritePath=false` (no rewrite, the recommended setting). |
 | #31 ingress docs on `networking.k8s.io/v1` | The same NGINX setup. Run the doc's commands exactly as written. |
 | Gateway API (chart-created HTTPRoute) | Install the Gateway API CRDs and NGINX Gateway Fabric, create a `Gateway`, then deploy with `httpRoute.enabled=true`. |
 | `service.type: LoadBalancer` (old issues #1/#14, "EXTERNAL-IP pending") | Run `cloud-provider-kind` alongside the cluster so LoadBalancer services get an IP. |
@@ -67,7 +67,7 @@ These check the image itself and guard against the problems found in the review 
 | I2 | OS CA bundle is patched | `docker run --rm --entrypoint apk IMG info -v ca-certificates` ≥ `20261020-r0` | eMudhra (OS store) |
 | I3 | Runs as numeric non-root user | `docker inspect -f '{{.Config.User}}' IMG` is `1000` or `1000:1000`; `docker run --rm --entrypoint id IMG -u` prints `1000` | #35 |
 | I4 | No HIGH/CRITICAL vulnerabilities with a fix available | Trivy with `--severity HIGH,CRITICAL --ignore-unfixed --exit-code 1` | stale base image |
-| I5 | Starts and serves on every published platform, and reports it correctly | For `linux/amd64` and `linux/arm64`: `docker run --platform <p> -d -p 8080:8080 IMG`, then `curl -fsS localhost:8080/` and check the page shows `<p>` as the architecture (proves CI wrote `info.json` for each platform) | #16, #40 |
+| I5 | Starts and serves on every published platform, and reports it correctly | For `linux/amd64` and `linux/arm64`: `docker run --platform <p> -d -p 8080:8080 IMG`, then `curl -fsS localhost:8080/` and check the page shows `<p>` as the architecture (proves the app reports each platform at runtime) | #16, #40 |
 | I6 | Respects `PORT` | `docker run -e PORT=9090 -p 9090:9090 IMG` and `curl -fsS localhost:9090/` | #34 |
 | I7 | Works with a read-only root filesystem | `docker run --read-only --tmpfs /tmp IMG` and `curl -fsS localhost:8080/` | chart `readOnlyRootFilesystem` default |
 
@@ -82,7 +82,7 @@ Every scenario runs on both kind and k3d unless the "Clusters" column says other
 | E3 | Custom message, escaped | `--set message='<b>Hi</b> & "you"'` | Install succeeds. Page has `&lt;b&gt;Hi&lt;/b&gt; &amp; &quot;you&quot;` and does **not** contain a raw `<b>Hi</b>` tag. **Expected to fail today:** `deployment.yaml` renders `value: "{{ .Values.message }}"`, so a message containing `"` produces invalid YAML. Fix with `{{ .Values.message \| quote }}` (same for `pathPrefix`) | both | message injection, chart quoting bug |
 | E4 | Custom port | `--set deployment.container.port=9090` | Pods become ready (probes follow the port), page served through the service | both | #34 |
 | E5 | Ingress with rewrite | Two releases (`hello-world`, `custom-message`) with `ingress.enabled=true`, `rewritePath=true`, prefixes `/app/hello-world` and `/app/custom`. Controller-specific annotations: `nginx.org/rewrites` on kind; a Traefik `stripPrefix` Middleware on k3d | `curl http://localhost:<port>/app/hello-world/` and `/app/custom/` each return their own page; CSS and image links resolve (200) | both | #31 docs |
-| E6 | Ingress without rewrite (default) | One release with `ingress.enabled=true`, `ingress.className` for the cluster, `pathPrefix=/app/hello`, no annotations | Pods **ready** (no probe failures in `kubectl get events`); page, `css/main.css` and `images/kubernetes.png` all 200 under `/app/hello/` | both | #30, #44, #38 |
+| E6 | Ingress without rewrite (recommended) | One release with `ingress.enabled=true`, `ingress.className` for the cluster, `pathPrefix=/app/hello`, `rewritePath=false`, no annotations | Pods **ready** (no probe failures in `kubectl get events`); page, `css/main.css` and `images/kubernetes.png` all 200 under `/app/hello/` | both | #30, #44, #38 |
 | E7 | Restricted Pod Security | Namespace labelled `pod-security.kubernetes.io/enforce=restricted`, chart installed with defaults | Install succeeds with no admission warnings; pods run with `runAsUser: 1000`; `kubectl exec ... -- id -u` prints `1000` | both | #35 |
 | E8 | LoadBalancer service | `--set service.type=LoadBalancer`. kind: run `cloud-provider-kind`; k3d: built-in ServiceLB | Service gets an `EXTERNAL-IP` within 60s; page served through it | both | #1, #14 |
 | E9 | Pods across nodes | `--set deployment.replicaCount=4` on a 1 control-plane + 2 worker cluster | Repeated requests through the service return at least 2 distinct pod names, and pods sit on at least 2 nodes | both | the demo's main point |

@@ -1,11 +1,11 @@
 ---
 title: Container image
-description: Node over Bun, base image, debugging with kubectl debug, amd64 and arm64 only, info.json, and vulnerability scanning.
+description: Node over Bun, base image, debugging with kubectl debug, amd64 and arm64 only, showing the architecture, and vulnerability scanning.
 type: plan
 status: active
 areas: [image, app]
 created: 2026-10-22
-updated: 2026-10-25
+updated: 2026-10-26
 ---
 
 # Container image
@@ -104,7 +104,14 @@ Platforms published, checked against the registries in October 2026:
 
 [GOAL.md](../../GOAL.md) limits the image to platforms with official Node runtime images: `linux/amd64` and `linux/arm64`. Every candidate base image above publishes both.
 
-The page shows the image's architecture, read from `src/app/info.json`. That file is hard-coded to `linux/amd64` today, so CI must write it for each platform during the multi-arch build (e.g. from buildx's `TARGETPLATFORM`). Otherwise an arm64 image reports the wrong architecture.
+The page shows the image's architecture. Today it reads it from `src/app/info.json`, which is hard-coded to `linux/amd64`, so an arm64 image would report the wrong architecture. From 1.11 the app reads it at runtime instead, from `process.platform` and `process.arch`, as PR #40 did, and `info.json` is removed (decided 2026-10-26):
+
+- **It shows the image, not the host.** `process.arch` is fixed when the Node binary is built, so an amd64 image running under emulation on an arm64 node shows `linux/amd64`. That's correct for "the image's architecture", and it makes emulation visible.
+- **Map Node's names to OCI names**, so the page matches image manifests and the `kubernetes.io/arch` node label: `x64` → `amd64`. `arm64` is the same in both.
+- **Don't use `os.machine()`.** It comes from the kernel (`uname -m`), so it reports the host, and QEMU user-mode emulation can fake it.
+- **No build step is needed**, so local builds on any platform report correctly too.
+
+The kernel line on the page (`os.type()` and `os.release()`) does come from the host kernel, and can look unusual in some environments. These are correct, not bugs: Docker Desktop shows its VM kernel (`…-microsoft-standard-WSL2` on Windows, `…-linuxkit` on macOS), gVisor shows its own kernel version, and Kata or Firecracker show the guest VM's kernel.
 
 ### Out of scope until 2.0
 

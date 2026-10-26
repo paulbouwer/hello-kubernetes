@@ -5,7 +5,7 @@ type: exploration
 status: exploring
 areas: [app, image, deploy, ci, site]
 created: 2026-10-23
-updated: 2026-10-23
+updated: 2026-10-26
 ---
 
 # 2.0: rewriting the app
@@ -46,7 +46,7 @@ Rust would also work, but Go wins on the things this project cares about:
 | Server | Express + handlebars | Go standard HTTP server and HTML templates. Escaping is built in, which settles the E3 message-escaping test |
 | Static files | `static/` copied into the image | CSS, logo and favicon embedded in the binary |
 | Font | Google Fonts at runtime | System font stack or an embedded font. The page works on offline and air-gapped clusters and makes no outside requests |
-| Architecture shown | `info.json` (hard-coded; CI to overwrite) | Read from the running binary (`runtime.GOARCH`, plus the ARM variant from Go's build info). Can't be wrong, so `info.json` goes away |
+| Architecture shown | `process.platform`/`process.arch` at runtime, from 1.11 (`info.json` before) | Read from the running binary (`runtime.GOARCH`, plus the ARM variant from Go's build info). Can't be wrong |
 | Version | `package.json` | Set at build time |
 | Logging | pino JSON with numeric levels | `slog` JSON, honouring `LOG_LEVEL`. Field names and level format change: a breaking change for anyone parsing logs |
 | Shutdown | npm in front of node; signals handled badly | Handles SIGTERM and finishes in-flight requests (see [Health endpoint](#health-endpoint)) |
@@ -167,8 +167,8 @@ Building more platforms costs almost nothing in Go; the real cost is testing the
 
 | File | What changes |
 |---|---|
-| [GOAL.md](../../GOAL.md) | The architecture list becomes amd64, arm64, arm/v7, riscv64, and the reason changes from "official Node images" to "platforms we can build and test". The "Possible 2.0 goal" section becomes the current scope. The `info.json` requirement is replaced by "detected from the running binary". Environment variables updated; `/healthz` only if approved. |
-| [image.md](../1.x/image.md) | The biggest rewrite:<br>- **Runtime:** "Node, not Bun" becomes "Go, not Rust".<br>- **Base image:** the Node-alpine/distroless-Node comparison becomes distroless static.<br>- **Obsolete sections:** the npm dependency upgrades and `package-lock.json`.<br>- **Debugging:** `kubectl debug` stays, without the "do it in a major version" caveat.<br>- **Architectures:** the table gains the static base image, and the `info.json` and 2.0 sections become the current plan.<br>- **Scanning:** Trivy now scans the Go binary's modules and Go version; add `govulncheck`, which reports only vulnerabilities the code can actually reach. The Trivy installation advice stays. The new maintenance task is rebuilding on Go patch releases. |
+| [GOAL.md](../../GOAL.md) | The architecture list becomes amd64, arm64, arm/v7, riscv64, and the reason changes from "official Node images" to "platforms we can build and test". The "Possible 2.0 goal" section becomes the current scope. Environment variables updated; `/healthz` only if approved. |
+| [image.md](../1.x/image.md) | The biggest rewrite:<br>- **Runtime:** "Node, not Bun" becomes "Go, not Rust".<br>- **Base image:** the Node-alpine/distroless-Node comparison becomes distroless static.<br>- **Obsolete sections:** the npm dependency upgrades and `package-lock.json`.<br>- **Debugging:** `kubectl debug` stays, without the "do it in a major version" caveat.<br>- **Architectures:** the table gains the static base image, and the 2.0 section becomes the current plan.<br>- **Scanning:** Trivy now scans the Go binary's modules and Go version; add `govulncheck`, which reports only vulnerabilities the code can actually reach. The Trivy installation advice stays. The new maintenance task is rebuilding on Go patch releases. |
 | [deploy.md](../1.x/deploy.md) | Mostly unchanged, which shows the chart was designed independently of the app. Changes:<br>- **Environment variables:** the mapping to `PATH_PREFIX`/`PREFIX_STRIPPED`.<br>- **Probes:** move to `/healthz` if approved; the rows about probes following the prefix go.<br>- **Resource requests:** smaller defaults (roughly 10m CPU and 16Mi memory).<br>- **Values table:** updated for the above. |
 | [testing.md](../1.x/testing.md) | **Image tests:**<br>- I1 checks the Go version instead of Node's.<br>- I2 (Alpine CA bundle) becomes "the image contains only the binary".<br>- I3 can't run `id` in the image, so it uses `docker inspect` only.<br>- I5 adds arm/v7 and riscv64 under QEMU.<br><br>**E2e tests:** E7 checks the pod spec instead of `kubectl exec`. E6/E17 check probes use `/healthz` if approved.<br><br>**New layer: unit tests** (`go test`) for escaping, prefix handling, environment aliases, redirects and `/healthz`. Cheap in Go, and missing today. |
 | [site.md](../1.x/site.md) | **Live preview:** the browser can't run Go templates. Instead, CI runs the real image with sample settings and saves the page, and the builder swaps in the message, so the preview still uses real output.<br>**Rationale:** "Astro is Node, like the app" no longer applies. Hugo's "Go templates, like Helm" gets a little stronger, but Starlight still wins on product feel. |
@@ -199,7 +199,7 @@ The e2e and image tests in [testing.md](../1.x/testing.md) are black-box: they o
    - the `rewritePath` default and value moves from [deploy.md](../1.x/deploy.md)
    - `/healthz`, if approved.
 
-   One major release with one migration guide is kinder to users than two. That means the breaking chart changes in `deploy.md` would wait for 2.0, while 1.x gets only the additions. The `:1` tag stays on the last 1.x release, and 1.x gets security rebuilds for a stated period (for example six months), then stops.
+   One major release with one migration guide is kinder to users than two. So the breaking chart changes in `deploy.md` wait for 2.0, while 1.x gets only the additions (decided 2026-10-26). The `:1` tag stays on the last 1.x release, and 1.x gets security rebuilds for a stated period (for example six months), then stops.
 4. **Clean-up:** remove the Node code, the npm Dependabot entries and the Node-specific sections of the notes.
 
 ## Risks

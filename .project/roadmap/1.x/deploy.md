@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [deploy]
 created: 2026-10-22
-updated: 2026-10-25
+updated: 2026-10-26
 ---
 
 # Deployment
@@ -18,7 +18,7 @@ How people should deploy hello-kubernetes: with Helm, with plain `kubectl apply`
 - **Publish rendered YAML from the chart** with every release, so `kubectl apply` and Kustomize users have a stable URL to start from.
 - **Document how to customise that YAML with Kustomize patches**, including a table of what each chart value changes.
 - **Have the chart create an Ingress or a Gateway API HTTPRoute**, not just set the app's path prefix. Document NGINX and Traefik as the two worked examples.
-- **Make "no rewrite" the default for path prefixes**, so an Ingress works on any controller without annotations.
+- **Recommend "no rewrite" for path prefixes**, so an Ingress works on any controller without annotations. In 1.x the default stays `rewritePath: true`, so the docs set `rewritePath=false` explicitly. The default changes in 2.0.
 - **Support Helm 3 and Helm 4.** The devcontainer tracks the latest Helm 4.x release (#50).
 
 ## Helm version
@@ -44,22 +44,22 @@ When the app is served under a prefix such as `/app/hello`, either the proxy str
 
 | `rewritePath` | Proxy | App | Works on |
 |---|---|---|---|
-| `false` (proposed default) | Passes `/app/hello/...` through unchanged | Serves under `/app/hello` (`HANDLER_PATH_PREFIX` and `RENDER_PATH_PREFIX` both set) | Every Ingress controller and Gateway, no annotations |
-| `true` (current default) | Strips `/app/hello` | Serves at `/`, renders links with the prefix (`RENDER_PATH_PREFIX` only) | Ingress: needs controller-specific annotations. Gateway API: portable, using the standard `URLRewrite` filter |
+| `false` (recommended; default from 2.0) | Passes `/app/hello/...` through unchanged | Serves under `/app/hello` (`HANDLER_PATH_PREFIX` and `RENDER_PATH_PREFIX` both set) | Every Ingress controller and Gateway, no annotations |
+| `true` (default in 1.x) | Strips `/app/hello` | Serves at `/`, renders links with the prefix (`RENDER_PATH_PREFIX` only) | Ingress: needs controller-specific annotations. Gateway API: portable, using the standard `URLRewrite` filter |
 
-Because the app can serve under a prefix itself, `rewritePath: false` is the simplest default: the chart's Ingress works anywhere with no annotations. The probes must then use the prefix too, which is what PR #30 fixes.
+Because the app can serve under a prefix itself, `rewritePath: false` is the simplest setting: the chart's Ingress works anywhere with no annotations. The probes must then use the prefix too, which is what PR #30 fixes.
 
-Changing the default is a breaking change for anyone who relies on today's `true` default with their own rewriting Ingress. Ship it in a new chart major version with a migration note, labelled `breaking-change` (see [operations.md](operations.md)).
+Changing the default is a breaking change for anyone who relies on today's `true` default with their own rewriting Ingress. It waits for 2.0, so users migrate once (decided 2026-10-26, see the [1.x work plan](../../work/2026-10-26-roadmap-1x/plan.md#decisions)). Until then, the docs and examples set `rewritePath=false` explicitly.
 
 ### Proposed values
 
 ```yaml
 # Serve the app under a path prefix, behind an ingress or gateway
 pathPrefix: ""
-rewritePath: false
+rewritePath: true          # 1.x default; false from 2.0
 
 service:
-  type: ClusterIP          # proposed new default; LoadBalancer today
+  type: LoadBalancer       # 1.x default; ClusterIP considered for 2.0
   port: 80
 
 ingress:
@@ -78,7 +78,7 @@ httpRoute:
 Notes:
 
 - **`pathPrefix` and `rewritePath` move to the top level**, because they apply to both the Ingress and the HTTPRoute (and to a user's own Ingress). The chart keeps reading `ingress.pathPrefix`, `ingress.rewritePath` and `ingress.configured` for one major version, then drops them.
-- **The default Service type** is worth reconsidering in the same release. `LoadBalancer` suits the quick start on a cloud cluster, but leaves "EXTERNAL-IP pending" on kind and bare metal (old issues #1/#14), and is wrong behind an ingress or gateway. Either keep `LoadBalancer` and have the quick start say so, or switch to `ClusterIP` and show `kubectl port-forward` in the quick start.
+- **The default Service type** stays `LoadBalancer` in 1.x, so the quick start must say so. `LoadBalancer` suits the quick start on a cloud cluster, but leaves "EXTERNAL-IP pending" on kind and bare metal (old issues #1/#14), and is wrong behind an ingress or gateway. Switching to `ClusterIP`, with `kubectl port-forward` in the quick start, is a breaking change, so it's considered for 2.0.
 - Add all of these to `values.schema.json` (see [site.md](site.md)).
 
 ### Example: NGINX
@@ -89,7 +89,8 @@ Notes:
 helm install hello ./hello-kubernetes -n hello-kubernetes --create-namespace \
   --set ingress.enabled=true \
   --set ingress.className=nginx \
-  --set pathPrefix=/app/hello
+  --set pathPrefix=/app/hello \
+  --set rewritePath=false
 ```
 
 **With rewriting**, the annotation depends on which NGINX controller is installed:
@@ -109,7 +110,8 @@ Traefik is the default ingress controller in k3s and k3d, which many users run (
 helm install hello ./hello-kubernetes -n hello-kubernetes --create-namespace \
   --set ingress.enabled=true \
   --set ingress.className=traefik \
-  --set pathPrefix=/app/hello
+  --set pathPrefix=/app/hello \
+  --set rewritePath=false
 ```
 
 **With rewriting**, Traefik strips the prefix with a `Middleware`, referenced from an Ingress annotation as `<namespace>-<name>@kubernetescrd`:
