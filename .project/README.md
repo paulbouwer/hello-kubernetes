@@ -54,6 +54,7 @@ updated: 2026-10-23
 | `areas` | for `goal`, `review`, `plan`, `exploration` | `app` · `image` · `deploy` · `ci` · `site` · `operations` (the `area:` labels) | Finding the plan for an `area:` issue |
 | `created` | yes | `YYYY-MM-DD` | When the note was written |
 | `updated` | yes | `YYYY-MM-DD` | Date of the last real change, not link or formatting fixes |
+| `issues` | no; for work plans | Issue numbers, e.g. `[56]` | Finding the issues a work plan delivers |
 | `superseded_by` | when `status: superseded` | Path to the replacement note | Following a replaced plan to the current one |
 
 When adding a note, add a row to its folder's README using the note's `description`. When a plan is done or replaced, change its `status` rather than deleting it.
