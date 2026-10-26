@@ -1,0 +1,41 @@
+# area: labels for PRs, by changed path. Used by .github/workflows/pr-labels.yaml.
+# The paths follow the area table in .project/roadmap/1.x/operations.md.
+# Top-level entries are AND-ed, so each label uses one `any` block.
+
+area:app:
+  - any:
+      - changed-files:
+          - all-globs-to-any-file: ["src/app/**", "!src/app/Dockerfile"]
+
+area:image:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: ["src/app/Dockerfile"]
+
+area:deploy:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: ["deploy/**", "docs/deploy-*.md"]
+
+area:ci:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: [".github/workflows/**", "Makefile", "test/**"]
+
+area:site:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: ["site/**", "llms.txt"]
+
+area:operations:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - ".devcontainer/**"
+              - "docs/development-environment.md"
+              - ".project/**"
+              - "AGENTS.md"
+              - "CLAUDE.md"
+              - "CONTRIBUTING.md"
+              - "SECURITY.md"
+          - all-globs-to-any-file: [".github/**", "!.github/workflows/**"]
