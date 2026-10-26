@@ -25,7 +25,7 @@ One folder per piece of work, named `YYYY-MM-DD-slug`:
 | `plan.md` | yes | Front matter with `type: plan`. Sections: **Intent**, **Decisions**, **Tracking**, **Work**, **Rules**, **Validation**, **Open**. |
 | Other notes | no | Supporting material that is too long for the plan, e.g. a design sketch. Give each one the [front matter](../README.md#front-matter) and link it from `plan.md`. |
 
-Verification results do not go here. They go in a comment on the issue, as set out in [operations.md](../roadmap/1.x/operations.md#verification).
+Verification results do not go here. They go in a comment on the issue, as set out in [AGENTS.md](../../AGENTS.md#verify-then-record).
 
 ## Status
 
@@ -36,4 +36,5 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | Folder | Description | Status |
 |---|---|---|
 | [2026-10-26-roadmap-1x](2026-10-26-roadmap-1x/plan.md) | Deliver the 1.x roadmap in the 1.11 release, then deprecate the old image tags. | active |
-| [2026-10-26-labels-and-board](2026-10-26-labels-and-board/plan.md) | Set up the 15 labels with a script that applies and checks them, the board statuses and workflows, and make the board public. | active |
+| [2026-10-26-labels-and-board](2026-10-26-labels-and-board/plan.md) | Set up the 15 labels with a script that applies and checks them, the board statuses and workflows, and make the board public. | done |
+| [2026-10-26-contributing-and-checks](2026-10-26-contributing-and-checks/plan.md) | Make CONTRIBUTING.md and AGENTS.md the source of truth for contributing, add the issue forms, PR template and release notes config, and enforce the conventions with workflows, repo settings and a ruleset. | active |

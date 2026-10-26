@@ -29,7 +29,7 @@ How issues and PRs move through the repo: the labels, the project board, what ea
 
 ## Current state (October 2026)
 
-The repo has the 15 labels below, applied by `.github/labels.sh` on 26 October 2026 (#56). There are no issue templates or Discussions yet. The 1.11 work happens on the `release-1.11` branch and is tracked by the `v1.11` milestone.
+The repo has the 15 labels below, applied by `.github/labels.sh` on 26 October 2026 (#56). Issue forms, a PR template, `CONTRIBUTING.md` and `AGENTS.md` were added in #59. Discussions are off. The 1.11 work happens on the `release-1.11` branch and is tracked by the `v1.11` milestone.
 
 ## Labels (15)
 
@@ -159,7 +159,7 @@ The project is public, so contributors and the people credited in [community.md]
 Release work happens on a release branch (currently `release-1.11`), which merges into `main` when the release ships.
 
 - **PRs target the current release branch**, not `main`. The milestone (e.g. `v1.11`) on the issue says which release branch that is.
-- **Create the branch from the issue**, so the branch is linked to it (see [Branches](#branches)).
+- **Create the branch from the issue**, so the branch is linked to it (see [AGENTS.md](../../../AGENTS.md#conventions)).
 - **Link the PR to the issue by hand** in the Development section (see [Linking the PR to the issue](#linking-the-pr-to-the-issue)). Closing keywords don't work on a release branch, and the linked branch doesn't link the PR. Commit messages and PR bodies don't reference issues.
 - **Close the issue when its PR merges into the release branch**, by moving it to Done. Add a short comment such as "Merged into `release-1.11` in #52. This ships in 1.11.0.", so a reporter knows it isn't released yet.
 - **The milestone tracks the release.** It stays open while the release branch is in progress, and is closed when the release ships. Release notes are generated from the labels on merged PRs, not from issues.
@@ -167,46 +167,17 @@ Release work happens on a release branch (currently `release-1.11`), which merge
 
 ## Conventions
 
-These formats keep issues, branches, commits and PRs consistent, so people and agents can read and produce them the same way. They'll move into `CONTRIBUTING.md` (for people), `AGENTS.md` (for agents) and the templates in `.github/` (so they're applied automatically). This section keeps the reasoning.
+The conventions for issues, branches, commits, PRs and verification are in [AGENTS.md](../../../AGENTS.md#conventions), and the process for people is in [CONTRIBUTING.md](../../../CONTRIBUTING.md). Those files are the source of truth. This section keeps only the reasons.
 
-### Writing style
+- **Conventional commit titles everywhere.** Issue, commit and PR titles share one format, so the type in a title sets the branch type and the type label, and tools can parse all of them.
+- **Acceptance criteria are outcomes.** A person can check an outcome. A build step ("install kind") can be done without the result being right.
+- **No issue references in commits.** The link between the work and the issue lives on the PR, where it can be changed. A commit message can't be changed after the merge.
+- **Merge commits only.** A squash or rebase merge creates new commits, which drops the contributors' signatures and changes their commits. A merge commit keeps them.
+- **Verification goes in an issue comment.** The issue is where the acceptance criteria are, and it stays after the branch is deleted.
+- **Simple, direct language (ASD-STE100 style).** Many readers, people and agents, don't have English as a first language.
+- **Every PR has an issue.** The work is driven from issues, and the issue holds the acceptance criteria and the board status.
 
-Use simple, direct language, in the style of ASD-STE100 Simplified Technical English: short sentences, active voice, one idea per sentence, and common words. This applies to issues, PR descriptions and comments.
-
-### Issues
-
-- **Title:** a conventional commit, `type(scope): summary`, in lowercase and the imperative. The type also sets the branch type.
-- **Body**, in three sections:
-  - **Summary:** the problem, then what the issue does about it.
-  - **Scope:** the files or areas it touches.
-  - **Acceptance criteria:** a checklist.
-- **Acceptance criteria describe outcomes**, which a person can check, not how to build them. Write "A developer can create and delete a local Kubernetes cluster in the container", not "Install kind in the Dockerfile".
-- **Set everything when creating the issue:** the type label, the area label(s), the milestone and the board, e.g. `gh issue create --label enhancement --label area:operations --milestone v1.11 --project hello-kubernetes`.
-- **Type label from the title's type:**
-
-  | Conventional type | Type label |
-  |---|---|
-  | `feat`, `chore`, `build`, `ci`, `refactor`, `perf` | `enhancement` |
-  | `fix` | `bug` (or `security` for a security fix) |
-  | `docs` | `documentation` |
-
-  Dependabot applies `dependencies` itself. Add `breaking-change` on top of the type label when it applies.
-
-Example: [#50](https://github.com/paulbouwer/hello-kubernetes/issues/50).
-
-### Branches
-
-- **Name:** `{type}/{issue}-{slug}`, e.g. `chore/50-update-devcontainer`. The type matches the issue title's type. The slug is 2 to 4 lowercase words joined with hyphens. Leave the scope out, so there's only one `/`.
-- **Base:** the PR's base branch, which is the release branch for the issue's milestone. When the base moves, rebase or merge it in.
-- **Create it from the issue**, so the branch is linked to the issue:
-
-  ```bash
-  gh issue develop 51 --base release-1.11 --name docs/51-add-project-notes --checkout
-  ```
-
-  This links the **branch** only. The issue's Development section shows the branch, but a PR opened from it is not linked to the issue (see below).
-
-#### Linking the PR to the issue
+### Linking the PR to the issue
 
 GitHub keeps two separate links between an issue and the work for it:
 
@@ -216,75 +187,6 @@ GitHub keeps two separate links between an issue and the work for it:
 | Linked PR | A closing keyword on a PR into the default branch, or a link made by hand in the Development section | Yes | Yes |
 
 Release-branch PRs don't target the default branch, so the PR link has to be made by hand: on the PR, open **Development** in the sidebar and pick the issue. There's no API for it. This was confirmed on #51: its linked branch listed PR #53, but the issue had no linked PR until it was linked by hand.
-
-### Commits
-
-- **Title:** a conventional commit. It can differ from the issue title.
-- **Body:** a short paragraph that summarises the commit, then at most three bullet points of extra detail.
-- **Agents add a `Co-Authored-By:` trailer** with their name, e.g. `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
-- **No issue references** (`Fixes #n`, `Refs #n`). The link lives on the PR.
-- **Sign every commit.** The maintainer signs with an SSH key held in 1Password (`gpg.format ssh`, `gpg.ssh.program` set to `op-ssh-sign`), and GitHub shows the commits as Verified. Merge commits keep those signatures; squash and rebase merges recreate the commits.
-
-```text
-chore(devcontainer): update the development environment for developers and agents
-
-Replace the Node.js 15 dev container with an Ubuntu 26.04 base that has
-current tools for building, running and testing the app and the chart,
-and the CLIs agents use. Tools track the latest release in each major
-version and every download is verified against its published checksum.
-
-- Add Node.js 24, kubectl, Helm 4, Trivy, kind, k3d, gh, Copilot CLI and Claude Code for amd64 and arm64
-- Use docker-in-docker instead of the host Docker socket, and stop mounting the host ~/.kube
-- Rewrite docs/development-environment.md, including how to use host clusters safely
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-```
-
-### Pull requests
-
-- **Title:** a conventional commit that describes this PR's change. One issue can have several PRs, so the title can differ from the issue's.
-- **Body:**
-  - **Summary:** one paragraph.
-  - **Changes**, grouped by function or another meaningful category within the PR. Each group has a heading, then:
-    - **What:** what changed
-    - **Why:** why it changed
-    - **Goal:** what the change is for
-    - **Files:** a bullet list of the files.
-  - **Verification:** a link to the verification comment on the issue.
-- **Leave out** `Fixes #n` and any "generated by" footer.
-- **Labels and milestone:** the same as the issue. PRs aren't added to the board.
-- **Merge** with a merge commit, and delete the branch.
-
-Example: [PR #52](https://github.com/paulbouwer/hello-kubernetes/pull/52).
-
-### Verification
-
-- **Check each acceptance criterion before opening the PR.** Tick only the criteria that were actually verified. Leave the others unticked, and say why.
-- **Test failure paths too**, when a criterion is about something failing, e.g. a tampered download stopping the build.
-- **Record the results in a comment on the issue:**
-  - when, where and on which commit the checks ran
-  - a table with the columns Criterion, Result (✅ or ⚠️) and Evidence
-  - an **Open:** line for anything still to verify.
-
-  Checks done by hand by the maintainer are recorded as such.
-
-Example: [the verification comment on #50](https://github.com/paulbouwer/hello-kubernetes/issues/50#issuecomment-6392579940).
-
-### After the merge
-
-Comment on the issue that it's merged and which release it ships in, then move it to Done (see [Release branches](#release-branches)).
-
-### Every PR has an issue
-
-The work is driven from issues, so every PR must link one. Planned, not yet built:
-
-- `.github/pull_request_template.md` with the PR sections above.
-- **A check workflow** that fails a PR with no linked issue. Closing keywords don't link on release branches, and a PR linked by hand can only be checked after someone links it, so the check reads the issue number from the head branch name (`{type}/{issue}-…`), confirms that it's an open issue in this repo, and also accepts a PR linked through the Development section. Dependabot PRs are exempt.
-- **A repository ruleset** on `main` and `release-*` that makes the check required.
-
-### Epics
-
-Each release has a parent issue, e.g. `chore(release): v1.11`, in the release milestone. Each work issue is a sub-issue of it. The board's "Auto-add sub-issues to project" workflow adds sub-issues to the board, and the Parent issue and Sub-issues progress fields show the progress. No `epic` label is needed. Not yet created for 1.11.
 
 ## Workflow
 
@@ -303,33 +205,27 @@ new issue ──> Triage ──> + needs-info ──> (no reply ~30 days) closed
                                              until the release ships)
 ```
 
-Rules for agents, to be written into `AGENTS.md`:
-
-1. Only start work on issues in **Ready** on the board that are labelled `agent`.
-2. Move the issue to **In Progress** when starting.
-3. Read the plan for the issue's `area:` label first.
-4. Create the branch with `gh issue develop` from the release branch for the issue's milestone, and open the PR against that release branch, not `main`. Linking the PR to the issue can't be done through the API, so ask the maintainer to link it in the PR's Development section.
-5. Once the PR merges, comment on the issue that it's merged and which release it ships in, then move the issue to **Done**, which closes it.
-6. Never merge anything labelled `security` or `breaking-change` without a human review.
-7. Ignore anything labelled `invalid`.
+The rules for agents are in [AGENTS.md](../../../AGENTS.md#rules). The stale bot is not set up yet.
 
 ## Supporting files
 
-| File | Purpose |
-|---|---|
-| `.github/ISSUE_TEMPLATE/bug.yml`, `feature.yml` | Issue forms that apply the type label (the board's Auto-add workflow puts them on the board) |
-| `.github/ISSUE_TEMPLATE/config.yml` | Turns off blank issues; links to Discussions and private security reporting |
-| `.github/release.yml` | Groups generated release notes by the type labels |
-| `.github/labeler.yml` | The `area:` path rules above, used by `actions/labeler` on PRs |
-| `.github/dependabot.yml` | `labels:` per ecosystem (e.g. `["dependencies", "area:image"]` for the app's Dockerfile, `["dependencies", "area:ci"]` for GitHub Actions, `["dependencies", "area:operations"]` for the devcontainer). Without it, Dependabot creates its own `javascript`, `docker` and `github_actions` labels. |
-| Stale workflow | `actions/stale` limited to `needs-info` |
-| Project board workflows | Set up in the project's settings rather than in the repo; see [Built-in workflows](#built-in-workflows) |
-| `.github/pull_request_template.md` | The PR sections from [Pull requests](#pull-requests) |
-| PR issue check workflow and ruleset | Require every PR to link an issue (see [Every PR has an issue](#every-pr-has-an-issue)) |
-| `CONTRIBUTING.md` | The [Conventions](#conventions) for people |
-| `AGENTS.md` | The agent rules above, and the [Conventions](#conventions) for agents |
+| File | Purpose | Status |
+|---|---|---|
+| `CONTRIBUTING.md` | The process for people, steering them to use an agent | Added in #59 |
+| `AGENTS.md`, `CLAUDE.md` | The rules, conventions and verification for agents. `CLAUDE.md` imports `AGENTS.md` for Claude Code | Added in #59 |
+| `SECURITY.md` | How to report a vulnerability privately | Added in #59 |
+| `.github/ISSUE_TEMPLATE/bug.yml`, `feature.yml` | Issue forms that apply the type label (the board's Auto-add workflow puts them on the board) | Added in #59 |
+| `.github/ISSUE_TEMPLATE/config.yml` | Turns off blank issues, and links to private vulnerability reporting | Added in #59 |
+| `.github/pull_request_template.md` | The PR sections | Added in #59 |
+| `.github/release.yml` | Groups generated release notes by the type labels | Added in #59 |
+| `.github/labels.sh` | The labels, see [Setting up the labels](#setting-up-the-labels) | Added in #56 |
+| `.github/labeler.yml` and the labeler workflow | The `area:` path rules above, and copying the issue's type label and milestone to the PR | #59, second PR |
+| PR issue check workflow and ruleset | Require every PR to link an open issue, signed commits and merge commits on `main` and `release-*` | #59, second PR |
+| `.github/dependabot.yml` | `labels:` per ecosystem (e.g. `["dependencies", "area:image"]` for the app's Dockerfile, `["dependencies", "area:ci"]` for GitHub Actions, `["dependencies", "area:operations"]` for the devcontainer). Without it, Dependabot creates its own `javascript`, `docker` and `github_actions` labels | 1.4 |
+| Stale workflow | `actions/stale` limited to `needs-info` | Not planned yet |
+| Project board workflows | Set up in the project's settings rather than in the repo; see [Built-in workflows](#built-in-workflows) | Set up in #56 |
 
-Pin every action to a commit SHA and give each workflow least-privilege `permissions:`, as in the rest of the repo's workflows.
+Discussions are off for now, so the issue chooser has no link to them.
 
 ## Labelling the current items
 

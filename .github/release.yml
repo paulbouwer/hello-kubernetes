@@ -1,0 +1,21 @@
+# Groups generated release notes by the type label on each merged PR.
+# A PR is listed in the first category that matches, so the order matters.
+changelog:
+  exclude:
+    labels:
+      - invalid
+  categories:
+    - title: Breaking changes
+      labels: [breaking-change]
+    - title: Security
+      labels: [security]
+    - title: Features
+      labels: [enhancement]
+    - title: Bug fixes
+      labels: [bug]
+    - title: Documentation
+      labels: [documentation]
+    - title: Dependencies
+      labels: [dependencies]
+    - title: Other changes
+      labels: ["*"]

@@ -2,7 +2,7 @@
 title: Labels and board
 description: Set up the 15 labels with a script that applies and checks them, the board statuses and workflows, and make the board public.
 type: plan
-status: active
+status: done
 areas: [operations]
 issues: [56]
 created: 2026-10-26
@@ -104,7 +104,7 @@ The [1.x work plan rules](../2026-10-26-roadmap-1x/plan.md#rules) apply, and als
 
 ## Validation
 
-Record the results in the [verification comment](../../roadmap/1.x/operations.md#verification) on #56.
+Record the results in the [verification comment](../../../AGENTS.md#verify-then-record) on #56.
 
 | Check | How |
 |---|---|
