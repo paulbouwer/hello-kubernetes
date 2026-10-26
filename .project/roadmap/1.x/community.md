@@ -5,7 +5,7 @@ type: review
 status: final
 areas: [app, image, deploy]
 created: 2026-10-22
-updated: 2026-10-23
+updated: 2026-10-26
 ---
 
 # Community contributions — triage and credits
@@ -49,7 +49,7 @@ Accurate diagnosis: `USER node` is a name, so the kubelet can't verify non-root.
 
 **PR #40 — Multi arch support** (@MrRoundRobin, Jan 2023) and **PR #46 — Build multi-arch images locally, including ARM and RISC-V** (@chazapis, Jul 2023)
 Both are the right idea, but the actions they use are now several majors old and both rebase onto Node 16/19. Rather than merging, rebuild the publish workflow and credit both via `Co-authored-by` trailers. Ideas to carry over:
-- From #40: `docker/metadata-action` for tags, `setup-qemu` + `setup-buildx`, publishing to **GHCR as well as Docker Hub**, and making the page show the real architecture. #40 did that by replacing `info.json` with `os.platform() + '/' + os.arch()` in `server.js`; [GOAL.md](../../GOAL.md) instead has CI write `info.json` for each platform at build time.
+- From #40: `docker/metadata-action` for tags, `setup-qemu` + `setup-buildx`, publishing to **GHCR as well as Docker Hub**, and making the page show the real architecture. #40 did that by replacing `info.json` with `os.platform() + '/' + os.arch()` in `server.js`. 1.11 takes this approach, and maps Node's names to OCI names (`x64` → `amd64`), as set out in [image.md](image.md#supported-amd64-and-arm64).
 - From #46: a numeric UID 1000 user (also fixes #35) and a `make` target for local multi-arch builds. Its wider platform list (`linux/arm/v7`, `linux/riscv64`) is out of scope: [GOAL.md](../../GOAL.md) limits 1.x to `linux/amd64` and `linux/arm64`, the platforms with official Node runtime images. Node 24 has no arm/v7 build and only an unofficial riscv64 one (details in [image.md](image.md)). Explain this when closing, and mention that a possible 2.0 rewrite in Go or Rust could bring them back.
 
 Close both with a comment linking the replacement PR.
