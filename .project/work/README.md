@@ -36,3 +36,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | Folder | Description | Status |
 |---|---|---|
 | [2026-10-26-roadmap-1x](2026-10-26-roadmap-1x/plan.md) | Deliver the 1.x roadmap in the 1.11 release, then deprecate the old image tags. | active |
+| [2026-10-26-labels-and-board](2026-10-26-labels-and-board/plan.md) | Set up the 15 labels with a script that applies and checks them, the board statuses and workflows, and make the board public. | active |

@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [operations]
 created: 2026-10-23
-updated: 2026-10-25
+updated: 2026-10-26
 ---
 
 # Operations
@@ -29,7 +29,7 @@ How issues and PRs move through the repo: the labels, the project board, what ea
 
 ## Current state (October 2026)
 
-The repo has GitHub's eight default labels, plus `documentation` and `area:operations`, created for #50 and #51. There are no issue templates or Discussions yet. The 1.11 work happens on the `release-1.11` branch and is tracked by the `v1.11` milestone.
+The repo has the 15 labels below, applied by `.github/labels.sh` on 26 October 2026 (#56). There are no issue templates or Discussions yet. The 1.11 work happens on the `release-1.11` branch and is tracked by the `v1.11` milestone.
 
 ## Labels (15)
 
@@ -102,25 +102,26 @@ It's a label rather than a board status because `actions/stale` can only filter 
 
 The board is the user-owned project [hello-kubernetes (#5)](https://github.com/users/paulbouwer/projects/5), linked to the repo. Its Status field is the single source of workflow state. The board tracks **issues only**; PRs are reached through each issue's "Linked pull requests" field.
 
-### Current state (25 October 2026)
+### Current state (26 October 2026)
 
-- **Private.** Two unnamed views: "View 1" (table) and "View 2" (board). The first items are #50 (Done) and #51.
-- **Status has GitHub's three defaults:** Todo, In Progress, Done.
+Set up in #56.
+
+- **Public.** Two views: "Milestone" (table) and "Board" (board).
+- **Status options:** Triage, Ready, In Progress, In Review, Done, as in [Status options](#status-options).
 - **Fields:** the built-in ones only (Assignees, Labels, Linked pull requests, Milestone, Parent issue, Sub-issues progress, and so on). No custom fields.
-- **Built-in workflows enabled:** Item added to project, Item closed, Pull request linked to issue, Pull request merged, Auto-close issue, Auto-add sub-issues to project.
-- **No "Auto-add to project" workflow**, so issues only reach the board if someone adds them.
+- **Built-in workflows:** set as in [Built-in workflows](#built-in-workflows). "Auto-add to project" adds new open issues in Triage. Issues that were open before it was enabled are added by hand (1.3).
 
 ### Status options
 
-| Status | Change | Meaning | How an issue gets there |
-|---|---|---|---|
-| Triage | Add | New, not yet looked at | "Auto-add to project" (to enable), with "Item added to project" set to Triage |
-| Ready | Rename from Todo | Agreed and scoped, with clear acceptance criteria. The only issues agents may pick up | A person moves it after triage |
-| In Progress | Keep | Claimed, so two agents (or an agent and a person) don't take the same issue | The person or agent starting work. Agents can't always be assigned to issues, so moving the card is more consistent than assignees |
-| In Review | Add | A PR is open for it | "Pull request linked to issue", set to In Review |
-| Done | Keep | The PR is merged into the release branch, and the issue is closed | Moved by the agent or a person after the PR merges ("Auto-close issue" then closes it), or "Item closed" if the issue is closed first |
+| Status | Change | Colour | Description | Meaning | How an issue gets there |
+|---|---|---|---|---|---|
+| Triage | Add | Gray | New, not yet looked at | New, not yet looked at | "Auto-add to project" (to enable), with "Item added to project" set to Triage |
+| Ready | Rename from Todo | Green | Agreed and scoped. Agents may pick it up | Agreed and scoped, with clear acceptance criteria. The only issues agents may pick up | A person moves it after triage |
+| In Progress | Keep | Yellow | Someone is working on it | Claimed, so two agents (or an agent and a person) don't take the same issue | The person or agent starting work. Agents can't always be assigned to issues, so moving the card is more consistent than assignees |
+| In Review | Add | Blue | A PR is open for it | A PR is open for it | "Pull request linked to issue", set to In Review |
+| Done | Keep | Purple | Merged into the release branch, and closed | The PR is merged into the release branch, and the issue is closed | Moved by the agent or a person after the PR merges ("Auto-close issue" then closes it), or "Item closed" if the issue is closed first |
 
-Renaming Todo keeps its option ID, so the change is safe at any time.
+Renaming Todo keeps its option ID, so the change is safe at any time. The description is what the board shows for the option. Gray, Green, Yellow, Blue and Purple run from not started to finished. Red and Orange are free for a blocked state if one is added later.
 
 Done means merged, not released. Whether a change has shipped is tracked by the milestone (see [Release branches](#release-branches)).
 
@@ -140,11 +141,11 @@ Workflows are configured in the project's settings (**⋯ → Workflows**). The 
 
 ### Views
 
-Name the two views (e.g. "Board" and "Triage table"), and add a 1.11 view filtered by `milestone:v1.11`.
+The views are "Milestone" (table) and "Board" (board). There is no view for the current release: project filters have no "current milestone" keyword (`@current` works only for iteration fields), so a release view would need its filter changed by hand for each release.
 
 ### Visibility
 
-The project is private, so contributors and the people credited in [community.md](community.md) can't see where their issues are. Making it public costs nothing for an open source repo. It's your call.
+The project is public, so contributors and the people credited in [community.md](community.md) can see where their issues are. Changed from private on 26 October 2026 (#56).
 
 ### Notes
 
@@ -350,39 +351,13 @@ PR #30 needs its labels even though it's merged: the 1.11 release notes are gene
 
 ## Setting up the labels
 
-`documentation` and `area:operations` were created on 25 October 2026 for #50 and #51. The rest isn't applied yet. With the GitHub CLI:
+The labels are defined in [`.github/labels.sh`](../../../.github/labels.sh), which is the source of truth for their names, colours and descriptions. This note says what each label is for. The script needs `gh`, signed in with write access, and `jq`.
 
 ```bash
-# Type
-gh label create bug              --color d73a4a --description "Something isn't working" --force
-gh label create enhancement      --color a2eeef --description "New feature or improvement" --force
-gh label create documentation    --color 0075ca --description "Documentation only" --force
-gh label create security         --color b60205 --description "Security fix or scanner finding; needs human review" --force
-gh label create dependencies     --color 0366d6 --description "Dependency update" --force
-gh label create breaking-change  --color e11d21 --description "Needs a major version bump" --force
-
-# Area
-gh label create area:app        --color c5def5 --description "Node app (src/app)" --force
-gh label create area:image      --color c5def5 --description "Container image" --force
-gh label create area:deploy     --color c5def5 --description "Helm chart, release YAML, Kustomize" --force
-gh label create area:ci         --color c5def5 --description "Workflows, Makefile, tests" --force
-gh label create area:site       --color c5def5 --description "Website, llms.txt" --force
-gh label create area:operations --color c5def5 --description "Repo maintenance and dev environment" --force
-
-# Waiting on the reporter
-gh label create needs-info --color fbca04 --description "Waiting on the reporter" --force
-
-# Agent trigger and filter
-gh label create agent   --color 5319e7 --description "Approved for an agent to implement" --force
-gh label create invalid --color e4e669 --description "Not a contribution to this project" --force
-
-# Remove
-gh label delete duplicate --yes
-gh label delete wontfix --yes
-gh label delete question --yes
-gh label delete "good first issue" --yes
-gh label delete "help wanted" --yes
+.github/labels.sh --check   # change nothing; list each difference and exit 1 if there is one
+.github/labels.sh           # create, update and remove labels until the repo matches the list
 ```
 
-`--force` updates an existing label (e.g. `bug`, `enhancement`, `invalid`) instead of failing.
+Running the script again changes nothing. It deletes only the labels in its remove list (`duplicate`, `wontfix`, `question`, `good first issue`, `help wanted`). `--check` reports any other extra label, but the script never deletes it.
 
+**Only the owner creates or changes labels.** To add or change a label, change the list in the script in a PR, update the tables above, and run the script after the merge. GitHub has no setting that limits label creation: anyone with write access can create labels, and on a personal repo every collaborator has write access. Today the owner is the only collaborator. After the 1.x work, a workflow will remove or report labels that are not in the script, and CODEOWNERS will make the owner the reviewer for it (see the [labels and board plan](../../work/2026-10-26-labels-and-board/plan.md#open)).

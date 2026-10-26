@@ -49,7 +49,7 @@ The labels follow [operations.md](../../roadmap/1.x/operations.md#labels-15). "B
 
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
-| 1.1 | chore(repo): set up the labels, board statuses and board workflows | enhancement, area:operations | — | — | [operations.md](../../roadmap/1.x/operations.md#setting-up-the-labels) |
+| 1.1 | chore(repo): set up the labels, board statuses and board workflows | enhancement, area:operations | — | — | [work package](../2026-10-26-labels-and-board/plan.md), [operations.md](../../roadmap/1.x/operations.md#setting-up-the-labels) |
 | 1.2 | chore(repo): add AGENTS.md, CONTRIBUTING.md, templates, labeler, release notes config and the PR issue check | enhancement, area:operations | 1.1 | — | [operations.md](../../roadmap/1.x/operations.md#supporting-files) |
 | 1.3 | chore(triage): label the open items and close the off-topic PRs | enhancement, area:operations | 1.1 | #48, #41, #43 | [community.md](../../roadmap/1.x/community.md) |
 | 1.4 | chore(deps): add Dependabot and CodeQL | enhancement, area:operations | 1.1 | — | [image.md](../../roadmap/1.x/image.md#what-github-provides) |
@@ -282,3 +282,4 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **An image override with the old tags breaks with the new chart defaults.** The 1.10.1 and older images run as the non-numeric `USER node`, so `runAsNonRoot: true` rejects them (#35). Document this in the 4.1 release notes, or set `runAsUser: 1000` in the chart so that the kubelet can verify it. Decide in 4.1.
 - **operations.md** needs these updates, as part of 1.2: the epic and workstream tracking in this plan, the rule to keep the epic body up to date, and a link to the `work/` folder from the agent rules.
+- **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
