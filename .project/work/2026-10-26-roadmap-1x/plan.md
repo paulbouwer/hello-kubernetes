@@ -50,7 +50,7 @@ The labels follow [operations.md](../../roadmap/1.x/operations.md#labels-15). "B
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
 | 1.1 | chore(repo): set up the labels, board statuses and board workflows | enhancement, area:operations | — | — | [work package](../2026-10-26-labels-and-board/plan.md), [operations.md](../../roadmap/1.x/operations.md#setting-up-the-labels) |
-| 1.2 | chore(repo): add AGENTS.md, CONTRIBUTING.md, templates, labeler, release notes config and the PR issue check | enhancement, area:operations | 1.1 | — | [operations.md](../../roadmap/1.x/operations.md#supporting-files) |
+| 1.2 | chore(repo): add AGENTS.md, CONTRIBUTING.md, templates, labeler, release notes config and the PR issue check | enhancement, area:operations | 1.1 | — | [work package](../2026-10-26-contributing-and-checks/plan.md), [operations.md](../../roadmap/1.x/operations.md#supporting-files) |
 | 1.3 | chore(triage): label the open items and close the off-topic PRs | enhancement, area:operations | 1.1 | #48, #41, #43 | [community.md](../../roadmap/1.x/community.md) |
 | 1.4 | chore(deps): add Dependabot and CodeQL | enhancement, area:operations | 1.1 | — | [image.md](../../roadmap/1.x/image.md#what-github-provides) |
 
@@ -137,7 +137,7 @@ Follow these rules for every issue in this plan, together with the plan for the 
 
 4. **Start only on issues in Ready** on the board. Agents also need the `agent` label. Move the issue to In Progress when you start.
 5. **Read this plan and the area plan first.** If the work shows that a plan is wrong, update the plan in the same PR, and update the `updated` date.
-6. **Follow the [conventions](../../roadmap/1.x/operations.md#conventions)** for issues, branches, commits, PRs and verification:
+6. **Follow the [conventions](../../../AGENTS.md#conventions)** for issues, branches, commits, PRs and verification:
    - Create the branch from the issue: `gh issue develop <n> --base release-1.11 --name <type>/<n>-<slug> --checkout`.
    - Commit titles are conventional commits. Commit bodies are a short paragraph and at most three bullets. Do not reference issues. Sign every commit. Agents add a `Co-Authored-By:` trailer.
    - Open the PR against `release-1.11`. Ask the maintainer to link it to the issue in the Development section, because there is no API for this.
@@ -175,7 +175,7 @@ An issue is complete only when every check below that applies to it passes, and 
 
 ### Every issue
 
-- Each acceptance criterion is checked, and the [verification comment](../../roadmap/1.x/operations.md#verification) records the result and the evidence. Criteria that were not checked stay unticked, with the reason.
+- Each acceptance criterion is checked, and the [verification comment](../../../AGENTS.md#verify-then-record) records the result and the evidence. Criteria that were not checked stay unticked, with the reason.
 - `git log` on the branch shows only conventional commit titles, signed commits, no issue references and the correct trailers.
 - The PR targets `release-1.11`, has the issue's labels and milestone, and follows the PR body format.
 
@@ -197,12 +197,12 @@ This check applies to 2.x, 4.1 and 4.2. Save the output from `release-1.11` befo
 | 3. CI and publishing | Every `uses:` line is pinned to a 40-character SHA. Every workflow has a `permissions:` block. The scan fails on an image with a known fixable finding, and a wrong checksum stops the Trivy install. A publish to a test tag gives a manifest list with amd64 and arm64 (`docker buildx imagetools inspect`), with SBOM and provenance attached. A failed e2e job blocks the publish. |
 | 4. Chart and deployment | `helm lint` and `helm template` pass under Helm 4 in the devcontainer and Helm 3 in CI. `values.schema.json` rejects a wrong type and an unknown value. The scenarios for the issue pass on kind and k3d. The pods run in a namespace with restricted Pod Security. `kubectl apply -f` of the release YAML works on kind. Every command in the changed docs runs with no prompts, and gives the result the doc describes (E15). |
 | 5. Website | The site builds in CI and deploys to GitHub Pages under `/hello-kubernetes/`. There are no broken internal links. Each link in `llms.txt` points to raw markdown at the release tag, and each link resolves. The config builder output installs on kind. |
-| 6. Release | All 1.11 sub-issues are Done. The release notes are grouped by label and include the credits. `paulbouwer/hello-kubernetes:1` and `:1.10` point at the 1.11.0 digest. The release asset URL works with `kubectl apply`. |
+| 6. Release | All 1.11 sub-issues are Done. After the merge into `main`, the issue forms, the security link, the PR template and `SECURITY.md` work (from #59). The release notes are grouped by label and include the credits. `paulbouwer/hello-kubernetes:1` and `:1.10` point at the 1.11.0 digest. The release asset URL works with `kubectl apply`. |
 | 7. After 1.11 | Each deprecation image passes the checks in [review.md](../../roadmap/1.x/review.md#deprecation-images-for-the-old-tags): `/` returns 200, the original message text is present, and the probes pass on kind. The original image stays reachable under the `-original` tag. |
 
 ## Epic body
 
-Use this text for the epic issue. It follows the [issue conventions](../../roadmap/1.x/operations.md#issues): Summary, Scope and Acceptance criteria, with the work listed by workstream between Scope and Acceptance criteria.
+Use this text for the epic issue. It follows the [issue conventions](../../../AGENTS.md#conventions): Summary, Scope and Acceptance criteria, with the work listed by workstream between Scope and Acceptance criteria.
 
 When a sub-issue exists, replace its line with `- #NN`, on its own list line, so that GitHub shows the issue's title and state.
 
@@ -281,5 +281,4 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **An image override with the old tags breaks with the new chart defaults.** The 1.10.1 and older images run as the non-numeric `USER node`, so `runAsNonRoot: true` rejects them (#35). Document this in the 4.1 release notes, or set `runAsUser: 1000` in the chart so that the kubelet can verify it. Decide in 4.1.
-- **operations.md** needs these updates, as part of 1.2: the epic and workstream tracking in this plan, the rule to keep the epic body up to date, and a link to the `work/` folder from the agent rules.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
