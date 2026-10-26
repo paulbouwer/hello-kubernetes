@@ -219,8 +219,8 @@ The rules for agents are in [AGENTS.md](../../../AGENTS.md#rules). The stale bot
 | `.github/pull_request_template.md` | The PR sections | Added in #59 |
 | `.github/release.yml` | Groups generated release notes by the type labels | Added in #59 |
 | `.github/labels.sh` | The labels, see [Setting up the labels](#setting-up-the-labels) | Added in #56 |
-| `.github/labeler.yml` and the labeler workflow | The `area:` path rules above, and copying the issue's type label and milestone to the PR | #59, second PR |
-| PR issue check workflow and ruleset | Require every PR to link an open issue, signed commits and merge commits on `main` and `release-*` | #59, second PR |
+| `.github/labeler.yml`, `pr-labels.yaml` | The `area:` path rules above, and copying the issue's type label and milestone to the PR | Added in #59 |
+| `pr-issue-check.yaml` and the ruleset | Require every PR to link an open issue, signed commits and merge commits on `main` and `release-*`. The ruleset is a repo setting, created after the workflow merged | Added in #59 |
 | `.github/dependabot.yml` | `labels:` per ecosystem (e.g. `["dependencies", "area:image"]` for the app's Dockerfile, `["dependencies", "area:ci"]` for GitHub Actions, `["dependencies", "area:operations"]` for the devcontainer). Without it, Dependabot creates its own `javascript`, `docker` and `github_actions` labels | 1.4 |
 | Stale workflow | `actions/stale` limited to `needs-info` | Not planned yet |
 | Project board workflows | Set up in the project's settings rather than in the repo; see [Built-in workflows](#built-in-workflows) | Set up in #56 |

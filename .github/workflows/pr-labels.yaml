@@ -1,0 +1,57 @@
+# Labels PRs: area: labels from the changed paths (.github/labeler.yml), and
+# the type label and milestone of the PR's issue.
+#
+# Runs on pull_request_target so that it can label PRs from forks. It must
+# never check out or run the PR's code.
+name: PR labels
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply area labels
+        uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0
+
+      - name: Copy the type label and milestone from the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_MILESTONE: ${{ github.event.pull_request.milestone.title }}
+        run: |
+          set -euo pipefail
+
+          issue=""
+          if [[ "$HEAD_REF" =~ ^[a-z]+/([0-9]+)- ]]; then
+            issue="${BASH_REMATCH[1]}"
+          else
+            issue=$(gh pr view "$PR" --json closingIssuesReferences --jq '.closingIssuesReferences[0].number // empty')
+          fi
+          if [[ -z "$issue" ]] || ! gh api "repos/$GH_REPO/issues/$issue" --jq 'select(.pull_request == null) | .number' | grep -q .; then
+            echo "No issue found. Nothing to copy."
+            exit 0
+          fi
+
+          type_labels='["bug","enhancement","documentation","security","dependencies","breaking-change"]'
+          labels=$(gh api "repos/$GH_REPO/issues/$issue" --jq "[.labels[].name | select(. as \$l | $type_labels | index(\$l))] | join(\",\")")
+          milestone=$(gh api "repos/$GH_REPO/issues/$issue" --jq '.milestone.title // empty')
+
+          args=()
+          [[ -n "$labels" ]] && args+=(--add-label "$labels")
+          [[ -z "$PR_MILESTONE" && -n "$milestone" ]] && args+=(--milestone "$milestone")
+          if ((${#args[@]} > 0)); then
+            gh pr edit "$PR" "${args[@]}"
+            echo "Copied from #$issue: labels '$labels', milestone '${milestone:-none}'."
+          else
+            echo "Nothing to copy from #$issue."
+          fi
