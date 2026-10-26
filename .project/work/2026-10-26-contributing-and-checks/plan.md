@@ -31,6 +31,7 @@ Made on 2026-10-26.
 | Blank issues and questions | Blank issues are off. Discussions stay off for now, so `config.yml` links only to private vulnerability reporting. |
 | Security | Turn on private vulnerability reporting, and add `SECURITY.md`, which says how to report and which versions get fixes. |
 | Merge settings | Merge commits only. Squash and rebase merges are turned off. Branches are deleted after the merge. |
+| Files read from the default branch | GitHub reads the issue forms, `config.yml`, the PR template and `SECURITY.md` only from `main`. They take effect when 1.11 merges into `main`, and are checked in 6.2. No exception to the release-branch flow (decided 2026-10-26). |
 | Number of PRs | Two. PR 1 is the docs, templates and repo settings. PR 2 is the labeler, the issue check and the ruleset. PR 2 starts after PR 1 merges. |
 | PR labels | The labeler applies the `area:` labels from the changed paths. A workflow copies the issue's type label (`bug`, `enhancement`, `documentation`, `security`, `dependencies`, `breaking-change`) and its milestone to the PR. |
 | Finding a PR's issue | First from the head branch name (`{type}/{issue}-…`), then from an issue linked in the PR's Development section. The issue must be open and in this repo. |
@@ -119,8 +120,8 @@ Record the results in the verification comment on #59. Run the PR 1 checks befor
 |---|---|
 | Conventions have one home | operations.md has no copy of the conventions or the agent rules, only the reasons and links. Each rule is in `CONTRIBUTING.md` or `AGENTS.md`, not both. Both files are short and have no step-by-step commands. |
 | Agents load the rules | A new Claude Code session in the repo shows `AGENTS.md` loaded through `CLAUDE.md` (`/memory`). Copilot CLI lists `AGENTS.md` among its instructions. |
-| Issue forms | On the branch's "New issue" page (or the default branch after merge), only the bug and feature forms and the security link are shown, and there is no blank issue. A test issue from each form gets its type label and is added to the board in Triage. Delete both. |
-| PR template | A new PR body starts with the template. |
+| Issue forms | **In 6.2, after 1.11 merges into `main`.** On the "New issue" page, only the bug and feature forms and the security link are shown, and there is no blank issue. A test issue from each form gets its type label and is added to the board in Triage. Delete both. |
+| PR template | **In 6.2.** A new PR body starts with the template. Before then, the YAML of the forms and `config.yml` is parsed to check it is valid. |
 | Release notes | `gh api repos/paulbouwer/hello-kubernetes/releases/generate-notes -f tag_name=v1.11.0-test -f target_commitish=<branch>` groups the merged PRs by type label (#52, #53, #55 and #58 should be in their categories). No release is created. |
 | Merge settings | `gh api repos/paulbouwer/hello-kubernetes` shows only merge commits allowed, and `delete_branch_on_merge: true`. |
 | Vulnerability reporting | `gh api repos/paulbouwer/hello-kubernetes/private-vulnerability-reporting` shows `enabled: true`. |
