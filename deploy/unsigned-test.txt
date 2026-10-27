@@ -1,0 +1,1 @@
+Temporary file to test the signed-commit rule for #59.
