@@ -34,16 +34,18 @@ LABELS=(
   "needs-info|fbca04|Waiting on the reporter"
   # Agent trigger and filter
   "agent|5319e7|Approved for an agent to implement"
-  "invalid|e4e669|Not a contribution to this project"
+  "not-aligned|e4e669|Not aligned with the project's goals (see GOAL.md)"
 )
 
-# Removed in favour of close reasons and Discussions. Only these are ever deleted.
+# Removed in favour of close reasons and Discussions, and invalid, renamed to
+# not-aligned. Only these are ever deleted.
 REMOVE=(
   "duplicate"
   "wontfix"
   "question"
   "good first issue"
   "help wanted"
+  "invalid"
 )
 
 mode=apply

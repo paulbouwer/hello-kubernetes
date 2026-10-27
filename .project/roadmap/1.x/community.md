@@ -5,7 +5,7 @@ type: review
 status: final
 areas: [app, image, deploy]
 created: 2026-10-22
-updated: 2026-10-26
+updated: 2026-10-27
 ---
 
 # Community contributions — triage and credits
@@ -28,9 +28,9 @@ A review of every open issue and pull request (plus a few closed ones that are s
 | Issue #28 how to remove the deployment | @simonw | **Incorporate**: uninstall step in README quick start | docs |
 | Issue #29 single-file manifest (closed) | @STRRL | **Revisit**: publish rendered manifest as a release asset | #4 publishing |
 | Issue #23 is this on Artifact Hub? | @weironz | **Incorporate (optional)**: publish OCI chart + Artifact Hub listing, or close with answer | #4 publishing |
-| PR #41 replicas 2 → 3 | @szairi2011 | **Close** with thanks (personal values; use `--set`) | — |
-| PR #43 custom message + 6 replicas | @szairi2011 | **Close** with thanks (personal values; use `--set`) | — |
-| PR #48 "Create test.txt" (unrelated FastAPI service) | @maddy00o7 | **Close** as off-topic, label `invalid` | — |
+| PR #41 replicas 2 → 3 | @szairi2011 | **Close** with thanks (personal values; use `--set`), label `not-aligned` | — |
+| PR #43 custom message + 6 replicas | @szairi2011 | **Close** with thanks (personal values; use `--set`), label `not-aligned` | — |
+| PR #48 "Create test.txt" (unrelated FastAPI service) | @maddy00o7 | **Close** as off-topic, label `not-aligned` | — |
 
 ## Detail
 
@@ -78,10 +78,10 @@ The `opsmx/hello-kubernetes` chart on Artifact Hub is unofficial. Optional but c
 Right instinct, but it moves to `node:16.20.0-alpine3.18`, which is also end-of-life. Close as superseded by the Node 24 update, and thank Nikolai in the release notes for flagging it, since they were the first to send a fix for the stale base image.
 
 **PR #41 — Update values.yaml** and **PR #43 — Patch3** (@szairi2011, Apr 2023)
-These change the default replica count and message for one person's deployment. Close with a friendly note that `--set deployment.replicaCount=6 --set message="..."` does the same without forking the chart.
+These change the default replica count and message for one person's deployment. Close with a friendly note that `--set deployment.replicaCount=6 --set message="..."` does the same without forking the chart. Label both `not-aligned`.
 
 **PR #48 — Create test.txt** (@maddy00o7, Feb 2025)
-Adds an unrelated FastAPI service, a root Dockerfile and a CI workflow. Close as off-topic and label it `invalid` (see [operations.md](operations.md)).
+Adds an unrelated FastAPI service, a root Dockerfile and a CI workflow. Close as off-topic and label it `not-aligned` (see [operations.md](operations.md)).
 
 ## How to give credit
 
