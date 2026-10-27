@@ -37,4 +37,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 |---|---|---|
 | [2026-10-26-roadmap-1x](2026-10-26-roadmap-1x/plan.md) | Deliver the 1.x roadmap in the 1.11 release, then deprecate the old image tags. | active |
 | [2026-10-26-labels-and-board](2026-10-26-labels-and-board/plan.md) | Set up the 15 labels with a script that applies and checks them, the board statuses and workflows, and make the board public. | done |
-| [2026-10-26-contributing-and-checks](2026-10-26-contributing-and-checks/plan.md) | Make CONTRIBUTING.md and AGENTS.md the source of truth for contributing, add the issue forms, PR template and release notes config, and enforce the conventions with workflows, repo settings and a ruleset. | active |
+| [2026-10-26-contributing-and-checks](2026-10-26-contributing-and-checks/plan.md) | Make CONTRIBUTING.md and AGENTS.md the source of truth for contributing, add the issue forms, PR template and release notes config, and enforce the conventions with workflows, repo settings and a ruleset. | done |

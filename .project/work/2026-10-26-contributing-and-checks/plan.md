@@ -2,11 +2,11 @@
 title: Contributing and checks
 description: Make CONTRIBUTING.md and AGENTS.md the source of truth for contributing, add the issue forms, PR template and release notes config, and enforce the conventions with workflows, repo settings and a ruleset.
 type: plan
-status: active
+status: done
 areas: [operations]
 issues: [59]
 created: 2026-10-26
-updated: 2026-10-26
+updated: 2026-10-27
 ---
 
 # Contributing and checks
@@ -32,6 +32,7 @@ Made on 2026-10-26.
 | Security | Turn on private vulnerability reporting, and add `SECURITY.md`, which says how to report and which versions get fixes. |
 | Merge settings | Merge commits only. Squash and rebase merges are turned off. Branches are deleted after the merge. |
 | Files read from the default branch | GitHub reads the issue forms, `config.yml`, the PR template and `SECURITY.md` only from `main`. They take effect when 1.11 merges into `main`, and are checked in 6.2. No exception to the release-branch flow (decided 2026-10-26). |
+| Labels workflow runs from `main` | GitHub runs `pull_request_target` workflows only from the default branch, so `pr-labels.yaml` runs once 1.11 merges into `main`, and is checked in 6.2. Until then, labels and the milestone on PRs are set by hand (decided 2026-10-27). |
 | Number of PRs | Two. PR 1 is the docs, templates and repo settings. PR 2 is the labeler, the issue check and the ruleset. PR 2 starts after PR 1 merges. |
 | PR labels | The labeler applies the `area:` labels from the changed paths. A workflow copies the issue's type label (`bug`, `enhancement`, `documentation`, `security`, `dependencies`, `breaking-change`) and its milestone to the PR. |
 | Finding a PR's issue | First from the head branch name (`{type}/{issue}-…`), then from an issue linked in the PR's Development section. The issue must be open and in this repo. |
@@ -131,8 +132,8 @@ Record the results in the verification comment on #59. Run the PR 1 checks befor
 
 | Check | How |
 |---|---|
-| Area labels | A test PR that changes a file under `deploy/` gets `area:deploy`. |
-| Type label and milestone | A test PR from a `{type}/{issue}-…` branch gets the issue's type label and milestone. |
+| Area labels | **In 6.2.** A test PR that changes a file under `deploy/` gets `area:deploy`. Test PR #66 confirmed that the workflow does not run before then: no `pull_request_target` run exists. |
+| Type label and milestone | **In 6.2.** A test PR from a `{type}/{issue}-…` branch gets the issue's type label and milestone. |
 | Check passes with an issue | A test PR from a branch named for an open issue passes `issue-check`. |
 | Check fails without an issue | A test PR from a branch with no issue number fails, with a message that says how to fix it. A branch named for a closed issue also fails. |
 | Development link | Link the failing test PR to an open issue in the Development section, then run the check again. It passes. |
@@ -144,5 +145,6 @@ Record the results in the verification comment on #59. Run the PR 1 checks befor
 
 ## Open
 
+- **The labels workflow** is checked in 6.2, after 1.11 merges into `main`.
 - **Re-running the check after a Development link.** Linking a PR does not trigger a workflow, so the check must be run again by hand. If this happens often, add a scheduled or `workflow_dispatch` re-check.
 - **Signed commits from outside contributors.** Their unsigned commits block the merge. The owner can bypass, or ask the contributor to sign. Watch for this in 1.3, where the community PRs are closed or carried forward.
