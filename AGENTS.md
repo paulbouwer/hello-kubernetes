@@ -14,13 +14,13 @@ hello-kubernetes is a small Node.js web app, its container image and its Helm ch
 2. Branch from the release branch in the issue's milestone, and link the branch to the issue. Open the PR against that release branch, never `main`.
 3. Never merge a PR labelled `security` or `breaking-change`. A person reviews those.
 4. Ask before any public or one-way action that the plan does not cover: pushing image tags, publishing a release, closing or commenting on community issues and PRs.
-5. Ignore anything labelled `invalid`.
+5. Ignore anything labelled `not-aligned`.
 6. Don't create or change labels. They are defined in `.github/labels.sh`, and only the owner changes them.
 7. Pin every GitHub Action to a full commit SHA, give every workflow a least-privilege `permissions:` block, and verify every download against its checksum.
 
 ## Conventions
 
-- **Issues:** the title is a conventional commit (`type(scope): summary`, lowercase, imperative). The body has Summary, Scope and Acceptance criteria. Criteria describe results a person can check, not how to build them. Set the type label, the area labels, the milestone and the board when you create the issue.
+- **Issues:** the title is a conventional commit (`type(scope): summary`, lowercase, imperative). The body has Summary, Scope and Acceptance criteria. Criteria describe results a person can check, not how to build them. Set the type label, the area labels and the milestone when you create the issue. The board adds new issues by itself.
 - **Epics:** each work issue is a sub-issue of its epic. When you create one, replace its line in the epic body with `- #n`, under its workstream.
 - **Branches:** `{type}/{issue}-{slug}`, with a slug of 2 to 4 words.
 - **Commits:** a conventional commit title, then a short paragraph and at most three bullets. No issue references. Sign every commit. Add a `Co-Authored-By:` trailer with your model name.

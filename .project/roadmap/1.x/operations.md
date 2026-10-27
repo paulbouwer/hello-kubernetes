@@ -84,9 +84,9 @@ It's a label rather than a board status because `actions/stale` can only filter 
 
 | Label | What automation does with it |
 |---|---|
-| `invalid` | Not a contribution to this project (e.g. test or personal-fork PRs). Excluded from reports, triage and agent queues. Hacktoberfest also excludes PRs with this label (check the current year's rules). |
+| `not-aligned` | Not aligned with the project's goals in [GOAL.md](../../GOAL.md), e.g. an unrelated service or one person's settings. Excluded from release notes, reports, triage and agent queues. |
 
-`invalid` replaces a `spam` label: it's less hostile, already exists, and has the same effect for Hacktoberfest. If Hacktoberfest doesn't matter, `off-topic` is more neutral, but no tooling recognises it.
+`not-aligned` was `invalid` until #71. "Invalid" suggests that the contributor did something wrong, which is rarely true. Hacktoberfest reads `invalid`, but it counts only PRs in repos with the `hacktoberfest` topic, and this repo doesn't have it.
 
 ### Remove
 
@@ -229,21 +229,24 @@ Discussions are off for now, so the issue chooser has no link to them.
 
 ## Labelling the current items
 
-| # | Labels | Board |
-|---|---|---|
-| #50 update the devcontainer (PR #52, merged into `release-1.11`) | `enhancement`, `area:operations` (applied) | Done |
-| #51 add the project notes | `documentation`, `area:operations` (applied) | In Progress |
-| PR #30 probe paths with a path prefix (merged into `main`) | `bug`, `area:deploy` | Done |
-| #44 probes fail with `pathPrefix` (closed by PR #30) | `bug`, `area:deploy` | Done |
-| #35 `runAsNonRoot` fails | `bug`, `area:image`, `area:deploy` | Ready |
-| #31 ingress example not working | `documentation`, `area:deploy` | Ready |
-| #28 document how to delete | `documentation`, `area:deploy` | Ready |
-| #38 handlebars refactor | `bug`, `area:app` | Triage |
-| #23 Artifact Hub | `enhancement`, `area:deploy` | Triage |
-| PR #48 (unrelated FastAPI service) | `invalid`, then close | — |
-| PRs #41, #43 (personal values changes) | Close as "not planned" with thanks, as in [community.md](community.md); not `invalid` | — |
+Done in #71, on 27 October 2026. The comments for each item are in the [community triage plan](../../work/2026-10-27-community-triage/plan.md#work).
 
-PR #30 needs its labels even though it's merged: the 1.11 release notes are generated from the labels on merged PRs. The other open PRs from [community.md](community.md) (#40, #45, #46) get type and area labels when they're closed.
+| # | Labels | State |
+|---|---|---|
+| PR #30 probe paths with a path prefix (merged into `main`) | `bug`, `area:deploy` | Merged. Listed under Bug fixes in the 1.11 release notes |
+| #44 probes fail with `pathPrefix` | `bug`, `area:deploy` | Closed by PR #30 |
+| #35 `runAsNonRoot` fails | `bug`, `area:image`, `area:deploy` | Open, Triage. Resolved by 2.1 and 4.1 |
+| #38 asset paths without `RENDER_PATH_PREFIX` | `bug`, `area:app` | Open, Triage. Resolved by 2.3 |
+| #31 ingress example not working | `documentation`, `area:deploy` | Open, Triage. Resolved by 4.2 and 4.5 |
+| #28 document how to delete | `documentation`, `area:deploy` | Open, Triage. Resolved by 4.5 |
+| #23 Artifact Hub | `enhancement`, `area:deploy` | Open, Triage. Resolved by 4.4 |
+| PR #40 multi-arch | `enhancement`, `area:ci`, `area:image` | Open until 2.4 and 3.2 merge |
+| PR #46 multi-arch incl. RISC-V | `enhancement`, `area:ci`, `area:image` | Open until 2.1 and 3.2 merge |
+| PR #45 base image update | `security`, `area:image` | Open until 2.1 merges |
+| PRs #41, #43 (personal values changes) | `not-aligned` | Closed with thanks |
+| PR #48 (unrelated FastAPI service) | `not-aligned` | Closed |
+
+The open community issues stay in Triage, without the `agent` label: the 1.x sub-issues do the work, and each community item is closed when the work that resolves it merges.
 
 ## Setting up the labels
 

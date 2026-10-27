@@ -3,7 +3,7 @@
 changelog:
   exclude:
     labels:
-      - invalid
+      - not-aligned
   categories:
     - title: Breaking changes
       labels: [breaking-change]

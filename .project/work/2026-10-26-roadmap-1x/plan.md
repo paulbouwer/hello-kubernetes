@@ -51,7 +51,7 @@ The labels follow [operations.md](../../roadmap/1.x/operations.md#labels-15). "B
 |---|---|---|---|---|---|
 | 1.1 | chore(repo): set up the labels, board statuses and board workflows | enhancement, area:operations | — | — | [work package](../2026-10-26-labels-and-board/plan.md), [operations.md](../../roadmap/1.x/operations.md#setting-up-the-labels) |
 | 1.2 | chore(repo): add AGENTS.md, CONTRIBUTING.md, templates, labeler, release notes config and the PR issue check | enhancement, area:operations | 1.1 | — | [work package](../2026-10-26-contributing-and-checks/plan.md), [operations.md](../../roadmap/1.x/operations.md#supporting-files) |
-| 1.3 | chore(triage): label the open items and close the off-topic PRs | enhancement, area:operations | 1.1 | #48, #41, #43 | [community.md](../../roadmap/1.x/community.md) |
+| 1.3 | chore(triage): label the open items and close the off-topic PRs | enhancement, area:operations | 1.1 | #48, #41, #43 | [work package](../2026-10-27-community-triage/plan.md), [community.md](../../roadmap/1.x/community.md) |
 | 1.4 | chore(deps): add Dependabot and CodeQL | enhancement, area:operations | 1.1 | — | [image.md](../../roadmap/1.x/image.md#what-github-provides) |
 
 #### 2. Image and app
