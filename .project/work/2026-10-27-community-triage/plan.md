@@ -2,7 +2,7 @@
 title: Community triage
 description: Rename invalid to not-aligned, close the PRs that don't fit the project with thanks, and label and reply to every other open community issue and PR.
 type: plan
-status: active
+status: done
 areas: [operations]
 issues: [71]
 created: 2026-10-27
