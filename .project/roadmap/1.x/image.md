@@ -41,6 +41,8 @@ Worth more than a runtime change. All are major versions, so test routes and log
 
 Also commit a `package-lock.json`. The repo doesn't have one, and `npm ci` and Dependabot's npm updates need it.
 
+Done in #75 (the lockfile) and #77 (the upgrades): Express 5.3.0, express-handlebars 9.0.2, pino 10.4.0 and pino-http 11.0.0, with the unused direct `handlebars` dependency removed. Every version was published at least 7 days before it was chosen (`npm install --before`), the cooldown that AGENTS.md now sets. #77 also added a SIGTERM and SIGINT handler, so the container stops in about 0.2 seconds instead of being killed after the grace period.
+
 ## Base image
 
 ### Step 1: `node:24-alpine`

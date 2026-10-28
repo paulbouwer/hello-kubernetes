@@ -2,7 +2,7 @@
 title: Node 24 image
 description: Move the image to node:24-alpine, pinned by digest, with a committed lockfile, a numeric non-root user and no package manager at runtime, and add image tests I1 to I3.
 type: plan
-status: active
+status: done
 areas: [image]
 issues: [75]
 created: 2026-10-28

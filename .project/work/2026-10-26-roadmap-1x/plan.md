@@ -59,7 +59,7 @@ The labels follow [operations.md](../../roadmap/1.x/operations.md#labels-15). "B
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
 | 2.1 | fix(image): move to node:24-alpine with a lockfile and a numeric non-root user | security, area:image | — | #35 (image), #45 | [work package](../2026-10-28-node24-image/plan.md), [image.md](../../roadmap/1.x/image.md#step-1-node24-alpine) |
-| 2.2 | chore(app): upgrade express, pino-http and express-handlebars | enhancement, area:app | 2.1 | — | [image.md](../../roadmap/1.x/image.md#dependency-upgrades) |
+| 2.2 | chore(app): upgrade express, pino-http and express-handlebars | enhancement, area:app | 2.1 | — | [work package](../2026-10-28-app-dependencies/plan.md), [image.md](../../roadmap/1.x/image.md#dependency-upgrades) |
 | 2.3 | fix(app): load assets correctly when RENDER_PATH_PREFIX is not set | bug, area:app | 2.2 | #38 | [community.md](../../roadmap/1.x/community.md#incorporate-in-spirit) |
 | 2.4 | feat(app): show the image architecture from the runtime | enhancement, area:app | 2.2 | #40 (in spirit) | [image.md](../../roadmap/1.x/image.md#supported-amd64-and-arm64) |
 | 2.5 | test(e2e): add the e2e harness and the first kind scenarios | enhancement, area:ci | — | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) step 1 |
@@ -281,6 +281,7 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 
 ## Open
 
+- **This week: bump body-parser to 2.4.0** (for #77) on or after 2026-10-29, when it meets the 7-day cooldown. It fixes GHSA-27r3-jxmh-p828 (HIGH), which the app can't reach because it parses no request bodies. Regenerate the lockfile with `npm install --before`, re-run Trivy, tick the last criterion on #77, and remove this item.
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **An image override with the old tags breaks with the new chart defaults.** The 1.10.1 and older images run as the non-numeric `USER node`, so `runAsNonRoot: true` rejects them (#35). Document this in the 4.1 release notes, or set `runAsUser: 1000` in the chart so that the kubelet can verify it. Decide in 4.1.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
