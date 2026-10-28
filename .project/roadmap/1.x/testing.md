@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [ci]
 created: 2026-10-22
-updated: 2026-10-26
+updated: 2026-10-28
 ---
 
 # Testing
@@ -64,7 +64,7 @@ These check the image itself and guard against the problems found in the review 
 | ID | Check | How | Guards against |
 |---|---|---|---|
 | I1 | Node is a supported, patched version | `docker run --rm --entrypoint node IMG -p process.versions.node` ≥ the eMudhra-fixed release for that line (22.23.4 / 24.22.1 / 26.12.1) | Node 16 EOL, eMudhra |
-| I2 | OS CA bundle is patched | `docker run --rm --entrypoint apk IMG info -v ca-certificates` ≥ `20261020-r0` | eMudhra (OS store) |
+| I2 | OS CA bundle is patched | `docker run --rm --entrypoint apk IMG list --installed ca-certificates-bundle` ≥ `20261020-r0`. The `node` Alpine images install `ca-certificates-bundle`, not `ca-certificates` (found in #75) | eMudhra (OS store) |
 | I3 | Runs as numeric non-root user | `docker inspect -f '{{.Config.User}}' IMG` is `1000` or `1000:1000`; `docker run --rm --entrypoint id IMG -u` prints `1000` | #35 |
 | I4 | No HIGH/CRITICAL vulnerabilities with a fix available | Trivy with `--severity HIGH,CRITICAL --ignore-unfixed --exit-code 1` | stale base image |
 | I5 | Starts and serves on every published platform, and reports it correctly | For `linux/amd64` and `linux/arm64`: `docker run --platform <p> -d -p 8080:8080 IMG`, then `curl -fsS localhost:8080/` and check the page shows `<p>` as the architecture (proves the app reports each platform at runtime) | #16, #40 |

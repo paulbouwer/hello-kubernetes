@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [image, app]
 created: 2026-10-22
-updated: 2026-10-27
+updated: 2026-10-28
 ---
 
 # Container image
@@ -46,6 +46,13 @@ Also commit a `package-lock.json`. The repo doesn't have one, and `npm ci` and D
 ### Step 1: `node:24-alpine`
 
 Review item 1: `node:24-alpine` (≥24.22.1, pinned by digest), multi-stage `npm ci --omit=dev`, numeric `USER 1000`, and `CMD ["node","server.js"]` so npm isn't in the startup path.
+
+Done in #75, with two additions:
+
+- **The lockfile was ignored.** `.gitignore` and `src/app/.dockerignore` both listed `package-lock.json`, so it could never be committed or used in a build. Both lines are removed, and the lockfile is committed.
+- **npm, corepack and Yarn are removed from the runtime image.** The app no longer runs them, and npm's bundled dependencies (`undici`, `brace-expansion`) were the only fixable HIGH findings left. With them removed, Trivy finds no vulnerabilities at any severity. The build stage still uses npm for `npm ci`.
+
+The image still stops slowly: `node` is PID 1 with no SIGTERM handler, so it waits for the grace period. 2.2 adds a handler.
 
 ### Step 2 (optional, 2.x): distroless
 

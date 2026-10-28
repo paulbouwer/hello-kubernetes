@@ -27,3 +27,7 @@ push-image:
 	docker push $(IMAGE):$(IMAGE_VERSION); \
 	docker push $(IMAGE):$(IMAGE_MAJOR_VERSION); \
 	docker push $(IMAGE):$(IMAGE_MAJOR_VERSION).$(IMAGE_MINOR_VERSION)
+
+.PHONY: test-image
+test-image: ## image tests (test/image/run.sh) against $(IMAGE):$(IMAGE_VERSION)
+	test/image/run.sh "$(IMAGE):$(IMAGE_VERSION)"

@@ -58,7 +58,7 @@ The labels follow [operations.md](../../roadmap/1.x/operations.md#labels-15). "B
 
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
-| 2.1 | fix(image): move to node:24-alpine with a lockfile and a numeric non-root user | security, area:image | — | #35 (image), #45 | [image.md](../../roadmap/1.x/image.md#step-1-node24-alpine) |
+| 2.1 | fix(image): move to node:24-alpine with a lockfile and a numeric non-root user | security, area:image | — | #35 (image), #45 | [work package](../2026-10-28-node24-image/plan.md), [image.md](../../roadmap/1.x/image.md#step-1-node24-alpine) |
 | 2.2 | chore(app): upgrade express, pino-http and express-handlebars | enhancement, area:app | 2.1 | — | [image.md](../../roadmap/1.x/image.md#dependency-upgrades) |
 | 2.3 | fix(app): load assets correctly when RENDER_PATH_PREFIX is not set | bug, area:app | 2.2 | #38 | [community.md](../../roadmap/1.x/community.md#incorporate-in-spirit) |
 | 2.4 | feat(app): show the image architecture from the runtime | enhancement, area:app | 2.2 | #40 (in spirit) | [image.md](../../roadmap/1.x/image.md#supported-amd64-and-arm64) |
@@ -66,6 +66,8 @@ The labels follow [operations.md](../../roadmap/1.x/operations.md#labels-15). "B
 | 2.6 | test(image): add the image tests | enhancement, area:ci | 2.1, 2.4 | — | [testing.md](../../roadmap/1.x/testing.md#image-tests) |
 
 2.5 covers `lib.sh`, `run.sh`, the kind config and E1–E4, E7 and E11.
+
+2.2 also adds a SIGTERM handler to `server.js`, so the app stops at once instead of waiting 10 to 30 seconds for the grace period. 2.1 verifies the image on amd64 only. The arm64 checks run in the CI matrix in 3.3 (both decided 2026-10-28).
 
 #### 3. CI and publishing
 
