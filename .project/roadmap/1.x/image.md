@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [image, app]
 created: 2026-10-22
-updated: 2026-10-26
+updated: 2026-10-27
 ---
 
 # Container image
@@ -128,8 +128,8 @@ A possible 2.0 rewrite in Go or Rust would remove the dependency on Node's platf
 
 ### What GitHub provides
 
-- **Dependabot alerts and security updates** cover the npm dependencies in `src/app/package.json`. Free; turn them on, plus `dependabot.yml` for npm, docker and github-actions (review item 5).
-- **CodeQL code scanning** finds vulnerable patterns in the JavaScript source. Free for public repos; enable the default setup.
+- **Dependabot alerts and security updates** cover the npm dependencies in `src/app/package.json`. Free; turn them on, plus `dependabot.yml` for npm, docker and github-actions (review item 5). Done in #73, with the devcontainer as well. GitHub reads `dependabot.yml` only from `main`, so version updates start when 1.11 merges.
+- **CodeQL code scanning** finds vulnerable patterns in the JavaScript source. Free for public repos; enable the default setup. Done in #73, for JavaScript/TypeScript and Actions.
 - **Nothing in GitHub scans the OS packages inside an image.** Code scanning only displays results from other tools. The current alerts (zlib, busybox, OpenSSL) are all OS packages, so an external scanner is still needed.
 
 ### Trivy, installed safely

@@ -1,0 +1,62 @@
+# Dependabot version updates. GitHub reads this file only from the default
+# branch (main), so it takes effect when a release merges into main, and PRs
+# target main. Security updates also target main.
+#
+# Minor and patch updates are grouped into one PR per ecosystem. Major updates
+# come as separate PRs, apart from new major versions of the node base image:
+# Node majors are planned work, and odd-numbered majors never get LTS.
+
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /src/app
+    schedule:
+      interval: weekly
+    labels: [dependencies, "area:app"]
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /src/app
+    schedule:
+      interval: weekly
+    labels: [dependencies, "area:image"]
+    commit-message:
+      prefix: build(deps)
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
+    groups:
+      image-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencies, "area:ci"]
+    commit-message:
+      prefix: ci(deps)
+    groups:
+      actions-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /.devcontainer
+    schedule:
+      interval: weekly
+    labels: [dependencies, "area:operations"]
+    commit-message:
+      prefix: chore(deps)
+
+  - package-ecosystem: devcontainers
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencies, "area:operations"]
+    commit-message:
+      prefix: chore(deps)
