@@ -1,16 +1,16 @@
 const express = require('express');
-const exphbs  = require('express-handlebars');
+const { engine } = require('express-handlebars');
 const os = require("os");
 const fs = require('fs');
 
 const pino = require('pino');
-const expressPino = require('express-pino-logger');
+const pinoHttp = require('pino-http');
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
-const expressLogger = expressPino({ logger });
+const expressLogger = pinoHttp({ logger });
 
 const app = express();
 app.use(expressLogger);
-app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.engine('handlebars', engine({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
 // Configuration
@@ -77,6 +77,30 @@ logger.debug();
 logger.debug('Server');
 logger.debug('-----------------------------------------------------');
 
-app.listen(port, function () {
+const server = app.listen(port, function (err) {
+  if (err) {
+    logger.error(err, 'Failed to listen on port %s', port);
+    process.exit(1);
+  }
   logger.info("Listening on: http://%s:%s", podName, port);
 });
+
+// Shutdown
+
+// Stop accepting connections, close idle keep-alive connections, and exit
+// when in-flight requests finish. Exit anyway after 5 seconds.
+function shutdown(signal) {
+  logger.info('Received %s, shutting down', signal);
+  server.close(function () {
+    logger.info('Server closed');
+    process.exit(0);
+  });
+  server.closeIdleConnections();
+  setTimeout(function () {
+    logger.warn('Requests still open after 5 seconds, exiting');
+    process.exit(1);
+  }, 5000).unref();
+}
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

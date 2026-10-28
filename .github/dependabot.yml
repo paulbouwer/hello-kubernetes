@@ -2,6 +2,9 @@
 # branch (main), so it takes effect when a release merges into main, and PRs
 # target main. Security updates also target main.
 #
+# Each ecosystem waits 7 days after a release before it proposes it (cooldown),
+# the same rule as in AGENTS.md. Security updates don't wait.
+#
 # Minor and patch updates are grouped into one PR per ecosystem. Major updates
 # come as separate PRs, apart from new major versions of the node base image:
 # Node majors are planned work, and odd-numbered majors never get LTS.
@@ -13,6 +16,8 @@ updates:
     directory: /src/app
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     labels: [dependencies, "area:app"]
     commit-message:
       prefix: chore(deps)
@@ -24,6 +29,8 @@ updates:
     directory: /src/app
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     labels: [dependencies, "area:image"]
     commit-message:
       prefix: build(deps)
@@ -38,6 +45,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     labels: [dependencies, "area:ci"]
     commit-message:
       prefix: ci(deps)
@@ -49,6 +58,8 @@ updates:
     directory: /.devcontainer
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     labels: [dependencies, "area:operations"]
     commit-message:
       prefix: chore(deps)
@@ -57,6 +68,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     labels: [dependencies, "area:operations"]
     commit-message:
       prefix: chore(deps)

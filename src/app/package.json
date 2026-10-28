@@ -9,10 +9,9 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.17.1",
-    "express-handlebars": "^5.2.1",
-    "express-pino-logger": "^6.0.0",
-    "handlebars": "^4.7.7",
-    "pino": "^6.11.2"
+    "express": "^5.3.0",
+    "express-handlebars": "^9.0.2",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0"
   }
 }

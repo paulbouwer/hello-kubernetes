@@ -59,7 +59,7 @@ The labels follow [operations.md](../../roadmap/1.x/operations.md#labels-15). "B
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
 | 2.1 | fix(image): move to node:24-alpine with a lockfile and a numeric non-root user | security, area:image | — | #35 (image), #45 | [work package](../2026-10-28-node24-image/plan.md), [image.md](../../roadmap/1.x/image.md#step-1-node24-alpine) |
-| 2.2 | chore(app): upgrade express, pino-http and express-handlebars | enhancement, area:app | 2.1 | — | [image.md](../../roadmap/1.x/image.md#dependency-upgrades) |
+| 2.2 | chore(app): upgrade express, pino-http and express-handlebars | enhancement, area:app | 2.1 | — | [work package](../2026-10-28-app-dependencies/plan.md), [image.md](../../roadmap/1.x/image.md#dependency-upgrades) |
 | 2.3 | fix(app): load assets correctly when RENDER_PATH_PREFIX is not set | bug, area:app | 2.2 | #38 | [community.md](../../roadmap/1.x/community.md#incorporate-in-spirit) |
 | 2.4 | feat(app): show the image architecture from the runtime | enhancement, area:app | 2.2 | #40 (in spirit) | [image.md](../../roadmap/1.x/image.md#supported-amd64-and-arm64) |
 | 2.5 | test(e2e): add the e2e harness and the first kind scenarios | enhancement, area:ci | — | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) step 1 |
