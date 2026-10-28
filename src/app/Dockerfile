@@ -1,4 +1,14 @@
-FROM node:16-alpine3.13
+# Both stages use node:24-alpine, pinned by digest to a multi-arch index
+# (amd64 and arm64). Dependabot updates both digests. New Node majors are
+# planned work.
+
+# Install the production dependencies from the lockfile.
+FROM node:24-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS deps
+WORKDIR /usr/src/app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+
+FROM node:24-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53
 
 ARG IMAGE_CREATE_DATE
 ARG IMAGE_VERSION
@@ -15,18 +25,24 @@ LABEL org.opencontainers.image.title="Hello Kubernetes!" \
       org.opencontainers.image.vendor="Paul Bouwer" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.source="https://github.com/paulbouwer/hello-kubernetes.git" \
-      org.opencontainers.image.revision=$IMAGE_SOURCE_REVISION 
+      org.opencontainers.image.revision=$IMAGE_SOURCE_REVISION
 
-# Create app directory
-RUN mkdir -p /usr/src/app
+# The app runs without a package manager, so remove npm, corepack and yarn.
+# Their bundled dependencies otherwise show up in vulnerability scans.
+RUN rm -rf /usr/local/lib/node_modules /opt/yarn-* \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+      /usr/local/bin/yarn /usr/local/bin/yarnpkg
+
 WORKDIR /usr/src/app
 
-# Install app dependencies
-COPY package.json /usr/src/app/
-RUN npm install
+# The app files stay owned by root and read-only to the app user.
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY package.json info.json server.js ./
+COPY static ./static
+COPY views ./views
 
-# Bundle app source
-COPY . /usr/src/app
-
-USER node
-CMD [ "npm", "start" ]
+# Numeric user, so that a cluster can verify runAsNonRoot. 1000 is the
+# image's node user. Start node directly, without npm.
+USER 1000:1000
+EXPOSE 8080
+CMD ["node", "server.js"]
