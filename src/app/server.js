@@ -2,6 +2,7 @@ const express = require('express');
 const { engine } = require('express-handlebars');
 const os = require("os");
 const fs = require('fs');
+const path = require('path');
 
 const pino = require('pino');
 const pinoHttp = require('pino-http');
@@ -12,6 +13,8 @@ const app = express();
 app.use(expressLogger);
 app.engine('handlebars', engine({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
+// Find the app's files from its own folder, so it runs from any directory.
+app.set('views', path.join(__dirname, 'views'));
 
 // Configuration
 
@@ -36,7 +39,7 @@ var namespace = process.env.KUBERNETES_NAMESPACE || '-';
 var podName = process.env.KUBERNETES_POD_NAME || os.hostname();
 var nodeName = process.env.KUBERNETES_NODE_NAME || '-';
 var nodeOS = os.type() + ' ' + os.release();
-var applicationVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
+var applicationVersion = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version;
 var containerImage = process.env.CONTAINER_IMAGE || 'paulbouwer/hello-kubernetes:' + applicationVersion
 // The image's architecture, read from the running Node binary, so it is always
 // the image's and never the host's. Node's names that differ from OCI names
@@ -64,7 +67,7 @@ logger.debug('-----------------------------------------------------');
 
 logger.debug('Handler: static assets');
 logger.debug('Serving from base path "' + handlerPathPrefix + '"');
-app.use(handlerPathPrefix, express.static('static'))
+app.use(handlerPathPrefix, express.static(path.join(__dirname, 'static')))
 
 logger.debug('Handler: /');
 logger.debug('Serving from base path "' + handlerPathPrefix + '"');

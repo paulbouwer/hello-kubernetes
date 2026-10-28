@@ -69,6 +69,8 @@ The [workstream 1 review](workstream-01-review.md) records the outcome and the f
 
 2.5 covers `lib.sh`, `run.sh`, the kind config and E1–E4, E7 and E11.
 
+#85, found while reviewing 2.4, makes the app run from any directory and adds `make run` ([work package](../2026-10-28-run-locally/plan.md)).
+
 2.2 also adds a SIGTERM handler to `server.js`, so the app stops at once instead of waiting 10 to 30 seconds for the grace period. 2.1 verifies the image on amd64 only. The arm64 checks run in the CI matrix in 3.3 (both decided 2026-10-28).
 
 #### 3. CI and publishing
