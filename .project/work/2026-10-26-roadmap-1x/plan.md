@@ -281,6 +281,7 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 
 ## Open
 
+- **This week: bump body-parser to 2.4.0** (for #77) on or after 2026-10-29, when it meets the 7-day cooldown. It fixes GHSA-27r3-jxmh-p828 (HIGH), which the app can't reach because it parses no request bodies. Regenerate the lockfile with `npm install --before`, re-run Trivy, tick the last criterion on #77, and remove this item.
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **An image override with the old tags breaks with the new chart defaults.** The 1.10.1 and older images run as the non-numeric `USER node`, so `runAsNonRoot: true` rejects them (#35). Document this in the 4.1 release notes, or set `runAsUser: 1000` in the chart so that the kubelet can verify it. Decide in 4.1.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
