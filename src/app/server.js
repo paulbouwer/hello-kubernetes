@@ -17,16 +17,20 @@ app.set('view engine', 'handlebars');
 
 var port = process.env.PORT || 8080;
 var message = process.env.MESSAGE || 'Hello world!';
-var renderPathPrefix = (
-  process.env.RENDER_PATH_PREFIX ? 
-    '/' + process.env.RENDER_PATH_PREFIX.replace(/^[\\/]+/, '').replace(/[\\/]+$/, '') :
-    ''
-);
-var handlerPathPrefix = (
-  process.env.HANDLER_PATH_PREFIX ? 
-    '/' + process.env.HANDLER_PATH_PREFIX.replace(/^[\\/]+/, '').replace(/[\\/]+$/, '') :
-    ''
-);
+// A path prefix such as "app" or "/app/" becomes "/app". An empty prefix, or
+// one that is only slashes, becomes "".
+function normalisePrefix(value) {
+  var path = (value || '').replace(/^[\\/]+/, '').replace(/[\\/]+$/, '');
+  return path ? '/' + path : '';
+}
+
+var renderPathPrefix = normalisePrefix(process.env.RENDER_PATH_PREFIX);
+var handlerPathPrefix = normalisePrefix(process.env.HANDLER_PATH_PREFIX);
+
+// Asset URLs are absolute under a render prefix, and relative without one, so
+// that the page also works behind a proxy that serves it under a path and
+// strips that path (#38).
+var assetPathPrefix = renderPathPrefix ? renderPathPrefix + '/' : '';
 
 var namespace = process.env.KUBERNETES_NAMESPACE || '-';
 var podName = process.env.KUBERNETES_POD_NAME || os.hostname();
@@ -67,7 +71,7 @@ app.get(handlerPathPrefix + '/', function (req, res) {
       pod: podName,
       node: nodeName + ' (' + nodeOS + ')',
       container: containerImage + ' (' + containerImageArch + ')',
-      renderPathPrefix: renderPathPrefix
+      assetPathPrefix: assetPathPrefix
     });
 });
 

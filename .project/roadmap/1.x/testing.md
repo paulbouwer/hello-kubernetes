@@ -71,6 +71,16 @@ These check the image itself and guard against the problems found in the review 
 | I6 | Respects `PORT` | `docker run -e PORT=9090 -p 9090:9090 IMG` and `curl -fsS localhost:9090/` | #34 |
 | I7 | Works with a read-only root filesystem | `docker run --read-only --tmpfs /tmp IMG` and `curl -fsS localhost:8080/` | chart `readOnlyRootFilesystem` default |
 
+## Proxy tests
+
+`test/proxy/run.sh` (`make test-proxy`), added in #81, runs the image behind an NGINX container and checks that the page and every asset it links to load through the proxy. It covers deployments that don't use the chart, which the e2e scenarios don't reach.
+
+| ID | Proxy | Prefixes | Guards against |
+|---|---|---|---|
+| P1 | Serves the app at `/hello/` and strips the path | none | #38 |
+| P2 | Passes `/hello/` through | `RENDER_PATH_PREFIX` and `HANDLER_PATH_PREFIX` both `/hello` | the chart's recommended setup breaking |
+| P3 | Serves the app at `/hello/` and strips the path | both only `/` | asset URLs becoming `//css/…` |
+
 ## End-to-end scenarios
 
 Every scenario runs on both kind and k3d unless the "Clusters" column says otherwise. "Page" means the HTML returned by `GET /` (or `GET /<prefix>/`). The checks only use `kubectl`, `helm` and `curl`, so they behave the same locally and in CI.
