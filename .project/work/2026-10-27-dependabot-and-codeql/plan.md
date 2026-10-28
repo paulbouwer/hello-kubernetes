@@ -2,7 +2,7 @@
 title: Dependabot and CodeQL
 description: Add Dependabot version updates for the app, image, workflows and devcontainer, turn on CodeQL and secret scanning with push protection, and record how a CVE fix becomes a patch release.
 type: plan
-status: active
+status: done
 areas: [operations]
 issues: [73]
 created: 2026-10-27
@@ -30,7 +30,7 @@ Made on 2026-10-27.
 | Commit prefixes | `chore(deps)` for npm and the devcontainer, `build(deps)` for the image, `ci(deps)` for Actions. |
 | Ignore | New major versions of the `node` base image. Node majors are planned work, tested on both architectures, and odd-numbered majors never get LTS. The docs don't say whether this also stops a security update. That's acceptable: a Node or Alpine CVE is fixed within the same major, and Trivy fails the build on anything this misses. |
 | Auto-merge | No. |
-| CodeQL | Default setup with the default query suite, for JavaScript/TypeScript and GitHub Actions. It is a repo setting, so it works now. |
+| CodeQL | Default setup with the default query suite, for JavaScript/TypeScript and GitHub Actions. It is a repo setting, so it works now. It scans `main` on pushes and weekly, and PRs into `main`, but not PRs into `release-*`: PR #74 got no CodeQL run. So during release work, findings show on the release PR into `main`. A CodeQL workflow (advanced setup) could also scan `release-*` PRs, if that is needed later. |
 | Secret scanning | On, with push protection. Push protection blocks any push that contains a detected secret, from anyone. Who may push to `main` and `release-*` is controlled by the ruleset from 1.2. |
 | Trivy | Still needed. Dependabot fixes dependencies, CodeQL checks our code, and Trivy checks the finished image and fails the build. |
 
@@ -75,4 +75,5 @@ Record the results in the verification comment on #73.
 ## Open
 
 - **Dependabot is checked in 6.2**, after 1.11 merges into `main`.
+- **CodeQL found two alerts on `main`:** the old publish and scan workflows have no `permissions:` block. 3.1 and 3.2 rewrite both workflows, and the alerts close when that work reaches `main`.
 - **The patch release process** goes into `CONTRIBUTING.md` and `AGENTS.md` in 6.2.
