@@ -120,6 +120,8 @@ The page shows the image's architecture. Today it reads it from `src/app/info.js
 - **Don't use `os.machine()`.** It comes from the kernel (`uname -m`), so it reports the host, and QEMU user-mode emulation can fake it.
 - **No build step is needed**, so local builds on any platform report correctly too.
 
+Done in #83. The app maps `x64` → `amd64`, `ia32` → `386` and `ppc64` → `ppc64le`, and shows other names as they are. `info.json` is removed. Image test I5a checks the mapping with a simulated `process.arch`, so it runs without an emulated platform.
+
 The kernel line on the page (`os.type()` and `os.release()`) does come from the host kernel, and can look unusual in some environments. These are correct, not bugs: Docker Desktop shows its VM kernel (`…-microsoft-standard-WSL2` on Windows, `…-linuxkit` on macOS), gVisor shows its own kernel version, and Kata or Firecracker show the guest VM's kernel.
 
 ### Out of scope until 2.0

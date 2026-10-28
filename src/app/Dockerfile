@@ -37,7 +37,7 @@ WORKDIR /usr/src/app
 
 # The app files stay owned by root and read-only to the app user.
 COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY package.json info.json server.js ./
+COPY package.json server.js ./
 COPY static ./static
 COPY views ./views
 

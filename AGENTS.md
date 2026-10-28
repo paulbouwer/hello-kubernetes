@@ -13,7 +13,7 @@ hello-kubernetes is a small Node.js web app, its container image and its Helm ch
 1. Work only on issues in **Ready** on the [project board](https://github.com/users/paulbouwer/projects/5) that have the `agent` label, unless the maintainer asks you directly. Move the issue to **In Progress** when you start.
 2. Branch from the release branch in the issue's milestone, and link the branch to the issue. Open the PR against that release branch, never `main`.
 3. Never merge a PR labelled `security` or `breaking-change`. A person reviews those.
-4. Ask before any public or one-way action that the plan does not cover: pushing image tags, publishing a release, closing or commenting on community issues and PRs.
+4. Ask before any public or one-way action that the plan does not cover: pushing image tags, publishing a release, closing or commenting on community issues and PRs. The one exception is closing a community item when the work that resolves it merges (see below).
 5. Ignore anything labelled `not-aligned`.
 6. Don't create or change labels. They are defined in `.github/labels.sh`, and only the owner changes them.
 7. Pin every GitHub Action to a full commit SHA, give every workflow a least-privilege `permissions:` block, and verify every download against its checksum.
@@ -35,6 +35,7 @@ hello-kubernetes is a small Node.js web app, its container image and its Helm ch
 - Tick only the criteria you actually verified. Leave the others unticked, and say why.
 - Post the results as a comment on the issue: when, where and on which commit; a table of criterion, result (✅ or ⚠️) and evidence; and an **Open:** line.
 - After the merge, comment on the issue that it is merged and which release it ships in, then move it to **Done**. Set the work plan's `status` to `done` in the last PR for it.
+- When the work that resolves a community issue or PR merges, close it without asking. The comment uses "we" and says: what merged and in which PR, the release it ships in, any caveat the reporter needs, thanks to the reporter and to anyone who helped in the thread, and how they are credited. Don't apologise in the comment; the release notes do that once.
 
 ## Tools
 

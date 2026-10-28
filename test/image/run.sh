@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Image tests from .project/roadmap/1.x/testing.md (I1 to I3 so far).
+# Image tests from .project/roadmap/1.x/testing.md (I1 to I3 and I5a so far).
 #
 # Usage: test/image/run.sh IMAGE
 #
@@ -60,6 +60,37 @@ if [[ "$config_user" =~ ^1000(:1000)?$ && "$uid" == "1000" ]]; then
   pass I3 "user is $config_user, id -u is $uid"
 else
   fail I3 "user is '$config_user', id -u is '$uid' (want 1000)"
+fi
+
+# I5a: the page shows the architecture of the running image, in OCI form.
+# The real architecture must match the image config. Simulated values, set
+# with test/image/fake-arch.js, check the mapping from Node's names.
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+page_arch() {
+  local fake="$1" cid port html
+  cid=$(docker run -d -p 127.0.0.1::8080 -e FAKE_ARCH="$fake" \
+    -v "$here/fake-arch.js:/tmp/fake-arch.js:ro" -e NODE_OPTIONS=--require=/tmp/fake-arch.js "$image")
+  port=$(docker port "$cid" 8080/tcp | head -n1 | sed 's/.*://')
+  for _ in $(seq 1 40); do
+    html=$(curl -fs "http://127.0.0.1:$port/" 2>/dev/null) && break
+    sleep 0.25
+  done
+  docker rm -f "$cid" >/dev/null
+  # The footer ends with "(<os>/<arch>)".
+  sed -nE 's/.*\(([a-z0-9]+\/[a-z0-9]+)\).*/\1/p' <<<"$html" | tail -n1
+}
+expected_real=$(docker inspect -f '{{.Os}}/{{.Architecture}}' "$image")
+i5a_problems=()
+shown=$(page_arch "")
+[[ "$shown" == "$expected_real" ]] || i5a_problems+=("real: shows '$shown', image is $expected_real")
+for pair in x64=amd64 arm64=arm64 ia32=386 ppc64=ppc64le s390x=s390x riscv64=riscv64; do
+  shown=$(page_arch "${pair%%=*}")
+  [[ "$shown" == "linux/${pair#*=}" ]] || i5a_problems+=("${pair%%=*}: shows '$shown', want linux/${pair#*=}")
+done
+if ((${#i5a_problems[@]} == 0)); then
+  pass I5a "page shows $expected_real, and x64, arm64, ia32, ppc64, s390x, riscv64 map correctly"
+else
+  fail I5a "${i5a_problems[*]}"
 fi
 
 if ((failures > 0)); then

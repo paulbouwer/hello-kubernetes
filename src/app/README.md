@@ -28,4 +28,3 @@ The application relies on the following files for configuration and operational 
 | File | Required | Information | Description |
 | ---- | -------- | ----------- | ----------- |
 | package.json | Yes | `.version` | The release version is used when the CONTAINER_IMAGE env is not provided. |
-| info.json | Yes | `.containerImageArch` | The container image architecture is used for display. This file will be overwritten in future versions as part of the container image build process when multi-arch images are supported. |
