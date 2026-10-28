@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [app, image, deploy, ci, site, operations]
 created: 2026-10-26
-updated: 2026-10-26
+updated: 2026-10-28
 ---
 
 # 1.x roadmap
@@ -46,6 +46,8 @@ The labels follow [operations.md](../../roadmap/1.x/operations.md#labels-15). "B
 ### 1.11
 
 #### 1. Foundations
+
+The [workstream 1 review](workstream-01-review.md) records the outcome and the follow-up needed before automatic PR labelling goes live.
 
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
@@ -281,6 +283,7 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 
 ## Open
 
+- **Before automatic PR labelling goes live in 6.2:** make the labels workflow resolve the PR's issue the same way as the issue check. Both must accept only open issues in this repo and try linked issues when the branch candidate is not valid. See the [workstream 1 review](workstream-01-review.md#finding-to-address).
 - **This week: bump body-parser to 2.4.0** (for #77) on or after 2026-10-29, when it meets the 7-day cooldown. It fixes GHSA-27r3-jxmh-p828 (HIGH), which the app can't reach because it parses no request bodies. Regenerate the lockfile with `npm install --before`, re-run Trivy, tick the last criterion on #77, and remove this item.
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **An image override with the old tags breaks with the new chart defaults.** The 1.10.1 and older images run as the non-numeric `USER node`, so `runAsNonRoot: true` rejects them (#35). Document this in the 4.1 release notes, or set `runAsUser: 1000` in the chart so that the kubelet can verify it. Decide in 4.1.
