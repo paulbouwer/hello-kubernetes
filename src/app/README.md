@@ -16,8 +16,8 @@ The application can be configured via the following environment variables.
 | --- | -------- | ------------- | ----------- |
 | PORT | No | 8080 | The port that the app listens on. |
 | MESSAGE | No | "Hello world!" | The message displayed by the app. |
-| RENDER_PATH_PREFIX | No | "" | The path prefix to use when rendering the urls for the static assets in the handlebar templates. <br/> Must be used when app is deployed with an ingress using a backend path for traffic to app. |
-| HANDLER_PATH_PREFIX | No | "" | The path prefix to use by handlers when serving the dynamic and static assets. <br/> Note: Must be used when app is deployed with an ingress that has a backend path for traffic to the app, but which does not rewrite the backend paths to '/'. |
+| RENDER_PATH_PREFIX | No | "" | The path prefix to use when rendering the urls for the static assets in the handlebar templates. <br/> Must be used when app is deployed with an ingress using a backend path for traffic to app. <br/> When it is not set, the asset urls are relative (`css/main.css`), so the app also works behind a proxy that serves it under a path and strips that path. The page url must then end in `/` (for example `/hello/`, not `/hello`). A value of only `/` is the same as not setting it. |
+| HANDLER_PATH_PREFIX | No | "" | The path prefix to use by handlers when serving the dynamic and static assets. <br/> Note: Must be used when app is deployed with an ingress that has a backend path for traffic to the app, but which does not rewrite the backend paths to '/'. <br/> A value of only `/` is the same as not setting it. |
 | KUBERNETES_NAMESPACE | Yes | "-" | The Kubernetes namespace that the app has been deployed to. |
 | KUBERNETES_POD_NAME | Yes | hostname | The name of the Kubernetes pod that the app is deployed into. |
 | KUBERNETES_NODE_NAME | Yes | "-" | The name of the Kubernetes node that the app is deployed on. |

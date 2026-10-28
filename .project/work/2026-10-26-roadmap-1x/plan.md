@@ -12,7 +12,7 @@ updated: 2026-10-28
 
 ## Intent
 
-Bring hello-kubernetes 1.x up to date in one release, 1.11.0. The release gives a patched and supported image for amd64 and arm64, a secure Helm chart that can create an Ingress or an HTTPRoute, tests on real clusters, current docs, and a website. People who use the defaults today must see no change in behaviour. After the release, the old image tags get deprecation warnings, and the main upstream users are told about the upgrade.
+Bring hello-kubernetes 1.x up to date in one release, 1.11.0. The release gives a patched and supported image for amd64 and arm64, a secure Helm chart that can create an Ingress or an HTTPRoute, tests on real clusters, current docs, and a website. People who use the defaults today must see no change in behaviour, apart from the fixes that the plan lists. After the release, the old image tags get deprecation warnings, and the main upstream users are told about the upgrade.
 
 The *why* and *how* for each area is in the [1.x roadmap](../../roadmap/1.x/README.md). This plan says what we build, in which order, which rules apply, and how we prove that the result is good. The scope is set by [GOAL.md](../../GOAL.md).
 
@@ -62,7 +62,7 @@ The [workstream 1 review](workstream-01-review.md) records the outcome and the f
 |---|---|---|---|---|---|
 | 2.1 | fix(image): move to node:24-alpine with a lockfile and a numeric non-root user | security, area:image | — | #35 (image), #45 | [work package](../2026-10-28-node24-image/plan.md), [image.md](../../roadmap/1.x/image.md#step-1-node24-alpine) |
 | 2.2 | chore(app): upgrade express, pino-http and express-handlebars | enhancement, area:app | 2.1 | — | [work package](../2026-10-28-app-dependencies/plan.md), [image.md](../../roadmap/1.x/image.md#dependency-upgrades) |
-| 2.3 | fix(app): load assets correctly when RENDER_PATH_PREFIX is not set | bug, area:app | 2.2 | #38 | [community.md](../../roadmap/1.x/community.md#incorporate-in-spirit) |
+| 2.3 | fix(app): load assets correctly when RENDER_PATH_PREFIX is not set | bug, area:app | 2.2 | #38 | [work package](../2026-10-28-asset-paths/plan.md), [community.md](../../roadmap/1.x/community.md#incorporate-in-spirit) |
 | 2.4 | feat(app): show the image architecture from the runtime | enhancement, area:app | 2.2 | #40 (in spirit) | [image.md](../../roadmap/1.x/image.md#supported-amd64-and-arm64) |
 | 2.5 | test(e2e): add the e2e harness and the first kind scenarios | enhancement, area:ci | — | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) step 1 |
 | 2.6 | test(image): add the image tests | enhancement, area:ci | 2.1, 2.4 | — | [testing.md](../../roadmap/1.x/testing.md#image-tests) |
@@ -189,7 +189,7 @@ This check applies to 2.x, 4.1 and 4.2. Save the output from `release-1.11` befo
 
 - `helm template hello-kubernetes deploy/helm/hello-kubernetes` with the default values. The only differences are the planned additions, such as the `securityContext`.
 - The same render with the old `ingress.configured=true`, `ingress.pathPrefix` and `ingress.rewritePath` values. The output matches the new top-level values.
-- The page HTML for the default settings, and for each `MESSAGE`, `PORT`, `RENDER_PATH_PREFIX` and `HANDLER_PATH_PREFIX` setting. The only differences are the architecture and the version.
+- The page HTML for the default settings, and for each `MESSAGE`, `PORT`, `RENDER_PATH_PREFIX` and `HANDLER_PATH_PREFIX` setting. The only differences are the architecture, the version, and the relative asset URLs when `RENDER_PATH_PREFIX` is not set (2.3, #38).
 - The log lines at `LOG_LEVEL=info` and `debug`. They have the same fields, or the PR records the change.
 
 ### By workstream

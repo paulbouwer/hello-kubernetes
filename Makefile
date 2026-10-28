@@ -31,3 +31,7 @@ push-image:
 .PHONY: test-image
 test-image: ## image tests (test/image/run.sh) against $(IMAGE):$(IMAGE_VERSION)
 	test/image/run.sh "$(IMAGE):$(IMAGE_VERSION)"
+
+.PHONY: test-proxy
+test-proxy: ## proxy tests (test/proxy/run.sh) against $(IMAGE):$(IMAGE_VERSION)
+	test/proxy/run.sh "$(IMAGE):$(IMAGE_VERSION)"
