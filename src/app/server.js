@@ -38,7 +38,11 @@ var nodeName = process.env.KUBERNETES_NODE_NAME || '-';
 var nodeOS = os.type() + ' ' + os.release();
 var applicationVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
 var containerImage = process.env.CONTAINER_IMAGE || 'paulbouwer/hello-kubernetes:' + applicationVersion
-var containerImageArch = JSON.parse(fs.readFileSync('info.json', 'utf8')).containerImageArch;
+// The image's architecture, read from the running Node binary, so it is always
+// the image's and never the host's. Node's names that differ from OCI names
+// are mapped, so the page matches image manifests and node labels.
+var ociArchitectures = { x64: 'amd64', ia32: '386', ppc64: 'ppc64le' };
+var containerImageArch = process.platform + '/' + (ociArchitectures[process.arch] || process.arch);
 
 logger.debug();
 logger.debug('Configuration');

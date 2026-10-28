@@ -43,3 +43,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-28-node24-image](2026-10-28-node24-image/plan.md) | Move the image to node:24-alpine, pinned by digest, with a committed lockfile, a numeric non-root user and no package manager at runtime, and add image tests I1 to I3. | done |
 | [2026-10-28-app-dependencies](2026-10-28-app-dependencies/plan.md) | Upgrade the app to Express 5, express-handlebars 9, pino 10 and pino-http 11 with a 7-day release cooldown, and stop the app cleanly on SIGTERM. | active |
 | [2026-10-28-asset-paths](2026-10-28-asset-paths/plan.md) | Make the asset URLs relative when no render prefix is set, treat a prefix of only slashes as no prefix, and add proxy tests that prove it. | done |
+| [2026-10-28-runtime-architecture](2026-10-28-runtime-architecture/plan.md) | Show the image architecture from the running Node binary, mapped to OCI names, and remove info.json. | done |
