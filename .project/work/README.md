@@ -44,3 +44,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-28-app-dependencies](2026-10-28-app-dependencies/plan.md) | Upgrade the app to Express 5, express-handlebars 9, pino 10 and pino-http 11 with a 7-day release cooldown, and stop the app cleanly on SIGTERM. | active |
 | [2026-10-28-asset-paths](2026-10-28-asset-paths/plan.md) | Make the asset URLs relative when no render prefix is set, treat a prefix of only slashes as no prefix, and add proxy tests that prove it. | done |
 | [2026-10-28-runtime-architecture](2026-10-28-runtime-architecture/plan.md) | Show the image architecture from the running Node binary, mapped to OCI names, and remove info.json. | done |
+| [2026-10-28-run-locally](2026-10-28-run-locally/plan.md) | Make the app find its files from its own folder, and add make run, which installs the dependencies from the lockfile when they are out of date. | done |

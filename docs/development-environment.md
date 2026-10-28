@@ -30,15 +30,17 @@ Version lookups use the GitHub API without a token, which allows 60 requests an 
 
 ## Application development
 
-Port `8080` is forwarded to your host. Run the app from the `src/app` folder:
+Port `8080` is forwarded to your host. Run the app from the repo root:
 
 ```bash
-cd src/app
-npm install
-npm start
+make run
 ```
 
-Then browse to `http://localhost:8080`.
+Then browse to `http://localhost:8080`. Stop it with Ctrl+C.
+
+`make run` installs the dependencies from `src/app/package-lock.json` with `npm ci` when they are missing or older than the lockfile, for example after a `git pull` that changed them. Otherwise it starts the app at once. To set the app's environment variables, put them before the command, for example `PORT=9090 MESSAGE="Hi" make run`.
+
+You can also start the app directly from any directory with `node src/app/server.js`, after `npm ci` in `src/app`.
 
 ## Kubernetes clusters
 
