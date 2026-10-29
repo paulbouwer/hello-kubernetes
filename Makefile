@@ -6,8 +6,8 @@ IMAGE_MINOR_VERSION = $(shell echo "$(IMAGE_VERSION)" | cut -d '.' -f2 )
 IMAGE = $(REGISTRY)/$(REPOSITORY)/hello-kubernetes
 
 .PHONY: scan-for-vulns
-scan-for-vulns:
-	trivy image --format template --template "@/trivy/contrib/sarif.tpl" $(IMAGE):$(IMAGE_VERSION)
+scan-for-vulns: ## scan $(IMAGE):$(IMAGE_VERSION) as CI does: fail on HIGH and CRITICAL findings that have a fix
+	trivy image --image-src docker --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 $(IMAGE):$(IMAGE_VERSION)
 
 .PHONY: build-images
 build-images: build-image-linux

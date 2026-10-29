@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [image, app]
 created: 2026-10-22
-updated: 2026-10-28
+updated: 2026-10-29
 ---
 
 # Container image
@@ -152,7 +152,7 @@ That changes review item 3 ("the `trivy-action` (pinned)"). Either:
 - download a specific Trivy release from after the incident and **verify its checksum**, or
 - use the action pinned to a **commit SHA** of a post-fix version, never a tag.
 
-The current workflow downloads Trivy 0.19.2 with no checksum check, and that version is far too old to catch current CVEs. The devcontainer installed the same version until #50; it now installs the latest Trivy 0.x release, checked against the release's checksum file.
+Until #94, the workflow downloaded Trivy 0.19.2 with no checksum check, and that version was far too old to catch current CVEs. #94 pins Trivy 0.76.1 and checks the download against a SHA-256 kept in the workflow, not only against the checksums file from the same release. Sigstore verification was left out: it would add a tool (cosign) and little beyond the pinned SHA-256. The devcontainer installed the same version until #50; it now installs the latest Trivy 0.x release, checked against the release's checksum file.
 
 ### Alternatives
 

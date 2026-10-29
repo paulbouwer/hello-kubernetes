@@ -79,11 +79,15 @@ The [workstream 2 review](workstream-02-review.md) records the outcome and the f
 
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
-| 3.1 | ci(scan): rebuild the vulnerability scan so it fails on fixable findings | security, area:ci | 2.1 | open code-scanning alerts | [image.md](../../roadmap/1.x/image.md#trivy-installed-safely) |
+| 3.1 | ci(scan): rebuild the vulnerability scan so it fails on fixable findings | security, area:ci | 2.1 | open code-scanning alerts | [work package](../2026-10-29-vulnerability-scan/plan.md), [image.md](../../roadmap/1.x/image.md#trivy-installed-safely) |
 | 3.2 | ci(publish): publish amd64 and arm64 images to Docker Hub and GHCR | enhancement, area:ci, area:image | 2.1, 2.4 | #40, #46 | [review.md](../../roadmap/1.x/review.md#fixes-effort-and-impact) row 4 |
 | 3.3 | ci(e2e): run the image and e2e tests on amd64 and arm64 | enhancement, area:ci | 2.5, 2.6 | — | [testing.md](../../roadmap/1.x/testing.md#ci) |
+| 3.4 | fix(ci): find the PR's issue the same way in the labels workflow and the issue check | security, area:ci | 1.2 | — | [workstream 1 review](workstream-01-review.md#finding-to-address) |
 
-3.2 includes SBOM and provenance. 3.3 makes the tests a required check before publishing.
+- 3.1 scans on PRs, on pushes to `main` and `release-*`, and every day, and reports every finding to code scanning. The 10 old Trivy alerts close when the scan runs on `main`, after 1.11 merges.
+- 3.2 includes SBOM and provenance, closes CodeQL alert #67 (no `permissions:` block), and adds a daily scan of the published image (`paulbouwer/hello-kubernetes:1`), which shows when a patch release is due.
+- 3.3 runs the image tests (I1–I7, I5a) on native amd64 and arm64 runners, the proxy tests, and the e2e tests on amd64 on kind and k3d, as required checks before publishing. It loads a single-platform image into each cluster. It also hardens the harness, from the workstream 2 review: an `EXPECTED_FAILURE` names the error it expects, so a different failure is a FAIL; a failed cluster deletion is reported; and the image tests show Docker's errors when a container doesn't start. The arm64 e2e job comes with 4.1, because the chart pins pods to amd64 until then.
+- 3.4 comes from the workstream 1 review. It must land before 6.2, when automatic PR labelling goes live on `main`.
 
 #### 4. Chart and deployment
 
@@ -96,7 +100,7 @@ The [workstream 2 review](workstream-02-review.md) records the outcome and the f
 | 4.5 | docs(deploy): rewrite the deployment docs for Helm, kubectl and Kustomize | documentation, area:deploy | 4.2, 4.4 | #28, #31 | [deploy.md](../../roadmap/1.x/deploy.md) |
 | 4.6 | test(e2e): add Ingress and Gateway API scenarios on kind and k3d | enhancement, area:ci | 3.3, 4.2 | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) steps 2–4, 7, 8 |
 
-- 4.1 covers the `securityContext`, removing `kubernetes.io/arch: amd64` from `nodeSelector`, quoting `message` and `pathPrefix`, `appVersion`, and `NOTES.txt`.
+- 4.1 covers the `securityContext`, removing `kubernetes.io/arch: amd64` from `nodeSelector`, quoting `message` and `pathPrefix`, `appVersion`, and `NOTES.txt`. It removes the `EXPECTED_FAILURE` markers from E3 and E7, and adds the arm64 e2e job to CI, which proves the default chart on arm64 (workstream 2 review).
 - 4.2 also adds the top-level `pathPrefix` and `rewritePath`, and keeps the old names working.
 - 4.4 includes the Artifact Hub listing.
 - 4.5 covers the quick start with clean-up, Helm 3.x or 4.x, the NGINX, Traefik and Gateway API examples, the Kustomize guide and the values reference.
@@ -205,7 +209,7 @@ This check applies to 2.x, 4.1 and 4.2. Save the output from `release-1.11` befo
 | 3. CI and publishing | Every `uses:` line is pinned to a 40-character SHA. Every workflow has a `permissions:` block. The scan fails on an image with a known fixable finding, and a wrong checksum stops the Trivy install. A publish to a test tag gives a manifest list with amd64 and arm64 (`docker buildx imagetools inspect`), with SBOM and provenance attached. A failed e2e job blocks the publish. |
 | 4. Chart and deployment | `helm lint` and `helm template` pass under Helm 4 in the devcontainer and Helm 3 in CI. `values.schema.json` rejects a wrong type and an unknown value. The scenarios for the issue pass on kind and k3d. The pods run in a namespace with restricted Pod Security. `kubectl apply -f` of the release YAML works on kind. Every command in the changed docs runs with no prompts, and gives the result the doc describes (E15). |
 | 5. Website | The site builds in CI and deploys to GitHub Pages under `/hello-kubernetes/`. There are no broken internal links. Each link in `llms.txt` points to raw markdown at the release tag, and each link resolves. The config builder output installs on kind. |
-| 6. Release | All 1.11 sub-issues are Done. After the merge into `main`, the issue forms, the security link, the PR template, `SECURITY.md` and the PR labels workflow work (from #59), and Dependabot runs for each ecosystem with no config errors (from #73). The release notes are grouped by label and include the credits. `paulbouwer/hello-kubernetes:1` and `:1.10` point at the 1.11.0 digest. The release asset URL works with `kubectl apply`. |
+| 6. Release | All 1.11 sub-issues are Done. The arm64 e2e job passes with the default chart, and no e2e scenario has an `EXPECTED_FAILURE` marker. After the merge into `main`, the 10 old Trivy alerts are closed by the scan on `main`, and Trivy in the scan workflow is the newest release that meets the 7-day cooldown. After the merge into `main`, the issue forms, the security link, the PR template, `SECURITY.md` and the PR labels workflow work (from #59), and Dependabot runs for each ecosystem with no config errors (from #73). The release notes are grouped by label and include the credits. `paulbouwer/hello-kubernetes:1` and `:1.10` point at the 1.11.0 digest. The release asset URL works with `kubectl apply`. |
 | 7. After 1.11 | Each deprecation image passes the checks in [review.md](../../roadmap/1.x/review.md#deprecation-images-for-the-old-tags): `/` returns 200, the original message text is present, and the probes pass on kind. The original image stays reachable under the `-original` tag. |
 
 ## Epic body
@@ -250,6 +254,7 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 - 3.1 ci(scan): rebuild the vulnerability scan so it fails on fixable findings
 - 3.2 ci(publish): publish amd64 and arm64 images to Docker Hub and GHCR
 - 3.3 ci(e2e): run the image and e2e tests on amd64 and arm64
+- 3.4 fix(ci): find the PR's issue the same way in the labels workflow and the issue check
 
 ### 4. Chart and deployment
 - 4.1 fix(chart): add secure defaults and fix the chart bugs
@@ -287,8 +292,8 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 
 ## Open
 
-- **Before automatic PR labelling goes live in 6.2:** make the labels workflow resolve the PR's issue the same way as the issue check. Both must accept only open issues in this repo and try linked issues when the branch candidate is not valid. See the [workstream 1 review](workstream-01-review.md#finding-to-address).
-- **Before arm64 CI:** the chart still pins pods to amd64. 3.3 runs the image tests on native amd64 and arm64 runners and the e2e tests on amd64. The arm64 e2e job for the default chart comes with 4.1, and a passing arm64 e2e run is a release gate in 6.2. See the [workstream 2 review](workstream-02-review.md#follow-up-before-arm64-ci).
+- **Before automatic PR labelling goes live in 6.2:** tracked as 3.4 (#95), from the [workstream 1 review](workstream-01-review.md#finding-to-address).
+- **Before arm64 CI:** placed in 3.3 and 4.1, and a release gate in 6.2, from the [workstream 2 review](workstream-02-review.md#follow-up-before-arm64-ci).
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **An image override with the old tags breaks with the new chart defaults.** The 1.10.1 and older images run as the non-numeric `USER node`, so `runAsNonRoot: true` rejects them (#35). Document this in the 4.1 release notes, or set `runAsUser: 1000` in the chart so that the kubelet can verify it. Decide in 4.1.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
