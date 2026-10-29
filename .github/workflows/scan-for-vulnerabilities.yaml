@@ -6,10 +6,9 @@
 # - Runs every day, because new CVEs appear without code changes. GitHub runs
 #   scheduled workflows only from the default branch.
 #
-# Trivy is installed from a pinned release and checked against a SHA-256 kept
-# here, not only against the checksums file from the same release. Dependabot
-# can't update these two values: check for a newer Trivy at each release, and
-# use a version published at least 7 days ago (AGENTS.md rule 8).
+# Trivy is installed by test/ci/install-tools.sh, at the version pinned there,
+# and checked against a SHA-256 kept there, not only against the checksums file
+# from the same release. The image tests use the same table.
 #
 # Keep the file name and the job name: code scanning groups results by them,
 # so the new results replace the alerts from the old scan.
@@ -28,8 +27,6 @@ permissions:
   contents: read
 
 env:
-  TRIVY_VERSION: "0.76.1"
-  TRIVY_SHA256: "c7cbe3137fb8a48a17574bede3dd6beb16742d1e9772929940fc90082c39d9c0"
   IMAGE: hello-kubernetes:scan
 
 jobs:
@@ -54,12 +51,7 @@ jobs:
 
       - name: Install Trivy
         run: |
-          file="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
-          cd "$(mktemp -d)"
-          curl -fsSLO "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${file}"
-          echo "${TRIVY_SHA256}  ${file}" | sha256sum -c -
-          tar -xzf "$file" trivy
-          sudo install -m 0755 trivy /usr/local/bin/trivy
+          test/ci/install-tools.sh trivy
           trivy --version
 
       - name: Report every finding

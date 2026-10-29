@@ -215,23 +215,22 @@ I'd write the tests as plain Bash with a small assert library rather than adding
 
 ## CI
 
-A new workflow, `.github/workflows/e2e.yaml`, on every pull request and on pushes to `main`:
+`.github/workflows/tests.yaml` (#98) runs on every PR into `main` and `release-*`, on pushes to those branches, and by hand. Its jobs are required checks in the ruleset:
 
-1. **Build** the image once with Buildx for `linux/amd64` and `linux/arm64`, save it as a workflow artifact.
-2. **Image tests** (I1–I7), with QEMU for the non-native platforms.
-3. **E2E matrix**:
+| Job | Runner | Runs |
+|---|---|---|
+| `image-tests (amd64)` | `ubuntu-latest` | builds the image natively, then `test/image/run.sh` (I1–I7, I5a) and `test/proxy/run.sh` (P1–P3) |
+| `image-tests (arm64)` | `ubuntu-24.04-arm` | the same, on a native arm64 runner |
+| `e2e (kind)` | `ubuntu-latest` | builds a single-platform image, then `test/e2e/run.sh kind` |
+| `e2e (k3d)` | `ubuntu-latest` | the same on k3d |
 
-   | Cluster | Runner | Kubernetes |
-   |---|---|---|
-   | kind | `ubuntu-latest` (amd64) | oldest supported, newest |
-   | kind | `ubuntu-24.04-arm` (arm64) | newest |
-   | k3d | `ubuntu-latest` (amd64) | pinned k3s |
-   | k3d | `ubuntu-24.04-arm` (arm64) | pinned k3s |
+Each job builds and tests its own architecture, with no QEMU. An earlier plan built a multi-arch image once and tested other platforms under emulation. Native runners test the real image, and avoid `kind load` failing on multi-platform images (#87). The arm64 e2e job comes with 4.1, when the chart stops pinning pods to amd64.
 
-4. **On failure**, upload the diagnostics dump as an artifact.
-5. Make the e2e jobs **required checks** before the publish workflow can run on a tag.
+A failed scenario prints its diagnostics in the job log. A new push to a PR cancels that PR's older runs.
 
-As in the rest of the workflows, pin every action to a commit SHA, set a least-privilege `permissions:` block (`contents: read` is enough here), and keep the kind, k3d, k3s, Gateway API CRD, NGINX Ingress Controller and NGINX Gateway Fabric versions current with Dependabot or Renovate (versions pinned inside scripts need Renovate's regex rules).
+The tool versions (Trivy, kind, k3d, Helm, kubectl) are set only in `test/ci/install-tools.sh`, each with a SHA-256 for amd64 and arm64. The scan workflow uses the same table. All actions are pinned to commit SHAs, and the workflow has `permissions: contents: read`.
+
+Test containers run with `docker run --pull never` (#98). Otherwise a `docker run --platform` for a platform the local image doesn't have pulls the published image and replaces the local tag, and later tests check the wrong image.
 
 ## Running locally
 

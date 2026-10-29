@@ -38,7 +38,7 @@ start() {
   local upstream_path="$1"
   shift
   docker rm -f "$id-app" "$id-nginx" >/dev/null 2>&1 || true
-  docker run -d --name "$id-app" --network "$network" "$@" "$image" >/dev/null
+  docker run -d --pull never --name "$id-app" --network "$network" "$@" "$image" >/dev/null
   cat >"$workdir/default.conf" <<EOF
 server {
   listen 80;
