@@ -1,5 +1,6 @@
 # Labels PRs: area: labels from the changed paths (.github/labeler.yml), and
-# the type label and milestone of the PR's issue.
+# the type label and milestone of the PR's issue, found by
+# .github/scripts/find-pr-issue.sh, the same resolver as pr-issue-check.yaml.
 #
 # Runs on pull_request_target so that it can label PRs from forks. It must
 # never check out or run the PR's code.
@@ -18,6 +19,13 @@ jobs:
   labels:
     runs-on: ubuntu-latest
     steps:
+      # In pull_request_target, checkout gets the base branch: trusted code only.
+      # Never check out the PR's head here.
+      - name: Check out the base branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Apply area labels
         uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7.0.0
 
@@ -31,14 +39,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          issue=""
-          if [[ "$HEAD_REF" =~ ^[a-z]+/([0-9]+)- ]]; then
-            issue="${BASH_REMATCH[1]}"
-          else
-            issue=$(gh pr view "$PR" --json closingIssuesReferences --jq '.closingIssuesReferences[0].number // empty')
-          fi
-          if [[ -z "$issue" ]] || ! gh api "repos/$GH_REPO/issues/$issue" --jq 'select(.pull_request == null) | .number' | grep -q .; then
-            echo "No issue found. Nothing to copy."
+          set +e
+          issue=$(.github/scripts/find-pr-issue.sh "$PR" "$HEAD_REF")
+          status=$?
+          set -e
+          if ((status != 0)); then
+            echo "No single open issue for this PR (status $status). Nothing to copy."
             exit 0
           fi
 

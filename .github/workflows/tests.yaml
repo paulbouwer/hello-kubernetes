@@ -1,5 +1,7 @@
 # Runs the image, proxy and e2e tests on every PR, as required checks.
 #
+# - workflow-tests: test/ci/find-pr-issue-test.sh, the tests for the resolver
+#   that the PR workflows share.
 # - image-tests: test/image/run.sh (I1 to I7, I5a) and test/proxy/run.sh
 #   (P1 to P3), on native amd64 and arm64 runners. Each job builds the image
 #   for its own architecture, so arm64 is built and run on real arm64.
@@ -29,6 +31,19 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  workflow-tests:
+    name: workflow-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolver tests
+        run: test/ci/find-pr-issue-test.sh
+
   image-tests:
     name: image-tests (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
