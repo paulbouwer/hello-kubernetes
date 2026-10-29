@@ -72,6 +72,10 @@ These check the image itself and guard against the problems found in the review 
 | I6 | Respects `PORT` | `docker run -e PORT=9090 -p 9090:9090 IMG` and `curl -fsS localhost:9090/` | #34 |
 | I7 | Works with a read-only root filesystem | `docker run --read-only --tmpfs /tmp IMG` and `curl -fsS localhost:8080/` | chart `readOnlyRootFilesystem` default |
 
+## Published images
+
+`test/image/verify-published.sh` (`make verify-published PUBLISHED=…`), added in #102, checks a published image in a registry: one index for amd64 and arm64 (V1), an SBOM (V2) and provenance from this repo's CI (V3) for each platform, the signed attestation (V4), the user and labels (V5), and with `SCAN=1` a vulnerability scan (V6). Local images have no SBOM, provenance or signature, so they are checked with `make test-image` instead. 6.2 runs it on both registries after the release.
+
 ## Proxy tests
 
 `test/proxy/run.sh` (`make test-proxy`), added in #81, runs the image behind an NGINX container and checks that the page and every asset it links to load through the proxy. It covers deployments that don't use the chart, which the e2e scenarios don't reach.

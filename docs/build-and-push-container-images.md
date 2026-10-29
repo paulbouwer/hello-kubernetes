@@ -67,3 +67,17 @@ make push-image
 docker buildx build --platform linux/amd64,linux/arm64 \
   --tag myregistry.example.com/myrepo/hello-kubernetes:1.11.0 --push src/app
 ```
+
+## Verifying a published image
+
+Each official image has an SBOM and SLSA provenance for each platform, and its provenance is signed with GitHub artifact attestations. To check an image you pull:
+
+```bash
+make verify-published PUBLISHED=paulbouwer/hello-kubernetes:1.11.0
+# or, with a vulnerability scan too:
+SCAN=1 test/image/verify-published.sh ghcr.io/paulbouwer/hello-kubernetes:1
+```
+
+It checks that the image is one index for `linux/amd64` and `linux/arm64` (V1), that each platform has an SBOM (V2) and provenance from this repo's CI (V3), that the signed attestation verifies for this repo (V4), and that each platform runs as user `1000` with version and revision labels (V5). With `SCAN=1`, it also fails on fixable HIGH and CRITICAL vulnerabilities (V6).
+
+It needs Docker with Buildx, `jq`, and the GitHub CLI signed in. Only published images have an SBOM, provenance and a signature: an image you build locally keeps none of them. For a local image, use `make test-image`.
