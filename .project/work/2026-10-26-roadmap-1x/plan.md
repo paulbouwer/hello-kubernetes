@@ -64,7 +64,7 @@ The [workstream 1 review](workstream-01-review.md) records the outcome and the f
 | 2.2 | chore(app): upgrade express, pino-http and express-handlebars | enhancement, area:app | 2.1 | — | [work package](../2026-10-28-app-dependencies/plan.md), [image.md](../../roadmap/1.x/image.md#dependency-upgrades) |
 | 2.3 | fix(app): load assets correctly when RENDER_PATH_PREFIX is not set | bug, area:app | 2.2 | #38 | [work package](../2026-10-28-asset-paths/plan.md), [community.md](../../roadmap/1.x/community.md#incorporate-in-spirit) |
 | 2.4 | feat(app): show the image architecture from the runtime | enhancement, area:app | 2.2 | #40 (in spirit) | [work package](../2026-10-28-runtime-architecture/plan.md), [image.md](../../roadmap/1.x/image.md#supported-amd64-and-arm64) |
-| 2.5 | test(e2e): add the e2e harness and the first scenarios on kind and k3d | enhancement, area:ci | — | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) step 1 |
+| 2.5 | test(e2e): add the e2e harness and the first scenarios on kind and k3d | enhancement, area:ci | — | — | [work package](../2026-10-28-e2e-harness/plan.md), [testing.md](../../roadmap/1.x/testing.md#suggested-order) step 1 |
 | 2.6 | test(image): add the image tests | enhancement, area:ci | 2.1, 2.4 | — | [testing.md](../../roadmap/1.x/testing.md#image-tests) |
 
 2.5 covers `lib.sh`, `run.sh`, the kind and k3d configs, and E1–E4, E7 and E11 on both clusters ([work package](../2026-10-28-e2e-harness/plan.md)). E3 and E7 are expected failures until 4.1 (decided 2026-10-28: k3d moved from 4.6 into 2.5).
@@ -286,7 +286,6 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 ## Open
 
 - **Before automatic PR labelling goes live in 6.2:** make the labels workflow resolve the PR's issue the same way as the issue check. Both must accept only open issues in this repo and try linked issues when the branch candidate is not valid. See the [workstream 1 review](workstream-01-review.md#finding-to-address).
-- **This week: bump body-parser to 2.4.0** (for #77) on or after 2026-10-29, when it meets the 7-day cooldown. It fixes GHSA-27r3-jxmh-p828 (HIGH), which the app can't reach because it parses no request bodies. Regenerate the lockfile with `npm install --before`, re-run Trivy, tick the last criterion on #77, and remove this item.
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **An image override with the old tags breaks with the new chart defaults.** The 1.10.1 and older images run as the non-numeric `USER node`, so `runAsNonRoot: true` rejects them (#35). Document this in the 4.1 release notes, or set `runAsUser: 1000` in the chart so that the kubelet can verify it. Decide in 4.1.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).

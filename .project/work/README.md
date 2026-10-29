@@ -13,7 +13,9 @@ The roadmap notes say *why* and *how* for each area. A work folder says what we 
 
 ## Naming
 
-One folder per piece of work, named `YYYY-MM-DD-slug`:
+One folder per piece of work, named `YYYY-MM-DD-slug`. Link each work package from the Plan column of its row in the epic's work plan, for example the [1.x work plan](2026-10-26-roadmap-1x/plan.md#work).
+
+The name:
 
 - `YYYY-MM-DD` is the date the folder was created. It never changes, so links stay stable.
 - `slug` is 2 to 4 lowercase words joined with hyphens, e.g. `roadmap-1x`.
@@ -41,7 +43,7 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-27-community-triage](2026-10-27-community-triage/plan.md) | Rename invalid to not-aligned, close the PRs that don't fit the project with thanks, and label and reply to every other open community issue and PR. | done |
 | [2026-10-27-dependabot-and-codeql](2026-10-27-dependabot-and-codeql/plan.md) | Add Dependabot version updates for the app, image, workflows and devcontainer, turn on CodeQL and secret scanning with push protection, and record how a CVE fix becomes a patch release. | done |
 | [2026-10-28-node24-image](2026-10-28-node24-image/plan.md) | Move the image to node:24-alpine, pinned by digest, with a committed lockfile, a numeric non-root user and no package manager at runtime, and add image tests I1 to I3. | done |
-| [2026-10-28-app-dependencies](2026-10-28-app-dependencies/plan.md) | Upgrade the app to Express 5, express-handlebars 9, pino 10 and pino-http 11 with a 7-day release cooldown, and stop the app cleanly on SIGTERM. | active |
+| [2026-10-28-app-dependencies](2026-10-28-app-dependencies/plan.md) | Upgrade the app to Express 5, express-handlebars 9, pino 10 and pino-http 11 with a 7-day release cooldown, and stop the app cleanly on SIGTERM. | done |
 | [2026-10-28-asset-paths](2026-10-28-asset-paths/plan.md) | Make the asset URLs relative when no render prefix is set, treat a prefix of only slashes as no prefix, and add proxy tests that prove it. | done |
 | [2026-10-28-runtime-architecture](2026-10-28-runtime-architecture/plan.md) | Show the image architecture from the running Node binary, mapped to OCI names, and remove info.json. | done |
 | [2026-10-28-run-locally](2026-10-28-run-locally/plan.md) | Make the app find its files from its own folder, and add make run, which installs the dependencies from the lockfile when they are out of date. | done |
