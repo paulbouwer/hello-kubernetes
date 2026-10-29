@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Installs the tools that CI uses, at pinned versions, after checking each
-# download against a SHA-256 kept here. This table is the only place where the
-# CI tool versions are set: the test and scan workflows both use this script.
+# Installs the tools that CI and the devcontainer use, at pinned versions, after
+# checking each download against a SHA-256 kept here. This table is the only
+# place where these versions are set: the test and scan workflows and the
+# devcontainer all use this script.
 #
 # Usage: test/ci/install-tools.sh [tool...]
-#   tool: trivy, kind, k3d, helm or kubectl. With no tool, installs all of them.
+#   tool: node, trivy, kind, k3d, helm or kubectl. With no tool, installs all of
+#   them. Node.js unpacks into the parent of INSTALL_DIR, normally /usr/local.
 #
 # Environment:
 #   INSTALL_DIR  where to install (default /usr/local/bin, with sudo if needed)
@@ -15,6 +17,11 @@
 # update both values here.
 
 set -euo pipefail
+
+# Node.js matches the version in the app image (node:24-alpine, src/app/Dockerfile).
+NODE_VERSION=24.22.1
+NODE_SHA256_AMD64=6c172a9ab6718f7b801fb5a7bd486af2ee5e32758086a04b84fcce2aa77095e6
+NODE_SHA256_ARM64=dbabf7a1cbf947e6059ffad2c27b80041db97dea1e553b62afdee7f13fca336e
 
 TRIVY_VERSION=0.76.1
 TRIVY_SHA256_AMD64=c7cbe3137fb8a48a17574bede3dd6beb16742d1e9772929940fc90082c39d9c0
@@ -73,6 +80,19 @@ sha_for() {
   echo "${!var}"
 }
 
+install_node() {
+  local file prefix
+  file="node-v${NODE_VERSION}-linux-$([[ $arch == amd64 ]] && echo x64 || echo arm64).tar.xz"
+  prefix=$(dirname "$install_dir")
+  fetch "https://nodejs.org/dist/v${NODE_VERSION}/$file" "$file" "$(sha_for NODE)"
+  if [[ -w "$prefix" ]]; then
+    tar -xJf "$workdir/$file" -C "$prefix" --strip-components=1 --no-same-owner
+  else
+    sudo tar -xJf "$workdir/$file" -C "$prefix" --strip-components=1 --no-same-owner
+  fi
+  echo "installed node $NODE_VERSION to $prefix"
+}
+
 install_trivy() {
   local file
   file="trivy_${TRIVY_VERSION}_Linux-$([[ $arch == amd64 ]] && echo 64bit || echo ARM64).tar.gz"
@@ -104,12 +124,12 @@ install_kubectl() {
 }
 
 tools=("$@")
-((${#tools[@]} > 0)) || tools=(trivy kind k3d helm kubectl)
+((${#tools[@]} > 0)) || tools=(node trivy kind k3d helm kubectl)
 for tool in "${tools[@]}"; do
   case "$tool" in
-    trivy | kind | k3d | helm | kubectl) "install_$tool" ;;
+    node | trivy | kind | k3d | helm | kubectl) "install_$tool" ;;
     *)
-      echo "unknown tool: $tool (trivy, kind, k3d, helm or kubectl)" >&2
+      echo "unknown tool: $tool (node, trivy, kind, k3d, helm or kubectl)" >&2
       exit 2
       ;;
   esac

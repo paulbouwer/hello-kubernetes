@@ -11,22 +11,24 @@ The container runs as the `vscode` user on Ubuntu 26.04, and builds on both `amd
 
 ## Tools
 
-| Tool | Tracks |
-| ---- | ------ |
-| Node.js | latest 24.x |
-| kubectl | latest stable |
-| Helm | latest 4.x |
-| Trivy | latest 0.x |
-| kind | latest 0.x |
-| k3d | latest 5.x |
+| Tool | Version |
+| ---- | ------- |
+| Node.js | pinned in `test/ci/install-tools.sh` |
+| kubectl | pinned in `test/ci/install-tools.sh` |
+| Helm | pinned in `test/ci/install-tools.sh` |
+| Trivy | pinned in `test/ci/install-tools.sh` |
+| kind | pinned in `test/ci/install-tools.sh` |
+| k3d | pinned in `test/ci/install-tools.sh` |
 | GitHub CLI (`gh`) | latest 2.x |
 | GitHub Copilot CLI (`copilot`) | latest, updates itself |
 | Claude Code (`claude`) | stable channel, updates itself |
 | Docker | via the docker-in-docker feature |
 
-The development environment is meant to stay current, so tools aren't pinned to exact versions. Rebuilding the container picks up the latest release within each major version. Change a major version with the `*_MAJOR` build arguments in `.devcontainer/Dockerfile`. Every download is checked against the checksum file published with its release.
+The tools that build, test and scan what is deployed are pinned in `test/ci/install-tools.sh`, the same table that CI uses, so a test that passes here passes in CI for the same reason. Each download is checked against a SHA-256 kept in that table, and each version was published at least 7 days before it was chosen (AGENTS.md rule 8). Node.js matches the version in the app image. To change a version, change it in the table: CI and the devcontainer both follow.
 
-Version lookups use the GitHub API without a token, which allows 60 requests an hour. A build makes about six, so this only matters if you rebuild many times in a row.
+The developer tools that are never deployed (`gh`, the Copilot CLI and Claude Code) track their latest release, and are checked against the checksum published with that release. Change the `gh` major version with `GH_MAJOR` in `.devcontainer/Dockerfile`. Its version lookup uses the GitHub API without a token, which allows 60 requests an hour.
+
+The container builds from the repo root, and `/.dockerignore` sends only the files the Dockerfile copies.
 
 ## Application development
 

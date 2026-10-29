@@ -232,7 +232,7 @@ Each job builds and tests its own architecture, with no QEMU. An earlier plan bu
 
 A failed scenario prints its diagnostics in the job log. A new push to a PR cancels that PR's older runs.
 
-The tool versions (Trivy, kind, k3d, Helm, kubectl) are set only in `test/ci/install-tools.sh`, each with a SHA-256 for amd64 and arm64. The scan workflow uses the same table. All actions are pinned to commit SHAs, and the workflow has `permissions: contents: read`.
+The tool versions (Node.js, Trivy, kind, k3d, Helm, kubectl) are set only in `test/ci/install-tools.sh`, each with a SHA-256 for amd64 and arm64. The scan workflow and the devcontainer (#99) use the same table. All actions are pinned to commit SHAs, and the workflow has `permissions: contents: read`.
 
 Test containers run with `docker run --pull never` (#98). Otherwise a `docker run --platform` for a platform the local image doesn't have pulls the published image and replaces the local tag, and later tests check the wrong image.
 
