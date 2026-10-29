@@ -2,7 +2,7 @@
 title: CI tests
 description: Run the image, proxy and e2e tests on every PR as required checks, on native amd64 and arm64, from one pinned tool table, and harden the test harness.
 type: plan
-status: active
+status: done
 areas: [ci]
 issues: [98]
 created: 2026-10-29
