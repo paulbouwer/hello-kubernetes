@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [app, image, deploy, ci, site, operations]
 created: 2026-10-26
-updated: 2026-10-28
+updated: 2026-10-29
 ---
 
 # 1.x roadmap
@@ -72,6 +72,8 @@ The [workstream 1 review](workstream-01-review.md) records the outcome and the f
 #85, found while reviewing 2.4, makes the app run from any directory and adds `make run` ([work package](../2026-10-28-run-locally/plan.md)).
 
 2.2 also adds a SIGTERM handler to `server.js`, so the app stops at once instead of waiting 10 to 30 seconds for the grace period. 2.1 verifies the image on amd64 only. The arm64 checks run in the CI matrix in 3.3 (both decided 2026-10-28).
+
+The [workstream 2 review](workstream-02-review.md) records the outcome and the follow-up needed before arm64 CI.
 
 #### 3. CI and publishing
 
@@ -286,6 +288,7 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 ## Open
 
 - **Before automatic PR labelling goes live in 6.2:** make the labels workflow resolve the PR's issue the same way as the issue check. Both must accept only open issues in this repo and try linked issues when the branch candidate is not valid. See the [workstream 1 review](workstream-01-review.md#finding-to-address).
+- **Before arm64 CI:** the chart still pins pods to amd64. 3.3 runs the image tests on native amd64 and arm64 runners and the e2e tests on amd64. The arm64 e2e job for the default chart comes with 4.1, and a passing arm64 e2e run is a release gate in 6.2. See the [workstream 2 review](workstream-02-review.md#follow-up-before-arm64-ci).
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **An image override with the old tags breaks with the new chart defaults.** The 1.10.1 and older images run as the non-numeric `USER node`, so `runAsNonRoot: true` rejects them (#35). Document this in the 4.1 release notes, or set `runAsUser: 1000` in the chart so that the kubelet can verify it. Decide in 4.1.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
