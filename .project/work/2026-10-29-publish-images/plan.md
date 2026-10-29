@@ -2,7 +2,7 @@
 title: Publish images
 description: Publish each release for amd64 and arm64 to Docker Hub and GHCR, with an SBOM and signed provenance, only from main and only after the tests pass.
 type: plan
-status: active
+status: done
 areas: [ci, image]
 issues: [102]
 created: 2026-10-29
@@ -31,7 +31,8 @@ Made on 2026-10-29.
 | Actions | `docker/setup-qemu-action` v4.4.0, `setup-buildx-action` v4.4.1, `login-action` v4.6.0 (v4.7.0 was 6 days old), `metadata-action` v6.2.0, `build-push-action` v7.4.0 and `actions/attest-build-provenance` v4.2.2, pinned to commit SHAs. Least-privilege permissions: `packages: write`, `id-token: write` and `attestations: write` only on the publish job. |
 | Published image scan | A `scan-published-image` job in the scan workflow scans `paulbouwer/hello-kubernetes:1` every day, and reports to code scanning under its own category. It runs from `main`, so it starts after 1.11 is released. |
 | `make push-image` | Kept, for people who push to their own registry, which the build docs describe. It refuses to push to `docker.io/paulbouwer`: official images come only from CI (maintainer). |
-| GHCR | The first push creates the package as private. The maintainer makes it public once, and deletes the test versions by hand. |
+| GHCR | A private `hello-kubernetes` package from a 2021 test already existed, so the first test push was denied (`read_package`). The maintainer deleted it (its last version, `1.10.0`, could only be removed by deleting the package). The workflow then created a new package, linked to this repo and public, because the repo is public. The maintainer deletes the test versions by hand. |
+| First push to a new package | The provenance signing step got a 404 for the manifest it had just pushed, and passed when the job was run again. It happened when GHCR had just created the package. If it happens on the first Docker Hub release in 6.2, run the failed job again. |
 | PRs #40 and #46 | Closed with thanks when this work merges into `release-1.11` (maintainer). |
 
 ## Tracking
@@ -49,6 +50,7 @@ Made on 2026-10-29.
 | Both platforms | `docker buildx imagetools inspect` lists `linux/amd64` and `linux/arm64`. Pulling and running the arm64 variant shows `linux/arm64`. |
 | SBOM and provenance | `imagetools inspect --format` shows an SBOM and a SLSA provenance for each platform. `gh attestation verify` passes for the digest. |
 | No real tags touched | The Docker Hub tags are unchanged, and the workflow didn't log in to Docker Hub. |
+| Anonymous access | An anonymous manifest request to GHCR returns 200. |
 | Release checks | A `v*` tag that doesn't match `package.json`, or isn't on `main`, fails `check`, and nothing is published. Checked by reading the script, and by running it locally with the same inputs, because pushing a real `v*` tag would be a release. |
 | `make push-image` | Refuses `docker.io/paulbouwer`, and accepts another registry. |
 | Pinning and permissions | Every `uses:` is a 40-character SHA, and the publish workflow has least-privilege permissions (CodeQL alert #67). |
