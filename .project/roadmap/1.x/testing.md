@@ -250,6 +250,8 @@ A full local run of both clusters should take roughly 10–15 minutes, most of i
 
 ## Suggested order
 
+Steps 1 and 3 were done together in #87 (2.5): the harness, the kind and k3d configs, and E1–E4, E7 and E11 on both clusters. Both clusters run Kubernetes 1.37, with node images pinned by digest in `run.sh`. The configs have no port mappings yet; step 2 adds them, on host ports other than 8080, which `make run` uses.
+
 | Step | Work | Effort for an agent |
 |---|---|---|
 | 1 | `lib.sh`, `run.sh`, kind config, E1–E4, E7, E11 | **M** |

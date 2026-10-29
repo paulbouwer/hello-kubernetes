@@ -64,10 +64,10 @@ The [workstream 1 review](workstream-01-review.md) records the outcome and the f
 | 2.2 | chore(app): upgrade express, pino-http and express-handlebars | enhancement, area:app | 2.1 | — | [work package](../2026-10-28-app-dependencies/plan.md), [image.md](../../roadmap/1.x/image.md#dependency-upgrades) |
 | 2.3 | fix(app): load assets correctly when RENDER_PATH_PREFIX is not set | bug, area:app | 2.2 | #38 | [work package](../2026-10-28-asset-paths/plan.md), [community.md](../../roadmap/1.x/community.md#incorporate-in-spirit) |
 | 2.4 | feat(app): show the image architecture from the runtime | enhancement, area:app | 2.2 | #40 (in spirit) | [work package](../2026-10-28-runtime-architecture/plan.md), [image.md](../../roadmap/1.x/image.md#supported-amd64-and-arm64) |
-| 2.5 | test(e2e): add the e2e harness and the first kind scenarios | enhancement, area:ci | — | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) step 1 |
+| 2.5 | test(e2e): add the e2e harness and the first scenarios on kind and k3d | enhancement, area:ci | — | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) step 1 |
 | 2.6 | test(image): add the image tests | enhancement, area:ci | 2.1, 2.4 | — | [testing.md](../../roadmap/1.x/testing.md#image-tests) |
 
-2.5 covers `lib.sh`, `run.sh`, the kind config and E1–E4, E7 and E11.
+2.5 covers `lib.sh`, `run.sh`, the kind and k3d configs, and E1–E4, E7 and E11 on both clusters ([work package](../2026-10-28-e2e-harness/plan.md)). E3 and E7 are expected failures until 4.1 (decided 2026-10-28: k3d moved from 4.6 into 2.5).
 
 #85, found while reviewing 2.4, makes the app run from any directory and adds `make run` ([work package](../2026-10-28-run-locally/plan.md)).
 
@@ -92,7 +92,7 @@ The [workstream 1 review](workstream-01-review.md) records the outcome and the f
 | 4.3 | feat(chart): add values.schema.json | enhancement, area:deploy | 4.2 | — | [site.md](../../roadmap/1.x/site.md#agent-experience-ax) |
 | 4.4 | ci(release): publish the rendered YAML and the OCI chart with each release | enhancement, area:ci, area:deploy | 3.2, 4.2 | #29, #23 | [deploy.md](../../roadmap/1.x/deploy.md#rendered-yaml-on-each-release) |
 | 4.5 | docs(deploy): rewrite the deployment docs for Helm, kubectl and Kustomize | documentation, area:deploy | 4.2, 4.4 | #28, #31 | [deploy.md](../../roadmap/1.x/deploy.md) |
-| 4.6 | test(e2e): add k3d, Ingress and Gateway API scenarios | enhancement, area:ci | 3.3, 4.2 | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) steps 2–4, 7, 8 |
+| 4.6 | test(e2e): add Ingress and Gateway API scenarios on kind and k3d | enhancement, area:ci | 3.3, 4.2 | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) steps 2–4, 7, 8 |
 
 - 4.1 covers the `securityContext`, removing `kubernetes.io/arch: amd64` from `nodeSelector`, quoting `message` and `pathPrefix`, `appVersion`, and `NOTES.txt`.
 - 4.2 also adds the top-level `pathPrefix` and `rewritePath`, and keeps the old names working.

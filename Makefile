@@ -44,3 +44,29 @@ src/app/node_modules/.package-lock.json: src/app/package-lock.json
 .PHONY: run
 run: src/app/node_modules/.package-lock.json ## run the app locally on port 8080, installing dependencies first if they are out of date
 	node src/app/server.js
+
+# End-to-end tests on local clusters (test/e2e/run.sh). The image is built from
+# the working tree and tagged hello-kubernetes:e2e, so that no registry image
+# is ever used. KEEP_CLUSTER=1 keeps the cluster for debugging.
+E2E_IMAGE ?= hello-kubernetes:e2e
+
+.PHONY: e2e-image
+e2e-image:
+	docker build -q -t $(E2E_IMAGE) src/app >/dev/null
+
+.PHONY: e2e-kind
+e2e-kind: e2e-image ## e2e tests on a kind cluster
+	IMAGE=$(E2E_IMAGE) test/e2e/run.sh kind
+
+.PHONY: e2e-k3d
+e2e-k3d: e2e-image ## e2e tests on a k3d cluster
+	IMAGE=$(E2E_IMAGE) test/e2e/run.sh k3d
+
+.PHONY: e2e
+e2e: e2e-kind e2e-k3d ## e2e tests on kind, then k3d
+
+.PHONY: e2e-clean
+e2e-clean: ## delete the e2e clusters
+	-kind delete cluster --name hk-e2e-kind
+	-k3d cluster delete hk-e2e-k3d
+	rm -f $${TMPDIR:-/tmp}/hk-e2e-kind.kubeconfig $${TMPDIR:-/tmp}/hk-e2e-k3d.kubeconfig
