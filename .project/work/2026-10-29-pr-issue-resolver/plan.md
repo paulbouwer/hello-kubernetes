@@ -2,7 +2,7 @@
 title: PR issue resolver
 description: Find the PR's issue with one shared resolver in the issue check and the labels workflow, and fail a PR that points at more than one open issue.
 type: plan
-status: active
+status: done
 areas: [ci, operations]
 issues: [95]
 created: 2026-10-29
