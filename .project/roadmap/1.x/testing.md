@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [ci]
 created: 2026-10-22
-updated: 2026-10-28
+updated: 2026-10-29
 ---
 
 # Testing
@@ -59,7 +59,7 @@ Windows and architectures other than amd64 and arm64 (arm/v7, riscv64, ppc64le, 
 
 ## Image tests
 
-These check the image itself and guard against the problems found in the review coming back.
+These check the image itself and guard against the problems found in the review coming back. All of them are in `test/image/run.sh` (`make test-image`): I1 to I3 from #75, I5a from #83, and I4 to I7 from #90. I4 fails, rather than skips, when Trivy is missing. I5 runs the image on its own platform by default, and on each platform in `PLATFORMS` when it is set. arm64 is checked on native arm64 runners in CI (3.3).
 
 | ID | Check | How | Guards against |
 |---|---|---|---|

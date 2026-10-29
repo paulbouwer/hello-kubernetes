@@ -48,3 +48,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-28-runtime-architecture](2026-10-28-runtime-architecture/plan.md) | Show the image architecture from the running Node binary, mapped to OCI names, and remove info.json. | done |
 | [2026-10-28-run-locally](2026-10-28-run-locally/plan.md) | Make the app find its files from its own folder, and add make run, which installs the dependencies from the lockfile when they are out of date. | done |
 | [2026-10-28-e2e-harness](2026-10-28-e2e-harness/plan.md) | Add an e2e harness that runs the chart on local kind and k3d clusters with the image built from the working tree, and the first scenarios E1 to E4, E7 and E11 on both. | done |
+| [2026-10-29-image-tests](2026-10-29-image-tests/plan.md) | Add image tests I4 to I7: no fixable vulnerabilities, each platform starts and reports itself, PORT, and a read-only root filesystem. | done |
