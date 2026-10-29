@@ -21,7 +21,12 @@ build-image-linux:
 		-f src/app/Dockerfile -t "$(IMAGE):$(IMAGE_VERSION)" src/app;
 
 .PHONY: push-image
-push-image:
+push-image: ## push to your own registry. Official images are published only by CI.
+	@if [ "$(REGISTRY)/$(REPOSITORY)" = "docker.io/paulbouwer" ]; then \
+		echo "Official images are published only by CI (.github/workflows/build-and-publish-container-image.yaml)."; \
+		echo "Set REGISTRY and REPOSITORY to your own registry to push there."; \
+		exit 1; \
+	fi
 	docker tag $(IMAGE):$(IMAGE_VERSION) $(IMAGE):$(IMAGE_MAJOR_VERSION); \
 	docker tag $(IMAGE):$(IMAGE_VERSION) $(IMAGE):$(IMAGE_MAJOR_VERSION).$(IMAGE_MINOR_VERSION); \
 	docker push $(IMAGE):$(IMAGE_VERSION); \
