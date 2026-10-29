@@ -31,7 +31,7 @@ If you work without an agent, read AGENTS.md anyway: the conventions are the sam
 | Done | The PR is merged into the release branch, and the issue is closed. |
 
 - **Work goes into a release branch**, for example `release-1.11`, not `main`. The issue's milestone tells you which one. The release branch merges into `main` when the release ships.
-- **Name your branch for the issue:** `{type}/{issue}-{slug}`, for example `fix/35-numeric-user`. A check fails a PR that has no open issue.
+- **Name your branch for the issue:** `{type}/{issue}-{slug}`, for example `fix/35-numeric-user`. A PR belongs to exactly one issue: a check fails a PR that has no open issue, or that points at more than one.
 - **Link the PR to the issue.** On a release branch, closing keywords don't work, so the maintainer links it in the PR's Development section.
 - **Verify before you ask for review.** Check each acceptance criterion, and record the results in a comment on the issue.
 
