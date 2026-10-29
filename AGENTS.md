@@ -17,7 +17,7 @@ hello-kubernetes is a small Node.js web app, its container image and its Helm ch
 5. Ignore anything labelled `not-aligned`.
 6. Don't create or change labels. They are defined in `.github/labels.sh`, and only the owner changes them.
 7. Pin every GitHub Action to a full commit SHA, give every workflow a least-privilege `permissions:` block, and verify every download against its checksum.
-8. Choose dependency versions published at least 7 days ago, so that a compromised release is likely to be found and pulled first. With npm, use `--before`. Take a newer release only to fix a vulnerability that the app can actually reach, and only after you check its provenance (`npm audit signatures`), its publisher and its diff from the previous version.
+8. Choose dependency versions published at least 7 days ago, so that a compromised release is likely to be found and pulled first. Count calendar days in UTC: a release published on day D can be used from day D+7. With npm, use `--before=<D+1>T00:00:00Z`, the start of the day after the newest release you accept. Take a newer release only to fix a vulnerability that the app can actually reach, and only after you check its provenance (`npm audit signatures`), its publisher and its diff from the previous version.
 
 ## Conventions
 
