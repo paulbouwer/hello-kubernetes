@@ -81,7 +81,7 @@ The [workstream 2 review](workstream-02-review.md) records the outcome and the f
 |---|---|---|---|---|---|
 | 3.1 | ci(scan): rebuild the vulnerability scan so it fails on fixable findings | security, area:ci | 2.1 | open code-scanning alerts | [work package](../2026-10-29-vulnerability-scan/plan.md), [image.md](../../roadmap/1.x/image.md#trivy-installed-safely) |
 | 3.2 | ci(publish): publish amd64 and arm64 images to Docker Hub and GHCR | enhancement, area:ci, area:image | 2.1, 2.4 | #40, #46 | [review.md](../../roadmap/1.x/review.md#fixes-effort-and-impact) row 4 |
-| 3.3 | ci(e2e): run the image and e2e tests on amd64 and arm64 | enhancement, area:ci | 2.5, 2.6 | — | [testing.md](../../roadmap/1.x/testing.md#ci) |
+| 3.3 | ci(e2e): run the image and e2e tests on amd64 and arm64 | enhancement, area:ci | 2.5, 2.6 | — | [work package](../2026-10-29-ci-tests/plan.md), [workstream 2 review](workstream-02-review.md#follow-up-before-arm64-ci), [testing.md](../../roadmap/1.x/testing.md#ci) |
 | 3.4 | fix(ci): find the PR's issue the same way in the labels workflow and the issue check | security, area:ci | 1.2 | — | [workstream 1 review](workstream-01-review.md#finding-to-address) |
 
 - 3.1 scans on PRs, on pushes to `main` and `release-*`, and every day, and reports every finding to code scanning. The 10 old Trivy alerts close when the scan runs on `main`, after 1.11 merges.

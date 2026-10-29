@@ -1,0 +1,81 @@
+# Runs the image, proxy and e2e tests on every PR, as required checks.
+#
+# - image-tests: test/image/run.sh (I1 to I7, I5a) and test/proxy/run.sh
+#   (P1 to P3), on native amd64 and arm64 runners. Each job builds the image
+#   for its own architecture, so arm64 is built and run on real arm64.
+# - e2e: test/e2e/run.sh on kind and on k3d, on amd64. The chart pins pods to
+#   amd64 until 4.1, which adds the arm64 e2e job.
+#
+# Tool versions come from test/ci/install-tools.sh, the only place they are set.
+# A failed e2e scenario prints its diagnostics in the job log.
+name: Tests
+
+on:
+  pull_request:
+    branches: [main, "release-*"]
+  push:
+    branches: [main, "release-*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a PR cancels that PR's older runs. Runs on branches are never
+# cancelled.
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  image-tests:
+    name: image-tests (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the tools
+        run: test/ci/install-tools.sh trivy
+
+      - name: Build the image for ${{ matrix.arch }}
+        run: docker build --tag hello-kubernetes:ci src/app
+
+      - name: Image tests
+        run: test/image/run.sh hello-kubernetes:ci
+
+      - name: Proxy tests
+        run: test/proxy/run.sh hello-kubernetes:ci
+
+  e2e:
+    name: e2e (${{ matrix.cluster }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        cluster: [kind, k3d]
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the tools
+        run: test/ci/install-tools.sh ${{ matrix.cluster }} helm kubectl
+
+      - name: Build the image
+        run: make e2e-image
+
+      - name: E2E tests on ${{ matrix.cluster }}
+        run: IMAGE=hello-kubernetes:e2e test/e2e/run.sh ${{ matrix.cluster }}

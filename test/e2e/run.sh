@@ -13,8 +13,11 @@
 # KEEP_CLUSTER=1 or it existed before the run. Its kubeconfig is kept apart from
 # ~/.kube/config. Needs docker, kind or k3d, kubectl, helm and curl.
 #
-# A scenario that sets EXPECTED_FAILURE is reported as XFAIL when it fails. If it
-# passes, it is reported as XPASS and fails the run, so the marker gets removed.
+# A scenario that sets EXPECTED_FAILURE must also set EXPECTED_ERROR, an
+# extended regular expression for the error it expects. It is reported as XFAIL
+# only when it fails and its output matches EXPECTED_ERROR. Any other failure is
+# a FAIL. If it passes, it is reported as XPASS and fails the run, so the marker
+# gets removed.
 
 set -euo pipefail
 
@@ -84,13 +87,20 @@ load_image() {
   esac
 }
 
+# Runs on exit. A failed deletion is reported and fails the run.
 delete_cluster() {
+  local status=$? output
   echo "Deleting $cluster_type cluster $cluster"
-  case "$cluster_type" in
-    kind) kind delete cluster --name "$cluster" >/dev/null 2>&1 || true ;;
-    k3d) k3d cluster delete "$cluster" >/dev/null 2>&1 || true ;;
-  esac
+  if ! output=$(case "$cluster_type" in
+    kind) kind delete cluster --name "$cluster" 2>&1 ;;
+    k3d) k3d cluster delete "$cluster" 2>&1 ;;
+  esac); then
+    echo "$output" >&2
+    echo "FAIL: could not delete $cluster_type cluster $cluster. Delete it with make e2e-clean." >&2
+    exit 1
+  fi
   rm -f "$KUBECONFIG"
+  exit "$status"
 }
 
 created=false
@@ -132,6 +142,8 @@ for file in "${scenarios[@]}"; do
   namespace="hk-${name%%-*}"
   echo "== $name ($cluster_type)"
   expected=$(sed -nE 's/^EXPECTED_FAILURE="(.*)"$/\1/p' "$file")
+  expected_error=$(sed -nE "s/^EXPECTED_ERROR='(.*)'$/\\1/p" "$file")
+  output=$(mktemp)
   set +e
   (
     set -euo pipefail
@@ -141,15 +153,24 @@ for file in "${scenarios[@]}"; do
     # shellcheck disable=SC1090
     source "$file"
     scenario
-  )
-  status=$?
+  ) 2>&1 | tee "$output"
+  status=${PIPESTATUS[0]}
   set -e
+  matched=false
+  if [[ -n "$expected_error" ]] && grep -qE -- "$expected_error" "$output"; then
+    matched=true
+  fi
+  rm -f "$output"
   if ((status == 0)) && [[ -z "$expected" ]]; then
     echo "PASS $name"
     pass=$((pass + 1))
-  elif ((status != 0)) && [[ -n "$expected" ]]; then
+  elif ((status != 0)) && [[ -n "$expected" && "$matched" == true ]]; then
     echo "XFAIL $name: expected to fail: $expected"
     xfail=$((xfail + 1))
+  elif ((status != 0)) && [[ -n "$expected" ]]; then
+    (source "$here/lib.sh" && dump_diagnostics "$namespace")
+    echo "FAIL $name: failed, but not with the expected error /${expected_error:-EXPECTED_ERROR is not set}/"
+    problems+=("$name")
   elif ((status == 0)); then
     echo "XPASS $name: passed, but is marked as expected to fail ($expected). Remove EXPECTED_FAILURE."
     problems+=("$name (XPASS)")

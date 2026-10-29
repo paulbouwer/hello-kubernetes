@@ -1,6 +1,7 @@
 # E7: the chart installs in a namespace that enforces the restricted Pod
 # Security Standard, with no warnings, and the app runs as user 1000 (#35).
 EXPECTED_FAILURE="4.1: the chart has no securityContext, so restricted Pod Security rejects the pods"
+EXPECTED_ERROR='would violate PodSecurity'
 scenario() {
   kubectl create namespace "$NAMESPACE" >/dev/null
   kubectl label namespace "$NAMESPACE" pod-security.kubernetes.io/enforce=restricted \

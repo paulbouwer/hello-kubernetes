@@ -8,6 +8,8 @@
 #              Defaults to the image's own platform. Others need emulation.
 #
 # Each test prints PASS or FAIL. The script exits 1 if any test fails.
+# Every container runs with --pull never: a test must never fetch an image, which
+# would replace the local tag with a registry image and test the wrong one.
 # Needs docker, curl, jq and trivy (for I4).
 
 set -euo pipefail
@@ -22,7 +24,7 @@ fail() { echo "FAIL $1: $2"; failures=$((failures + 1)); }
 in_image() {
   local entrypoint="$1"
   shift
-  docker run --rm --entrypoint "$entrypoint" "$image" "$@"
+  docker run --rm --pull never --entrypoint "$entrypoint" "$image" "$@"
 }
 
 # version_ge A B: true if version A >= version B (dotted numbers).
@@ -35,17 +37,27 @@ version_ge() {
 # on the first line, then the page. The page is empty if it didn't load.
 # serve_page CONTAINER_PORT [docker run args...]
 serve_page() {
-  local container_port="$1" cid port html="" css=000
+  local container_port="$1" cid port html="" css=000 error
   shift
-  if cid=$(docker run -d -p "127.0.0.1::$container_port" "$@" "$image" 2>/dev/null); then
+  # Docker's errors and the container's logs go to stderr, so that they show
+  # in the test output without changing what this function prints.
+  if cid=$(docker run -d --pull never -p "127.0.0.1::$container_port" "$@" "$image" 2>"${TMPDIR:-/tmp}/serve-page.err"); then
     port=$(docker port "$cid" "$container_port/tcp" | head -n1 | sed 's/.*://')
     for _ in $(seq 1 40); do
       html=$(curl -fs "http://127.0.0.1:$port/" 2>/dev/null) && break
       sleep 0.25
     done
     css=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/css/main.css")
+    if [[ -z "$html" ]]; then
+      echo "    the page didn't load (docker run $*). Container logs:" >&2
+      docker logs "$cid" 2>&1 | tail -n 20 | sed 's/^/      /' >&2
+    fi
     docker rm -f "$cid" >/dev/null
+  else
+    error=$(cat "${TMPDIR:-/tmp}/serve-page.err")
+    echo "    docker run $* failed: $error" >&2
   fi
+  rm -f "${TMPDIR:-/tmp}/serve-page.err"
   printf '%s\n%s\n' "$css" "$html"
 }
 
@@ -108,7 +120,7 @@ fi
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 page_arch() {
   local fake="$1" cid port html
-  cid=$(docker run -d -p 127.0.0.1::8080 -e FAKE_ARCH="$fake" \
+  cid=$(docker run -d --pull never -p 127.0.0.1::8080 -e FAKE_ARCH="$fake" \
     -v "$here/fake-arch.js:/tmp/fake-arch.js:ro" -e NODE_OPTIONS=--require=/tmp/fake-arch.js "$image")
   port=$(docker port "$cid" 8080/tcp | head -n1 | sed 's/.*://')
   for _ in $(seq 1 40); do

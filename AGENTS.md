@@ -31,6 +31,7 @@ hello-kubernetes is a small Node.js web app, its container image and its Helm ch
 
 ## Verify, then record
 
+- CI runs the image, proxy and e2e tests, the scan and the issue check on every PR. They are required checks, so read a failure in the job log and fix it; don't work around it. The CI tool versions are set only in `test/ci/install-tools.sh`.
 - Check every acceptance criterion before you open the PR. Test the failure paths too, when a criterion is about something failing.
 - Tick only the criteria you actually verified. Leave the others unticked, and say why.
 - Post the results as a comment on the issue: when, where and on which commit; a table of criterion, result (✅ or ⚠️) and evidence; and an **Open:** line.
