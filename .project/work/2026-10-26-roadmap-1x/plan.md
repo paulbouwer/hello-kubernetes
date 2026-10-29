@@ -65,7 +65,7 @@ The [workstream 1 review](workstream-01-review.md) records the outcome and the f
 | 2.3 | fix(app): load assets correctly when RENDER_PATH_PREFIX is not set | bug, area:app | 2.2 | #38 | [work package](../2026-10-28-asset-paths/plan.md), [community.md](../../roadmap/1.x/community.md#incorporate-in-spirit) |
 | 2.4 | feat(app): show the image architecture from the runtime | enhancement, area:app | 2.2 | #40 (in spirit) | [work package](../2026-10-28-runtime-architecture/plan.md), [image.md](../../roadmap/1.x/image.md#supported-amd64-and-arm64) |
 | 2.5 | test(e2e): add the e2e harness and the first scenarios on kind and k3d | enhancement, area:ci | — | — | [work package](../2026-10-28-e2e-harness/plan.md), [testing.md](../../roadmap/1.x/testing.md#suggested-order) step 1 |
-| 2.6 | test(image): add the image tests | enhancement, area:ci | 2.1, 2.4 | — | [testing.md](../../roadmap/1.x/testing.md#image-tests) |
+| 2.6 | test(image): add the image tests | enhancement, area:ci | 2.1, 2.4 | — | [work package](../2026-10-29-image-tests/plan.md), [testing.md](../../roadmap/1.x/testing.md#image-tests) |
 
 2.5 covers `lib.sh`, `run.sh`, the kind and k3d configs, and E1–E4, E7 and E11 on both clusters ([work package](../2026-10-28-e2e-harness/plan.md)). E3 and E7 are expected failures until 4.1 (decided 2026-10-28: k3d moved from 4.6 into 2.5).
 
