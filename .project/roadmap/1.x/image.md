@@ -167,3 +167,5 @@ The scanner was never the root cause. The base image sat on an end-of-life Alpin
 2. **Make the scan fail the build** with `--severity HIGH,CRITICAL --ignore-unfixed --exit-code 1` (I4 in `testing.md`). Today it uploads results and always passes.
 3. **Expect scheduled runs to stop.** GitHub disables scheduled workflows after 60 days with no repository activity, which is what turned the scan off in August. Merging Dependabot PRs counts as activity. Also run the scan on PRs, not only on the schedule.
 4. Optionally, generate an SBOM (`anchore/sbom-action`) and build provenance (`actions/attest-build-provenance`), which the review notes are missing.
+
+Done in #102: BuildKit adds an SBOM and SLSA provenance (`mode=max`) to every published image, and `actions/attest-build-provenance` signs the provenance with GitHub artifact attestations. No separate cosign signature. The published image `:1` is scanned every day once 1.11 is on `main`.

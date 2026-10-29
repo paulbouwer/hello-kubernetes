@@ -5,6 +5,8 @@
 # - Reports every finding, of every severity, to code scanning.
 # - Runs every day, because new CVEs appear without code changes. GitHub runs
 #   scheduled workflows only from the default branch.
+# - Every day, also scans the published image that users pull
+#   (paulbouwer/hello-kubernetes:1). When it fails, a patch release is due.
 #
 # Trivy is installed by test/ci/install-tools.sh, at the version pinned there,
 # and checked against a SHA-256 kept there, not only against the checksums file
@@ -69,3 +71,40 @@ jobs:
         run: |
           trivy image --image-src docker --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
             --exit-code 1 --format table "$IMAGE"
+
+  scan-published-image:
+    # Only on the schedule or by hand. Its own job name gives it its own
+    # category in code scanning.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    env:
+      PUBLISHED_IMAGE: docker.io/paulbouwer/hello-kubernetes:1
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Trivy
+        run: |
+          test/ci/install-tools.sh trivy
+          trivy --version
+
+      - name: Report every finding
+        run: |
+          trivy image --image-src remote --scanners vuln --format sarif \
+            --output trivy-published.sarif "$PUBLISHED_IMAGE"
+
+      - name: Upload the report to code scanning
+        if: always() && hashFiles('trivy-published.sarif') != ''
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: trivy-published.sarif
+
+      - name: Fail on fixable HIGH and CRITICAL findings
+        run: |
+          trivy image --image-src remote --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
+            --exit-code 1 --format table "$PUBLISHED_IMAGE"

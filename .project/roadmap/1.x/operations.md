@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [operations]
 created: 2026-10-23
-updated: 2026-10-27
+updated: 2026-10-29
 ---
 
 # Operations
@@ -220,7 +220,7 @@ The rules for agents are in [AGENTS.md](../../../AGENTS.md#rules). The stale bot
 | `.github/release.yml` | Groups generated release notes by the type labels | Added in #59 |
 | `.github/labels.sh` | The labels, see [Setting up the labels](#setting-up-the-labels) | Added in #56 |
 | `.github/labeler.yml`, `pr-labels.yaml` | The `area:` path rules above, and copying the issue's type label and milestone to the PR. `pull_request_target` workflows run only from the default branch, so it works once 1.11 is in `main` | Added in #59 |
-| `pr-issue-check.yaml` and the ruleset | Require every PR to link an open issue, signed commits and merge commits on `main` and `release-*`. The ruleset ("main and release branches") is a repo setting: PRs only, merge commits only, signed commits, `issue-check` required, no force pushes or deletion, and the admin role can bypass | Added in #59 |
+| `pr-issue-check.yaml` and the ruleset | Require every PR to link an open issue, signed commits and merge commits on `main` and `release-*`. The ruleset ("main and release branches") is a repo setting: PRs only, merge commits only, signed commits, `issue-check` required, no force pushes or deletion, and the admin role can bypass. Since #98, it also requires `image-tests (amd64)`, `image-tests (arm64)`, `e2e (kind)`, `e2e (k3d)` and `scan-and-report-vulnerabilities` | Added in #59, checks added in #98 |
 | `.github/dependabot.yml` | `labels:` per ecosystem (e.g. `["dependencies", "area:image"]` for the app's Dockerfile, `["dependencies", "area:ci"]` for GitHub Actions, `["dependencies", "area:operations"]` for the devcontainer). Without it, Dependabot creates its own `javascript`, `docker` and `github_actions` labels. GitHub reads it only from `main`, so it takes effect when 1.11 merges | Added in #73 |
 | CodeQL, secret scanning, push protection | Repo settings: CodeQL default setup for JavaScript/TypeScript and Actions, and secret scanning that blocks pushes containing secrets | Set up in #73 |
 | Stale workflow | `actions/stale` limited to `needs-info` | Not planned yet |

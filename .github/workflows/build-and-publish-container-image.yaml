@@ -1,55 +1,182 @@
-name: "When a release tag is created, build and publish a new version of the container image"
+# Publishes the image for linux/amd64 and linux/arm64 to Docker Hub and GHCR,
+# with an SBOM and provenance, when a release tag is pushed.
+#
+# - A v* tag publishes X.Y.Z, X.Y and X to both registries (no latest). It
+#   must be on main, and match the version in src/app/package.json.
+# - A publish-test-* tag publishes only to GHCR, as test-<run number>, and
+#   never touches Docker Hub or a real tag. Delete the git tag and the GHCR
+#   test version afterwards.
+# - Nothing is published unless the full test suite (tests.yaml) passes.
+#
+# The provenance is signed with GitHub artifact attestations. Check it with:
+#   gh attestation verify oci://<image>@<digest> --repo paulbouwer/hello-kubernetes
+#
+# Keep the file name: CodeQL alert #67 is tracked against it.
+name: Publish images
 
 on:
+  push:
+    tags: ["v*", "publish-test-*"]
 
-  create
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOCKERHUB_IMAGE: docker.io/paulbouwer/hello-kubernetes
+  GHCR_IMAGE: ghcr.io/paulbouwer/hello-kubernetes
 
 jobs:
-
-  build-and-push-container-image:
-
+  check:
+    name: check the release
     runs-on: ubuntu-latest
-
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    env:
-      CONTAINER_REGISTRY: docker.io
-      CONTAINER_IMAGE: paulbouwer/hello-kubernetes
-
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      test: ${{ steps.check.outputs.test }}
+      created: ${{ steps.check.outputs.created }}
     steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Build image and version variables
+      - name: Check the tag
+        id: check
+        env:
+          TAG: ${{ github.ref_name }}
         run: |
-          echo "IMAGE=$CONTAINER_REGISTRY/$CONTAINER_IMAGE" >> $GITHUB_ENV
-          echo "IMAGE_VERSION=$(cat src/app/package.json | jq -r .version)" >> $GITHUB_ENV
-          
-      - name: Build additional image tag variables
+          version=$(jq -r .version src/app/package.json)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "created=$(git log -1 --format=%cI "$GITHUB_SHA")" >> "$GITHUB_OUTPUT"
+          if [[ "$TAG" == publish-test-* ]]; then
+            echo "Test publish: GHCR test tag only."
+            echo "test=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$TAG" != "v$version" ]]; then
+            echo "::error::Tag $TAG doesn't match version $version in src/app/package.json."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag $TAG isn't on main. Release from main."
+            exit 1
+          fi
+          echo "test=false" >> "$GITHUB_OUTPUT"
+
+  tests:
+    name: tests
+    needs: check
+    uses: ./.github/workflows/tests.yaml
+    permissions:
+      contents: read
+
+  publish:
+    name: publish
+    needs: [check, tests]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          platforms: arm64
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        if: needs.check.outputs.test == 'false'
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Tags for a release
+        id: release
+        if: needs.check.outputs.test == 'false'
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: |
+            ${{ env.DOCKERHUB_IMAGE }}
+            ${{ env.GHCR_IMAGE }}
+          flavor: latest=false
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - name: Tags for a test
+        id: test
+        if: needs.check.outputs.test == 'true'
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.GHCR_IMAGE }}
+          flavor: latest=false
+          tags: type=raw,value=test-${{ github.run_number }}
+
+      - name: Build and push for amd64 and arm64
+        id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: src/app
+          file: src/app/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          sbom: true
+          provenance: mode=max
+          tags: ${{ steps.release.outputs.tags || steps.test.outputs.tags }}
+          labels: ${{ steps.release.outputs.labels || steps.test.outputs.labels }}
+          build-args: |
+            IMAGE_VERSION=${{ needs.check.outputs.version }}
+            IMAGE_CREATE_DATE=${{ needs.check.outputs.created }}
+            IMAGE_SOURCE_REVISION=${{ github.sha }}
+
+      - name: Sign the provenance for GHCR
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ env.GHCR_IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Sign the provenance for Docker Hub
+        if: needs.check.outputs.test == 'false'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ env.DOCKERHUB_IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Summary
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          TAGS: ${{ steps.release.outputs.tags || steps.test.outputs.tags }}
         run: |
-          echo "IMAGE_MAJOR_VERSION=$(echo $IMAGE_VERSION | cut -d '.' -f1)" >> $GITHUB_ENV
-          echo "IMAGE_MINOR_VERSION=$(echo $IMAGE_VERSION | cut -d '.' -f2)" >> $GITHUB_ENV
-
-      - name: Build image
-        run: | 
-          docker build --tag "$IMAGE:$IMAGE_VERSION" \
-            --build-arg IMAGE_VERSION="$IMAGE_VERSION" \
-            --build-arg IMAGE_CREATE_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`" \
-            --build-arg IMAGE_SOURCE_REVISION="`git rev-parse HEAD`" \
-            --file src/app/Dockerfile src/app
-
-      - name: Create additional image tags
-        run: |
-          docker tag $IMAGE:$IMAGE_VERSION $IMAGE:$IMAGE_MAJOR_VERSION
-          docker tag $IMAGE:$IMAGE_VERSION $IMAGE:$IMAGE_MAJOR_VERSION.$IMAGE_MINOR_VERSION
-
-      - name: Log into registry
-        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-
-      - name: Push image and tags to registry
-        run: |
-          docker push $IMAGE:$IMAGE_VERSION
-          docker push $IMAGE:$IMAGE_MAJOR_VERSION
-          docker push $IMAGE:$IMAGE_MAJOR_VERSION.$IMAGE_MINOR_VERSION
-
+          {
+            echo "### Published"
+            echo
+            echo "Digest: \`$DIGEST\`"
+            echo
+            echo '```'
+            echo "$TAGS"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -21,7 +21,12 @@ build-image-linux:
 		-f src/app/Dockerfile -t "$(IMAGE):$(IMAGE_VERSION)" src/app;
 
 .PHONY: push-image
-push-image:
+push-image: ## push to your own registry. Official images are published only by CI.
+	@if [ "$(REGISTRY)/$(REPOSITORY)" = "docker.io/paulbouwer" ]; then \
+		echo "Official images are published only by CI (.github/workflows/build-and-publish-container-image.yaml)."; \
+		echo "Set REGISTRY and REPOSITORY to your own registry to push there."; \
+		exit 1; \
+	fi
 	docker tag $(IMAGE):$(IMAGE_VERSION) $(IMAGE):$(IMAGE_MAJOR_VERSION); \
 	docker tag $(IMAGE):$(IMAGE_VERSION) $(IMAGE):$(IMAGE_MAJOR_VERSION).$(IMAGE_MINOR_VERSION); \
 	docker push $(IMAGE):$(IMAGE_VERSION); \
@@ -70,3 +75,8 @@ e2e-clean: ## delete the e2e clusters
 	-kind delete cluster --name hk-e2e-kind
 	-k3d cluster delete hk-e2e-k3d
 	rm -f $${TMPDIR:-/tmp}/hk-e2e-kind.kubeconfig $${TMPDIR:-/tmp}/hk-e2e-k3d.kubeconfig
+
+.PHONY: verify-published
+verify-published: ## verify a published image: make verify-published PUBLISHED=ghcr.io/paulbouwer/hello-kubernetes:1.11.0 [SCAN=1]
+	@test -n "$(PUBLISHED)" || { echo "Set PUBLISHED, for example PUBLISHED=paulbouwer/hello-kubernetes:1.11.0"; exit 2; }
+	test/image/verify-published.sh "$(PUBLISHED)"
