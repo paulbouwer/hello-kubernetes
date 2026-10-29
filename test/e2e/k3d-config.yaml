@@ -1,0 +1,11 @@
+# k3d cluster for the e2e tests: 1 server and 2 agents, so that pods spread
+# across nodes. The k3s image is pinned in run.sh. k3s keeps its built-in
+# Traefik and ServiceLB, which the Ingress and LoadBalancer scenarios (4.6) use.
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+servers: 1
+agents: 2
+options:
+  kubeconfig:
+    updateDefaultKubeconfig: false
+    switchCurrentContext: false
