@@ -87,6 +87,7 @@ The [workstream 2 review](workstream-02-review.md) records the outcome and the f
 - 3.1 scans on PRs, on pushes to `main` and `release-*`, and every day, and reports every finding to code scanning. The 10 old Trivy alerts close when the scan runs on `main`, after 1.11 merges.
 - 3.2 includes SBOM and provenance, closes CodeQL alert #67 (no `permissions:` block), and adds a daily scan of the published image (`paulbouwer/hello-kubernetes:1`), which shows when a patch release is due.
 - 3.3 runs the image tests (I1–I7, I5a) on native amd64 and arm64 runners, the proxy tests, and the e2e tests on amd64 on kind and k3d, as required checks before publishing. It loads a single-platform image into each cluster. It also hardens the harness, from the workstream 2 review: an `EXPECTED_FAILURE` names the error it expects, so a different failure is a FAIL; a failed cluster deletion is reported; and the image tests show Docker's errors when a container doesn't start. The arm64 e2e job comes with 4.1, because the chart pins pods to amd64 until then.
+- #99, a follow-up to 3.3, makes the devcontainer install Node.js, kubectl, Helm, Trivy, kind and k3d from the same pinned table as CI ([work package](../2026-10-29-devcontainer-tools/plan.md)).
 - 3.4 comes from the workstream 1 review. It must land before 6.2, when automatic PR labelling goes live on `main`.
 
 #### 4. Chart and deployment

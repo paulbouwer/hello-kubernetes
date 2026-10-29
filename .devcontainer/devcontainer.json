@@ -1,6 +1,6 @@
 {
   "name": "hello-kubernetes",
-  "build": { "dockerfile": "Dockerfile" },
+  "build": { "dockerfile": "Dockerfile", "context": ".." },
 
   // Container settings
   "remoteUser": "vscode",
