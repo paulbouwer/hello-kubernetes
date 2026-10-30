@@ -102,16 +102,16 @@ The separate [workstream 3 efficiency review](workstream-03-efficiency-review.md
 | 4.2 | feat(chart): create an Ingress or an HTTPRoute from the chart | enhancement, area:deploy | 4.1 | #31 | [work package](../2026-10-30-chart-ingress-httproute/plan.md), [deploy.md](../../roadmap/1.x/deploy.md#exposing-the-app) |
 | 4.3 | feat(chart): add values.schema.json | enhancement, area:deploy | 4.2 | — | [work package](../2026-10-30-chart-values-schema/plan.md), [site.md](../../roadmap/1.x/site.md#agent-experience-ax) |
 | 4.4 | ci(release): publish the rendered YAML and the OCI chart with each release | enhancement, area:ci, area:deploy | 3.2, 4.2 | #29, #23 | [work package](../2026-10-30-release-chart-and-yaml/plan.md), [deploy.md](../../roadmap/1.x/deploy.md#rendered-yaml-on-each-release) |
-| 4.5 | docs(deploy): rewrite the deployment docs for Helm, kubectl and Kustomize | documentation, area:deploy | 4.2, 4.4 | #28, #31 | [deploy.md](../../roadmap/1.x/deploy.md) |
+| 4.5 | docs(deploy): rewrite the deployment docs for Helm, kubectl and Kustomize | documentation, area:deploy | 4.2, 4.4 | #28, #31 | [work package](../2026-10-30-deployment-docs/plan.md), [deploy.md](../../roadmap/1.x/deploy.md) |
 | 4.6 | test(e2e): add Ingress and Gateway API scenarios on kind and k3d | enhancement, area:ci | 3.3, 4.2 | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) steps 2–4, 7, 8 |
 
 - 4.1 covers the `securityContext`, removing `kubernetes.io/arch: amd64` from `nodeSelector`, quoting `message` and `pathPrefix`, `appVersion`, and `NOTES.txt`. It removes the `EXPECTED_FAILURE` markers from E3 and E7, and adds the arm64 e2e job to CI, which proves the default chart on arm64 (workstream 2 review). It also gives the image tests' error file in `test/image/run.sh` a unique name with `mktemp` (workstream 3 review).
 - 4.2 also adds the top-level `pathPrefix` and `rewritePath`, keeps the old names working, and adds the chart tests (C1–C11). #31 closes with 4.5, which replaces the broken Ingress example in the docs.
 - 4.3 rejects unknown keys in the parts the chart owns, and requires `message` to be a string; the image tag can be a number (decided 2026-10-30).
 - 4.4 includes the Artifact Hub listing. It also makes `verify-published.sh` check the digest it reads, not the tag, and report a Trivy failure apart from vulnerabilities, before 6.2 uses it (workstream 3 review).
-- 4.5 says which environments run the static `hello-kubernetes.yaml` with no changes, as a table: cloud clusters (EKS, GKE, AKS) and Docker Desktop, Rancher Desktop, OrbStack, k3s and k3d get a working `LoadBalancer`; on kind, minikube and bare metal the pods run, `EXTERNAL-IP` stays pending, and `kubectl port-forward` works (decided 2026-10-30).
+- 4.5 says which environments run the static `hello-kubernetes.yaml` with no changes, as a table: cloud clusters (EKS, GKE, AKS), Docker Desktop and OrbStack get a working `LoadBalancer`; on k3s, k3d and Rancher Desktop the built-in Traefik already holds port 80, so `EXTERNAL-IP` stays pending unless the Service port is changed (found in 4.5); on kind, minikube and bare metal `EXTERNAL-IP` stays pending, and `kubectl port-forward` works (decided 2026-10-30).
 - 4.5 covers the quick start with clean-up, Helm 4 (decided 2026-10-30: Helm 3 is not tested), the NGINX, Traefik and Gateway API examples, the Kustomize guide and the values reference.
-- 4.6 covers E5, E6, E8–E10 and E12–E18.
+- 4.6 covers E5, E6, E8–E10 and E12–E18. It also tests an NGINX rewrite annotation, and adds it to `docs/deploy-with-ingress.md` if it works with the chart's path, which has no trailing slash (4.5 found that the F5 `nginx.org/rewrites` example uses one).
 
 #### 5. Website
 

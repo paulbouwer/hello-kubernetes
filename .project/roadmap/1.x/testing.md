@@ -109,6 +109,7 @@ These check the image itself and guard against the problems found in the review 
 | C14 | `--set message=42`, `--set-string message=42`, `--set deployment.container.image.tag=1.11` | A number as the message is rejected; as a string it works. A number as the tag works |
 | C15 | the old `ingress.*` names, `global` | The schema accepts them |
 | C16 | `values.yaml` and `values.schema.json` | Every value has a description, and the schema has nothing `values.yaml` doesn't, except the old names and `global` |
+| C17 | `docs/deploy-using-helm.md` | The values table lists every value in the schema, except `global` (#121) |
 
 The schema (#117) is checked by C6 and C12–C16.
 
@@ -251,7 +252,7 @@ I'd write the tests as plain Bash with a small assert library rather than adding
 |---|---|---|
 | `image-tests (amd64)` | `ubuntu-latest` | builds the image natively, then `test/image/run.sh` (I1–I7, I5a) and `test/proxy/run.sh` (P1–P3) |
 | `image-tests (arm64)` | `ubuntu-24.04-arm` | the same, on a native arm64 runner |
-| `e2e (kind, amd64)` | `ubuntu-latest` | runs `test/chart/run.sh` (C1–C16), builds a single-platform image, then `test/e2e/run.sh kind` with the default chart |
+| `e2e (kind, amd64)` | `ubuntu-latest` | runs `test/chart/run.sh` (C1–C17), builds a single-platform image, then `test/e2e/run.sh kind` with the default chart |
 | `e2e (k3d, amd64)` | `ubuntu-latest` | the same on k3d |
 | `e2e (kind, arm64)` | `ubuntu-24.04-arm` | the same on kind, on a native arm64 runner |
 | `e2e (k3d, arm64)` | `ubuntu-24.04-arm` | the same on k3d, on a native arm64 runner |

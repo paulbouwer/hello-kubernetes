@@ -21,6 +21,7 @@
 #   C14 message must be a string; the image tag can be a number.
 #   C15 The schema accepts the old ingress.* names and global.
 #   C16 Every value has a description, and the schema matches values.yaml.
+#   C17 The values table in docs/deploy-using-helm.md lists every value.
 #
 # Each scenario prints PASS or FAIL. The script exits 1 if any fails.
 # Needs helm and node.
@@ -237,6 +238,26 @@ if ! out=$(helm install t "$chart" --dry-run=client -o json 2>&1 | node -e '
   problems+=("$out")
 fi
 result "C16 every value has a description, and the schema matches values.yaml"
+
+# Every value the schema describes, except global, must be in the values table.
+if ! out=$(node -e '
+  const fs = require("fs");
+  const schema = require(process.argv[1]), docs = fs.readFileSync(process.argv[2], "utf8");
+  const missing = [];
+  const walk = (s, path) => {
+    for (const [key, sub] of Object.entries(s.properties || {})) {
+      const p = path + key;
+      if (p === "global") continue;
+      if (sub.properties) walk(sub, p + ".");
+      else if (!docs.includes("`" + p + "`")) missing.push(p);
+    }
+  };
+  walk(schema, "");
+  if (missing.length) { console.log("not in the values table: " + missing.join(", ")); process.exit(1); }
+' "$chart/values.schema.json" "$here/../../docs/deploy-using-helm.md" 2>&1); then
+  problems+=("$out")
+fi
+result "C17 the docs list every value"
 
 if ((failures > 0)); then
   echo "$failures scenario(s) failed"
