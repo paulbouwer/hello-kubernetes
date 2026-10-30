@@ -33,6 +33,14 @@ spec:
             - name: http
               containerPort: {{ .Values.deployment.container.port }}
               protocol: TCP
+          # Keep serving for a few seconds after the pod is told to stop, while
+          # the Service and the Ingress or Gateway stop sending it requests.
+          # The app exits as soon as it gets SIGTERM, so without this a rolling
+          # update drops a request now and then (e2e E12).
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 5
           livenessProbe:
             httpGet:
               path: {{ ternary "/" (printf "%s/" $prefix) (or $rewrite (not $prefix)) | quote }}

@@ -15,11 +15,11 @@ ARG TARGETARCH
 
 COPY .devcontainer/github-latest-release.sh /usr/local/bin/github-latest-release
 
-# Node.js, kubectl, Helm, Trivy, kind and k3d, at the versions pinned in
-# test/ci/install-tools.sh: the same versions as CI, each checked against a
-# SHA-256 kept in that table.
+# Node.js, kubectl, Helm, Trivy, kind, k3d and cloud-provider-kind, at the
+# versions pinned in test/ci/install-tools.sh: the same versions as CI, each
+# checked against a SHA-256 kept in that table.
 COPY test/ci/install-tools.sh /tmp/install-tools.sh
-RUN /tmp/install-tools.sh node kubectl helm trivy kind k3d \
+RUN /tmp/install-tools.sh node kubectl helm trivy kind k3d cloud-provider-kind \
     && rm /tmp/install-tools.sh
 
 # GitHub CLI

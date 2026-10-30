@@ -5,8 +5,8 @@
 # devcontainer all use this script.
 #
 # Usage: test/ci/install-tools.sh [tool...]
-#   tool: node, trivy, kind, k3d, helm, kubectl or oras. With no tool, installs
-#   all of them. Node.js unpacks into the parent of INSTALL_DIR, normally /usr/local.
+#   tool: node, trivy, kind, k3d, helm, kubectl, oras or cloud-provider-kind.
+#   With no tool, installs all of them. Node.js unpacks into the parent of INSTALL_DIR, normally /usr/local.
 #
 # Environment:
 #   INSTALL_DIR  where to install (default /usr/local/bin, with sudo if needed)
@@ -42,6 +42,11 @@ HELM_SHA256_ARM64=8cf8f66ecbc252ac8f7f06cca68aba88508ddfde3a6a34feb1678ad1694b4f
 KUBECTL_VERSION=1.37.1
 KUBECTL_SHA256_AMD64=65691ff77eb6fa44c908b77a1082c9f092c3b9733b5cefabec0d1104890e21a8
 KUBECTL_SHA256_ARM64=ff749f4b78d9c4f1ec87307df9b50119ed819e2094aa9810cb9acffc3286c8c7
+
+# cloud-provider-kind gives LoadBalancer Services on kind an address (e2e E8).
+CLOUD_PROVIDER_KIND_VERSION=0.12.0
+CLOUD_PROVIDER_KIND_SHA256_AMD64=5716aca8f01a85172c12f3b6329c70f151bec02c91b6f600c9f230845ee138e6
+CLOUD_PROVIDER_KIND_SHA256_ARM64=8c13bb92ec621d23a77397fe894ac36c10e9d22b92c04fe54d8c9256355d3263
 
 # oras pushes the Artifact Hub metadata in the publish workflow.
 ORAS_VERSION=1.3.5
@@ -135,13 +140,21 @@ install_oras() {
   place "$workdir/oras" oras
 }
 
+install_cloud-provider-kind() {
+  local file="cloud-provider-kind_${CLOUD_PROVIDER_KIND_VERSION}_linux_${arch}.tar.gz"
+  fetch "https://github.com/kubernetes-sigs/cloud-provider-kind/releases/download/v${CLOUD_PROVIDER_KIND_VERSION}/$file" \
+    "$file" "$(sha_for CLOUD_PROVIDER_KIND)"
+  tar -xzf "$workdir/$file" -C "$workdir" cloud-provider-kind
+  place "$workdir/cloud-provider-kind" cloud-provider-kind
+}
+
 tools=("$@")
-((${#tools[@]} > 0)) || tools=(node trivy kind k3d helm kubectl oras)
+((${#tools[@]} > 0)) || tools=(node trivy kind k3d helm kubectl oras cloud-provider-kind)
 for tool in "${tools[@]}"; do
   case "$tool" in
-    node | trivy | kind | k3d | helm | kubectl | oras) "install_$tool" ;;
+    node | trivy | kind | k3d | helm | kubectl | oras | cloud-provider-kind) "install_$tool" ;;
     *)
-      echo "unknown tool: $tool (node, trivy, kind, k3d, helm, kubectl or oras)" >&2
+      echo "unknown tool: $tool (node, trivy, kind, k3d, helm, kubectl, oras or cloud-provider-kind)" >&2
       exit 2
       ;;
   esac
