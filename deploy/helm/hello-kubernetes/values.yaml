@@ -19,11 +19,26 @@ deployment:
       tag: "" # uses chart appVersion if not provided
       pullPolicy: IfNotPresent
     port: 8080
+    # Meets the restricted Pod Security Standard. The app needs no
+    # privileges, and writes only to /tmp, which the chart mounts.
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: ["ALL"]
 
-  # Currently only linux images on amd64 architecture are supported - support for arm64 and windows/amd64 coming ...
+  # The image runs as the numeric user 1000. Setting the user here also lets
+  # older images, which name the user, pass runAsNonRoot.
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+
+  # The image is built for linux/amd64 and linux/arm64.
   nodeSelector:
     kubernetes.io/os: linux
-    kubernetes.io/arch: amd64
 
   resources: {}
 

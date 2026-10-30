@@ -19,18 +19,17 @@ How people should deploy hello-kubernetes: with Helm, with plain `kubectl apply`
 - **Document how to customise that YAML with Kustomize patches**, including a table of what each chart value changes.
 - **Have the chart create an Ingress or a Gateway API HTTPRoute**, not just set the app's path prefix. Document NGINX and Traefik as the two worked examples.
 - **Recommend "no rewrite" for path prefixes**, so an Ingress works on any controller without annotations. In 1.x the default stays `rewritePath: true`, so the docs set `rewritePath=false` explicitly. The default changes in 2.0.
-- **Support Helm 3 and Helm 4.** The devcontainer tracks the latest Helm 4.x release (#50).
+- **Support Helm 4.** The devcontainer and CI use Helm 4. Helm 3 is near the end of its security fixes, so the chart is not tested with it (decided 2026-10-30).
 
 ## Helm version
 
 The devcontainer used to install whatever Helm release was newest at build time, so each rebuild could pull a different major version. Since #50 it installs the latest Helm 4.x release (`HELM_MAJOR=4` in `.devcontainer/Dockerfile`), checked against its published checksum. The development environment tracks the latest release in a major version on purpose; exact versions are pinned in CI and the release images, not in the devcontainer.
 
 - Helm 4 came out in late 2025, and Helm 3 is close to the end of its security-fix window. Check the exact date on helm.sh before putting it in the docs.
-- The chart is `apiVersion: v2` and uses nothing unusual, so it should work on both. Confirm with `helm lint` and `helm template` under Helm 4.
-- The devcontainer only has Helm 4, so test the chart under Helm 3 in CI (see [testing.md](testing.md)).
-- Change "Helm 3" in `README.md` and `docs/deploy-using-helm.md` to "Helm 3.x or 4.x".
+- The chart is `apiVersion: v2`. `helm lint` and `helm template` run under Helm 4, and the e2e tests install it with Helm 4 (see [testing.md](testing.md)).
+- The docs say Helm 4 (#113). On 2026-10-30 the maintainer decided not to test Helm 3: it is near the end of its security fixes, and the devcontainer and CI already use Helm 4.
 
-The chart also needs the work in review item 6: `securityContext`, the probe fix (PR #30/#44), bumping `appVersion` (still `1.10`) and the ingress docs (#31). `templates/NOTES.txt` is empty, which is a cheap win.
+The chart also needs the work in review item 6. 4.1 (#113) adds the `securityContext`, sets `appVersion` to `1.11.0` and fills `templates/NOTES.txt`. The probe fix (PR #30/#44) merged in 1.10. The ingress docs (#31) are in 4.5.
 
 ## Exposing the app
 

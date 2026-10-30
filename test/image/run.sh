@@ -37,11 +37,12 @@ version_ge() {
 # on the first line, then the page. The page is empty if it didn't load.
 # serve_page CONTAINER_PORT [docker run args...]
 serve_page() {
-  local container_port="$1" cid port html="" css=000 error
+  local container_port="$1" cid port html="" css=000 error errfile
   shift
+  errfile=$(mktemp)
   # Docker's errors and the container's logs go to stderr, so that they show
   # in the test output without changing what this function prints.
-  if cid=$(docker run -d --pull never -p "127.0.0.1::$container_port" "$@" "$image" 2>"${TMPDIR:-/tmp}/serve-page.err"); then
+  if cid=$(docker run -d --pull never -p "127.0.0.1::$container_port" "$@" "$image" 2>"$errfile"); then
     port=$(docker port "$cid" "$container_port/tcp" | head -n1 | sed 's/.*://')
     for _ in $(seq 1 40); do
       html=$(curl -fs "http://127.0.0.1:$port/" 2>/dev/null) && break
@@ -54,10 +55,10 @@ serve_page() {
     fi
     docker rm -f "$cid" >/dev/null
   else
-    error=$(cat "${TMPDIR:-/tmp}/serve-page.err")
+    error=$(cat "$errfile")
     echo "    docker run $* failed: $error" >&2
   fi
-  rm -f "${TMPDIR:-/tmp}/serve-page.err"
+  rm -f "$errfile"
   printf '%s\n%s\n' "$css" "$html"
 }
 

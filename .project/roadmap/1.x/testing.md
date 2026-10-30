@@ -94,7 +94,7 @@ Every scenario runs on both kind and k3d unless the "Clusters" column says other
 |---|---|---|---|---|---|
 | E1 | Default install | `helm install hello-world ./deploy/helm/hello-kubernetes -n hk-e1 --create-namespace --set service.type=ClusterIP --wait` | Deployment shows 2/2 ready. Through `kubectl port-forward svc/...`: page has `Hello world!`, the namespace `hk-e1`, a pod name and node name that match a real pod (`kubectl get pod -o jsonpath`), and the expected image tag | both | baseline |
 | E2 | Page details are correct | same as E1 | The architecture shown matches the node's `kubernetes.io/arch` label | both | #40 |
-| E3 | Custom message, escaped | `--set message='<b>Hi</b> & "you"'` | Install succeeds. Page has `&lt;b&gt;Hi&lt;/b&gt; &amp; &quot;you&quot;` and does **not** contain a raw `<b>Hi</b>` tag. **Expected to fail today:** `deployment.yaml` renders `value: "{{ .Values.message }}"`, so a message containing `"` produces invalid YAML. Fix with `{{ .Values.message \| quote }}` (same for `pathPrefix`) | both | message injection, chart quoting bug |
+| E3 | Custom message, escaped | `--set message='<b>Hi</b> & "you"'` | Install succeeds. Page has `&lt;b&gt;Hi&lt;/b&gt; &amp; &quot;you&quot;` and does **not** contain a raw `<b>Hi</b>` tag. Failed until 4.1 (#113), which quotes the message and `pathPrefix` | both | message injection, chart quoting bug |
 | E4 | Custom port | `--set deployment.container.port=9090` | Pods become ready (probes follow the port), page served through the service | both | #34 |
 | E5 | Ingress with rewrite | Two releases (`hello-world`, `custom-message`) with `ingress.enabled=true`, `rewritePath=true`, prefixes `/app/hello-world` and `/app/custom`. Controller-specific annotations: `nginx.org/rewrites` on kind; a Traefik `stripPrefix` Middleware on k3d | `curl http://localhost:<port>/app/hello-world/` and `/app/custom/` each return their own page; CSS and image links resolve (200) | both | #31 docs |
 | E6 | Ingress without rewrite (recommended) | One release with `ingress.enabled=true`, `ingress.className` for the cluster, `pathPrefix=/app/hello`, `rewritePath=false`, no annotations | Pods **ready** (no probe failures in `kubectl get events`); page, `css/main.css` and `images/kubernetes.png` all 200 under `/app/hello/` | both | #30, #44, #38 |
@@ -105,7 +105,7 @@ Every scenario runs on both kind and k3d unless the "Clusters" column says other
 | E11 | Clean uninstall | After E1: `helm uninstall hello-world -n hk-e1` then `kubectl delete ns hk-e1 --wait` | No Deployment, Service, ServiceAccount or pods left with the chart's labels | both | #28 |
 | E12 | Rolling upgrade | Install with `message=v1`, then `helm upgrade --set message=v2 --wait` | All pods replaced, page shows `v2`, no downtime: a background `curl` loop during the upgrade sees no non-200 responses | kind | upgrades |
 | E13 | Kubernetes version range | E1 + E6 + E7 on the oldest and newest Kubernetes versions the chart supports | Same pass criteria | kind (`kindest/node:<version>`) | API removals like #31 |
-| E14 | arm64 nodes | E1 + E2 on an arm64 host | Architecture shown is `linux/arm64` | both, arm64 runner | #16 |
+| E14 | arm64 nodes | E1 + E2 on an arm64 host | Architecture shown is `linux/arm64` | both, arm64 runner. Since 4.1, every scenario runs on arm64, and E2 checks the architecture | #16 |
 | E15 | Docs still work | Pull the shell commands from `README.md` quick start and `docs/deploy-with-ingress.md` (fenced blocks tagged for testing) and run them against the cluster | Each command exits 0 and the doc's described result is reached | kind | stops #31 recurring |
 | E16 | HTTPRoute with rewrite | Two releases with `httpRoute.enabled=true`, `parentRefs` pointing at the test `Gateway`, `rewritePath=true`, prefixes `/app/hello-world` and `/app/custom` | Same as E5, through the Gateway. The rendered HTTPRoute has a `URLRewrite` filter and no controller-specific settings | both | Gateway API scope |
 | E17 | HTTPRoute without rewrite | One release with `httpRoute.enabled=true`, `pathPrefix=/app/hello` | Same as E6, through the Gateway; the HTTPRoute is `Accepted` in its status | both | Gateway API scope |
@@ -225,10 +225,12 @@ I'd write the tests as plain Bash with a small assert library rather than adding
 |---|---|---|
 | `image-tests (amd64)` | `ubuntu-latest` | builds the image natively, then `test/image/run.sh` (I1–I7, I5a) and `test/proxy/run.sh` (P1–P3) |
 | `image-tests (arm64)` | `ubuntu-24.04-arm` | the same, on a native arm64 runner |
-| `e2e (kind)` | `ubuntu-latest` | builds a single-platform image, then `test/e2e/run.sh kind` |
-| `e2e (k3d)` | `ubuntu-latest` | the same on k3d |
+| `e2e (kind, amd64)` | `ubuntu-latest` | builds a single-platform image, then `test/e2e/run.sh kind` with the default chart |
+| `e2e (k3d, amd64)` | `ubuntu-latest` | the same on k3d |
+| `e2e (kind, arm64)` | `ubuntu-24.04-arm` | the same on kind, on a native arm64 runner |
+| `e2e (k3d, arm64)` | `ubuntu-24.04-arm` | the same on k3d, on a native arm64 runner |
 
-Each job builds and tests its own architecture, with no QEMU. An earlier plan built a multi-arch image once and tested other platforms under emulation. Native runners test the real image, and avoid `kind load` failing on multi-platform images (#87). The arm64 e2e job comes with 4.1, when the chart stops pinning pods to amd64.
+Each job builds and tests its own architecture, with no QEMU. An earlier plan built a multi-arch image once and tested other platforms under emulation. Native runners test the real image, and avoid `kind load` failing on multi-platform images (#87). The arm64 e2e jobs came with 4.1 (#113), when the chart stopped pinning pods to amd64.
 
 A failed scenario prints its diagnostics in the job log. A new push to a PR cancels that PR's older runs.
 

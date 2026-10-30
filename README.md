@@ -12,7 +12,7 @@ This container image can be deployed on a Kubernetes cluster. It runs a web app,
 
 ## Quick start
 
-You can deploy `hello-kubernetes` to your Kubernetes cluster using [Helm 3](https://helm.sh/docs/intro/install/). The Helm chart installation and configuration options can be found in the [Deploy using Helm](docs/deploy-using-helm.md) guide.
+You can deploy `hello-kubernetes` to your Kubernetes cluster using [Helm 4](https://helm.sh/docs/intro/install/). The Helm chart installation and configuration options can be found in the [Deploy using Helm](docs/deploy-using-helm.md) guide.
 
 When running through the following examples, ensure that you are in the chart directory in the repo, since you are referencing a local helm chart.
 

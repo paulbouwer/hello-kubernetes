@@ -1,0 +1,29 @@
+{{- $name := include "hello-kubernetes.name" . -}}
+{{- $ns := .Release.Namespace -}}
+hello-kubernetes {{ .Chart.AppVersion }} is installed as {{ $name }} in the {{ $ns }} namespace.
+
+Wait for the pods to be ready:
+
+  kubectl rollout status deployment/{{ $name }} -n {{ $ns }}
+
+{{ if .Values.ingress.configured -}}
+Open the app through your ingress, at the path /{{ .Values.ingress.pathPrefix }}.
+{{- else if eq .Values.service.type "LoadBalancer" -}}
+Get the external address of the service. It can take a minute to appear:
+
+  kubectl get service {{ $name }} -n {{ $ns }}
+
+Then open http://<EXTERNAL-IP>{{ if ne (int .Values.service.port) 80 }}:{{ .Values.service.port }}{{ end }}/
+{{- else if eq .Values.service.type "NodePort" -}}
+Get the node port, and open http://<node address>:<node port>/
+
+  kubectl get service {{ $name }} -n {{ $ns }} -o jsonpath='{.spec.ports[0].nodePort}'
+{{- else -}}
+Forward a local port to the service, then open http://localhost:8080/
+
+  kubectl port-forward service/{{ $name }} 8080:{{ .Values.service.port }} -n {{ $ns }}
+{{- end }}
+
+To remove it:
+
+  helm uninstall {{ .Release.Name }} -n {{ $ns }}

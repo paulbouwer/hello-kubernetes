@@ -74,14 +74,22 @@ jobs:
       - name: Proxy tests
         run: test/proxy/run.sh hello-kubernetes:ci
 
+  # Each architecture runs the default chart on its own native runner, so the
+  # arm64 jobs prove that the chart schedules and runs on arm64 nodes.
   e2e:
-    name: e2e (${{ matrix.cluster }})
-    runs-on: ubuntu-latest
+    name: e2e (${{ matrix.cluster }}, ${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         cluster: [kind, k3d]
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
     steps:
       - name: Check out the code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -91,8 +99,8 @@ jobs:
       - name: Install the tools
         run: test/ci/install-tools.sh ${{ matrix.cluster }} helm kubectl
 
-      - name: Build the image
+      - name: Build the image for ${{ matrix.arch }}
         run: make e2e-image
 
-      - name: E2E tests on ${{ matrix.cluster }}
+      - name: E2E tests on ${{ matrix.cluster }}, ${{ matrix.arch }}
         run: IMAGE=hello-kubernetes:e2e test/e2e/run.sh ${{ matrix.cluster }}

@@ -96,7 +96,7 @@ Deploy pages follow Herdr's install page:
 2. **Verify**: a command and its expected result, e.g. `curl -s localhost:8080 | grep "Hello world!"`.
 3. **Upgrade.**
 4. **Uninstall**: `helm uninstall` or `kubectl delete`, and deleting the namespace.
-5. **Requirements**: Kubernetes version, Helm 3.x or 4.x, platforms.
+5. **Requirements**: Kubernetes version, Helm 4, platforms.
 
 ### Pages
 

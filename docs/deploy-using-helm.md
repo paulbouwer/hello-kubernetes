@@ -8,7 +8,7 @@ The `hello-kubernetes` Helm chart can be used to deploy the `hello-kubernetes` a
 
 ## Prerequisites
 
-- [Helm 3](https://v3.helm.sh/)
+- [Helm 4](https://helm.sh/docs/intro/install/)
 
 If you are using the [VS Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) based development environment, all of the prerequisites will be available in the terminal.
 
@@ -29,7 +29,9 @@ The following table lists the configuration parameters of the hello-kubernetes c
 | `deployment.container.image.tag` | `string` | `""` | The container image tag. If not specified, the chart's appVersion is used. |
 | `deployment.container.image.pullPolicy` | `string` | `"IfNotPresent"` | The pull policy for the container image. |
 | `deployment.container.port` | `int` | `"8080"` | The port that hello-kubernetes app listens on. |
-| `deployment.nodeSelector` | `object` | `{"kubernetes.io/os":"linux", "kubernetes.io/arch":"amd64"}` | The node selector for the deployment. |
+| `deployment.container.securityContext` | `object` | `{"allowPrivilegeEscalation":false, "readOnlyRootFilesystem":true, "capabilities":{"drop":["ALL"]}}` | The container security context. With `deployment.podSecurityContext`, it meets the restricted Pod Security Standard. |
+| `deployment.podSecurityContext` | `object` | `{"runAsNonRoot":true, "runAsUser":1000, "runAsGroup":1000, "seccompProfile":{"type":"RuntimeDefault"}}` | The pod security context. The app runs as the numeric user 1000. |
+| `deployment.nodeSelector` | `object` | `{"kubernetes.io/os":"linux"}` | The node selector for the deployment. The image runs on `amd64` and `arm64` nodes. |
 | `deployment.resources` | `object` | `{}` | The resource limits for the deployment. |
 | `deployment.tolerations` | `object` | `[]` | The tolerations for the deployment. |
 | `deployment.affinity` | `object` | `{}` | The affinity for the deployment. |
