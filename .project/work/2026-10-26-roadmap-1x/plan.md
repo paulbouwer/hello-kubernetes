@@ -105,6 +105,8 @@ The separate [workstream 3 efficiency review](workstream-03-efficiency-review.md
 | 4.5 | docs(deploy): rewrite the deployment docs for Helm, kubectl and Kustomize | documentation, area:deploy | 4.2, 4.4 | #28, #31 | [work package](../2026-10-30-deployment-docs/plan.md), [deploy.md](../../roadmap/1.x/deploy.md) |
 | 4.6 | test(e2e): add Ingress and Gateway API scenarios on kind and k3d | enhancement, area:ci | 3.3, 4.2 | — | [work package](../2026-10-30-e2e-scenarios/plan.md), [testing.md](../../roadmap/1.x/testing.md#suggested-order) steps 2–4, 7, 8 |
 | 4.7 | feat(dev): start a local kind or k3d cluster to try the deployment docs | enhancement, area:operations | 4.6 | — | [work package](../2026-10-30-local-clusters/plan.md) |
+| 4.8 | fix(chart): render numeric image tags | bug, area:deploy | 4.3 | — | [workstream 4 review](workstream-04-review.md#finding-to-address) |
+| 4.9 | test(e2e): make reused local clusters safe | enhancement, area:ci | 4.7 | — | [workstream 4 review](workstream-04-review.md#minor-issues) |
 
 - 4.1 covers the `securityContext`, removing `kubernetes.io/arch: amd64` from `nodeSelector`, quoting `message` and `pathPrefix`, `appVersion`, and `NOTES.txt`. It removes the `EXPECTED_FAILURE` markers from E3 and E7, and adds the arm64 e2e job to CI, which proves the default chart on arm64 (workstream 2 review). It also gives the image tests' error file in `test/image/run.sh` a unique name with `mktemp` (workstream 3 review).
 - 4.2 also adds the top-level `pathPrefix` and `rewritePath`, keeps the old names working, and adds the chart tests (C1–C11). #31 closes with 4.5, which replaces the broken Ingress example in the docs.
@@ -114,6 +116,9 @@ The separate [workstream 3 efficiency review](workstream-03-efficiency-review.md
 - 4.5 covers the quick start with clean-up, Helm 4 (decided 2026-10-30: Helm 3 is not tested), the NGINX, Traefik and Gateway API examples, the Kustomize guide and the values reference.
 - 4.6 covers E5, E6, E8–E10 and E12–E18, in three PRs: Ingress and Gateway (E5, E6, E16–E18), cluster behaviour (E8–E10, E12), and versions and docs (E13 on Kubernetes 1.35, E15). The first PR found that `nginx.org/rewrites` works with the chart's path, and that the NGINX Ingress Controller needs a host and allows one Ingress per host; the docs say so.
 - 4.7 adds `make` targets that create a kind or k3d cluster with the same Ingress controller and Gateway as the e2e tests (`test/e2e/cluster.sh`), load the image, keep the cluster, and print how to reach it, so the deployment docs can be tried locally (asked by the maintainer, 2026-10-30).
+- 4.8 and 4.9 come from the workstream 4 review. 4.8 fixes numeric image tags, which rendered as `%!s(int64=1)`, and tests real numeric values; it must land before 6.2. 4.9 checks the Kubernetes version and image IDs of a reused local cluster, and makes `make e2e-clean` stop `cloud-provider-kind`.
+
+The [workstream 4 review](workstream-04-review.md) records the outcome, the finding fixed in 4.8, the minor issues fixed in 4.9, and the 6.2 release gates.
 
 #### 5. Website
 
@@ -273,6 +278,8 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 - 4.5 docs(deploy): rewrite the deployment docs for Helm, kubectl and Kustomize
 - 4.6 test(e2e): add k3d, Ingress and Gateway API scenarios
 - 4.7 feat(dev): start a local kind or k3d cluster to try the deployment docs
+- 4.8 fix(chart): render numeric image tags
+- 4.9 test(e2e): make reused local clusters safe
 
 ### 5. Website
 - 5.1 feat(site): scaffold the Starlight site and publish it to GitHub Pages
