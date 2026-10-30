@@ -36,6 +36,11 @@ From PR A, on kind with the NGINX Ingress Controller 5.7.0:
 - It rejects an Ingress with no host (`spec.rules[0].host: Required value`), and allows one Ingress per host (`All hosts are taken by other resources`). Traefik and the Gateway API have neither limit. The docs now say so, and the scenarios give each release its own host.
 - `nginx.org/rewrites: "serviceName=hello-kubernetes-<release> rewrite=/"` works with the chart's path, which has no trailing slash: the page and its assets load. The Ingress guide now has this NGINX rewrite example.
 
+From PR B:
+
+- A rolling upgrade dropped one request in each run (E12), because the app exits as soon as it gets SIGTERM, before the Service and the proxy stop sending it requests. The chart now has a `preStop` sleep of 5 seconds, which Kubernetes runs with no shell and restricted Pod Security allows. Without it, E12 failed 3 of 3 runs on kind; with it, it passed 3 of 3.
+- `pgrep -x` matches process names of up to 15 characters, and `cloud-provider-kind` has 19, so `cluster.sh` matches the command line instead.
+
 ## Tracking
 
 - **Issue:** [#123](https://github.com/paulbouwer/hello-kubernetes/issues/123), a sub-issue of epic [#54](https://github.com/paulbouwer/hello-kubernetes/issues/54).

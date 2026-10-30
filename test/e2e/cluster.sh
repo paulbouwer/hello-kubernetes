@@ -8,7 +8,8 @@
 #   GATEWAY_URL                         where the Gateway answers
 #
 # kind: the F5 NGINX Ingress Controller and NGINX Gateway Fabric, each on a
-# NodePort that kind maps to localhost. k3d: k3s's built-in Traefik, for both
+# NodePort that kind maps to localhost, and cloud-provider-kind, which gives
+# LoadBalancer Services an address. It runs on the host, while the cluster runs. k3d: k3s's built-in Traefik, for both
 # the Ingress and the Gateway, on the port that k3d maps to its load balancer.
 #
 # Every version is pinned, and checked against its digest or SHA-256. To change
@@ -87,9 +88,32 @@ load_image() {
 
 delete_cluster_now() {
   case "$CLUSTER_TYPE" in
-    kind) kind delete cluster --name "$cluster" 2>&1 ;;
+    kind) stop_cloud_provider_kind && kind delete cluster --name "$cluster" 2>&1 ;;
     k3d) k3d cluster delete "$cluster" 2>&1 ;;
   esac
+}
+
+cloud_provider_kind_pid="${TMPDIR:-/tmp}/$cluster-cloud-provider-kind.pid"
+
+# Starts cloud-provider-kind, unless one is running already.
+start_cloud_provider_kind() {
+  # pgrep -x only matches names of up to 15 characters, so match the command.
+  pgrep -f '(^|/)cloud-provider-kind( |$)' >/dev/null && return 0
+  command -v cloud-provider-kind >/dev/null || {
+    echo "cloud-provider-kind is not installed. Install it with test/ci/install-tools.sh cloud-provider-kind." >&2
+    return 1
+  }
+  echo "Starting cloud-provider-kind"
+  nohup cloud-provider-kind >"${TMPDIR:-/tmp}/$cluster-cloud-provider-kind.log" 2>&1 &
+  echo $! >"$cloud_provider_kind_pid"
+}
+
+# Stops the cloud-provider-kind that start_cloud_provider_kind started.
+stop_cloud_provider_kind() {
+  if [[ -f "$cloud_provider_kind_pid" ]]; then
+    kill "$(cat "$cloud_provider_kind_pid")" 2>/dev/null || true
+    rm -f "$cloud_provider_kind_pid"
+  fi
 }
 
 # Pulls a chart and checks its digest, then prints the path of the chart file.
@@ -149,6 +173,7 @@ setup_routing_kind() {
       --wait --timeout 300s >/dev/null
   fi
   rm -rf "$work"
+  start_cloud_provider_kind
   kubectl apply -f "$cluster_dir/extras/gateway-kind.yaml" >/dev/null
   kubectl wait "gateway/$GATEWAY_NAME" -n "$GATEWAY_NAMESPACE" --for=condition=Programmed --timeout=180s >/dev/null
 }

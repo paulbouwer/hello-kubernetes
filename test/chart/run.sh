@@ -63,6 +63,7 @@ lacks "kind: Ingress" "Ingress"
 lacks "kind: HTTPRoute" "HTTPRoute"
 lacks "PATH_PREFIX" "prefix variable"
 has 'path: "/"' "probe path"
+has $'preStop:\n              sleep:\n                seconds: 5' "preStop sleep"
 result "C1 defaults: no Ingress, no HTTPRoute, no prefix"
 
 out=$(render --set ingress.enabled=true --set ingress.className=traefik --set ingress.host=hello.example \

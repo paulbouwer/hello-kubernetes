@@ -97,7 +97,7 @@ jobs:
           persist-credentials: false
 
       - name: Install the tools
-        run: test/ci/install-tools.sh ${{ matrix.cluster }} helm kubectl
+        run: test/ci/install-tools.sh ${{ matrix.cluster == 'kind' && 'kind cloud-provider-kind' || 'k3d' }} helm kubectl
 
       - name: Chart tests
         run: test/chart/run.sh

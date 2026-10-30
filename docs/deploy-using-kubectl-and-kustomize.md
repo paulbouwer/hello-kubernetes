@@ -197,4 +197,4 @@ To make a change that the chart has a value for, without Helm, change the YAML l
 | `deployment.podSecurityContext` | The pod `securityContext` |
 | `deployment.resources`, `nodeSelector`, `tolerations`, `affinity` | Copied into the pod spec as they are |
 
-The root filesystem is read-only, so the Deployment mounts an `emptyDir` at `/tmp`. Keep it if you change the security settings.
+The root filesystem is read-only, so the Deployment mounts an `emptyDir` at `/tmp`. Keep it if you change the security settings. The container also has a `preStop` sleep of 5 seconds, so that an upgrade doesn't drop requests while the pods are replaced.

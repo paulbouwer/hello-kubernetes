@@ -126,7 +126,7 @@ Every scenario runs on both kind and k3d unless the "Clusters" column says other
 | E5 | Ingress with rewrite | Two releases (`hello-world`, `custom-message`) with `ingress.enabled=true`, `rewritePath=true`, prefixes `/app/hello-world` and `/app/custom`, each with its own host. Controller-specific annotations: `nginx.org/rewrites` on kind; a Traefik `stripPrefix` Middleware on k3d | `curl http://localhost:<port>/app/hello-world/` and `/app/custom/` each return their own page; CSS and image links resolve (200) | both | #31 docs |
 | E6 | Ingress without rewrite (recommended) | One release with `ingress.enabled=true`, `ingress.className` for the cluster, `pathPrefix=/app/hello`, `rewritePath=false`, no annotations | Pods **ready** (no probe failures in `kubectl get events`); page, `css/main.css` and `images/kubernetes.png` all 200 under `/app/hello/` | both | #30, #44, #38 |
 | E7 | Restricted Pod Security | Namespace labelled `pod-security.kubernetes.io/enforce=restricted`, chart installed with defaults | Install succeeds with no admission warnings; pods run with `runAsUser: 1000`; `kubectl exec ... -- id -u` prints `1000` | both | #35 |
-| E8 | LoadBalancer service | `--set service.type=LoadBalancer`. kind: run `cloud-provider-kind`; k3d: built-in ServiceLB | Service gets an `EXTERNAL-IP` within 60s; page served through it | both | #1, #14 |
+| E8 | LoadBalancer service | `--set service.type=LoadBalancer`. kind: `cloud-provider-kind`, which `cluster.sh` starts; k3d: built-in ServiceLB, on port 8080, because Traefik holds port 80 | Service gets an `EXTERNAL-IP` within 60s; page served through it | both | #1, #14 |
 | E9 | Pods across nodes | `--set deployment.replicaCount=4` on a 1 control-plane + 2 worker cluster | Repeated requests through the service return at least 2 distinct pod names, and pods sit on at least 2 nodes | both | the demo's main point |
 | E10 | Single-file manifest | `kubectl apply -f hello-kubernetes.yaml` (the rendered release asset), no Helm | Same checks as E1 | both | #29 |
 | E11 | Clean uninstall | After E1: `helm uninstall hello-world -n hk-e1` then `kubectl delete ns hk-e1 --wait` | No Deployment, Service, ServiceAccount or pods left with the chart's labels | both | #28 |
@@ -152,6 +152,8 @@ E15 needs a light convention in the docs, for example marking testable blocks as
 | Rewriting for E5 | the `nginx.org/rewrites` annotation | a `stripPrefix` `Middleware`, created by `rewrite_args` in `lib.sh` |
 
 The charts, the controller images and the CRD manifest are pinned, and checked against their digests or SHA-256.
+
+E12 found that a rolling upgrade dropped a request now and then, because the app exits as soon as it gets SIGTERM (2.2), before the Service and the proxy stop sending it requests. The chart now has a `preStop` sleep of 5 seconds (#123). Without it, E12 failed 3 runs of 3; with it, it passed 3 of 3.
 
 The NGINX Ingress Controller needs a host on each Ingress, and allows one Ingress per host, so each routing scenario gives each release its own host, and sends it as the `Host` header. `nginx.org/rewrites` works with the chart's path, which has no trailing slash (#123).
 
@@ -210,7 +212,7 @@ Test containers run with `docker run --pull never` (#98). Otherwise a `docker ru
 
 Prerequisites: Docker, `kind`, `k3d`, `kubectl`, `helm`, and `cloud-provider-kind` for E8.
 
-The devcontainer (#50) has all of these except `cloud-provider-kind`, and runs Docker inside the container (docker-in-docker), so the targets run there with no access to the host's Docker. See [docs/development-environment.md](../../../docs/development-environment.md). To run them on the host instead, your user needs access to the Docker socket: add it to the `docker` group (`sudo usermod -aG docker $USER`, then log out and back in).
+The devcontainer (#50) has all of these, `cloud-provider-kind` since #123, and runs Docker inside the container (docker-in-docker), so the targets run there with no access to the host's Docker. See [docs/development-environment.md](../../../docs/development-environment.md). To run them on the host instead, your user needs access to the Docker socket: add it to the `docker` group (`sudo usermod -aG docker $USER`, then log out and back in).
 
 ```sh
 make test-image

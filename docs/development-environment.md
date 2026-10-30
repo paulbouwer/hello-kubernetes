@@ -19,6 +19,7 @@ The container runs as the `vscode` user on Ubuntu 26.04, and builds on both `amd
 | Trivy | pinned in `test/ci/install-tools.sh` |
 | kind | pinned in `test/ci/install-tools.sh` |
 | k3d | pinned in `test/ci/install-tools.sh` |
+| cloud-provider-kind | pinned in `test/ci/install-tools.sh` |
 | GitHub CLI (`gh`) | latest 2.x |
 | GitHub Copilot CLI (`copilot`) | latest, updates itself |
 | Claude Code (`claude`) | stable channel, updates itself |
