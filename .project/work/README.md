@@ -56,3 +56,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-29-devcontainer-tools](2026-10-29-devcontainer-tools/plan.md) | Make the devcontainer install Node.js, kubectl, Helm, Trivy, kind and k3d from the same pinned table as CI. | done |
 | [2026-10-30-chart-secure-defaults](2026-10-30-chart-secure-defaults/plan.md) | Give the chart secure defaults that meet the restricted Pod Security Standard, fix its bugs, and run the e2e tests on arm64. | done |
 | [2026-10-30-chart-ingress-httproute](2026-10-30-chart-ingress-httproute/plan.md) | Let the chart create an Ingress or a Gateway API HTTPRoute, with top-level pathPrefix and rewritePath, and keep the old names working. | done |
+| [2026-10-30-chart-values-schema](2026-10-30-chart-values-schema/plan.md) | Add values.schema.json to the chart, so Helm checks values and editors and agents get descriptions and allowed values. | done |

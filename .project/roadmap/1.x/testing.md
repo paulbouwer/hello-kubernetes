@@ -89,7 +89,7 @@ These check the image itself and guard against the problems found in the review 
 
 ## Chart tests
 
-`test/chart/run.sh` (`make test-chart`), added in #115, renders the chart with `helm template` and checks what it creates, with no cluster. It covers the cases that are slow or need a controller to test on a cluster: each way of exposing the app, the old value names, and odd values.
+`test/chart/run.sh` (`make test-chart`), added in #115 and extended for the schema in #117, renders the chart with `helm template` and checks what it creates, with no cluster. It covers the cases that are slow or need a controller to test on a cluster: each way of exposing the app, the old value names, and odd values.
 
 | ID | Values | Checks |
 |---|---|---|
@@ -104,6 +104,13 @@ These check the image itself and guard against the problems found in the review 
 | C9 | `app/hello`, `/app/hello`, `/app/hello/`, `/` | The same result; `/` means no prefix |
 | C10 | quotes in the message and the prefix | `helm lint --strict` passes |
 | C11 | the old `ingress.pathPrefix` alone | No prefix, as before |
+| C12 | the defaults and the values of C2, C4 and others | The schema accepts them |
+| C13 | an unknown key, a wrong type, a `service.type` or `pullPolicy` not allowed, a port out of range, a non-string annotation | The schema rejects each, and the error names the value |
+| C14 | `--set message=42`, `--set-string message=42`, `--set deployment.container.image.tag=1.11` | A number as the message is rejected; as a string it works. A number as the tag works |
+| C15 | the old `ingress.*` names, `global` | The schema accepts them |
+| C16 | `values.yaml` and `values.schema.json` | Every value has a description, and the schema has nothing `values.yaml` doesn't, except the old names and `global` |
+
+The schema (#117) is checked by C6 and C12–C16.
 
 ## End-to-end scenarios
 
@@ -244,7 +251,7 @@ I'd write the tests as plain Bash with a small assert library rather than adding
 |---|---|---|
 | `image-tests (amd64)` | `ubuntu-latest` | builds the image natively, then `test/image/run.sh` (I1–I7, I5a) and `test/proxy/run.sh` (P1–P3) |
 | `image-tests (arm64)` | `ubuntu-24.04-arm` | the same, on a native arm64 runner |
-| `e2e (kind, amd64)` | `ubuntu-latest` | runs `test/chart/run.sh` (C1–C11), builds a single-platform image, then `test/e2e/run.sh kind` with the default chart |
+| `e2e (kind, amd64)` | `ubuntu-latest` | runs `test/chart/run.sh` (C1–C16), builds a single-platform image, then `test/e2e/run.sh kind` with the default chart |
 | `e2e (k3d, amd64)` | `ubuntu-latest` | the same on k3d |
 | `e2e (kind, arm64)` | `ubuntu-24.04-arm` | the same on kind, on a native arm64 runner |
 | `e2e (k3d, arm64)` | `ubuntu-24.04-arm` | the same on k3d, on a native arm64 runner |

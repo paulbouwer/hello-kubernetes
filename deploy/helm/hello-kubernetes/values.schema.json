@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "hello-kubernetes chart values",
+  "description": "Values for the hello-kubernetes Helm chart. Helm checks every install and upgrade against this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "global": {
+      "description": "Values that a parent chart shares with its subcharts. Not used by this chart.",
+      "type": "object"
+    },
+    "message": {
+      "description": "A custom message to show on the page instead of \"Hello world!\". It is text, so quote it in a values file, or use --set-string, even when it is only a number.",
+      "type": "string",
+      "default": ""
+    },
+    "pathPrefix": {
+      "description": "Serve the app under this path prefix, for example /app/hello, behind an Ingress, an HTTPRoute or your own proxy. Leading and trailing slashes are optional. Empty serves the app at /.",
+      "type": "string",
+      "default": ""
+    },
+    "rewritePath": {
+      "description": "true: the proxy strips the prefix, and the app serves at /. The HTTPRoute does this with the standard URLRewrite filter; an Ingress needs your controller's rewrite annotation. false (recommended): the proxy passes the prefix on, and the app serves under it, with no annotations.",
+      "type": "boolean",
+      "default": true
+    },
+    "ingress": {
+      "description": "Create a networking.k8s.io/v1 Ingress for the app.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "description": "Create an Ingress. Set service.type to ClusterIP, so the app is reached only through it.",
+          "type": "boolean",
+          "default": false
+        },
+        "className": {
+          "description": "The Ingress class, for example nginx or traefik. Empty uses the cluster's default class.",
+          "type": "string",
+          "default": ""
+        },
+        "annotations": {
+          "description": "Annotations for the Ingress, for example your controller's rewrite annotation when rewritePath is true.",
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "default": {}
+        },
+        "host": {
+          "description": "The host name for the Ingress rule. Empty matches all hosts.",
+          "type": "string",
+          "default": ""
+        },
+        "tls": {
+          "description": "The Ingress TLS settings, as in the Ingress spec.tls field.",
+          "type": "array",
+          "items": { "type": "object" },
+          "default": []
+        },
+        "configured": {
+          "description": "Deprecated: use pathPrefix. When true, the old ingress.pathPrefix is used as the path prefix. Removed in 2.0.",
+          "type": "boolean",
+          "deprecated": true
+        },
+        "pathPrefix": {
+          "description": "Deprecated: use the top-level pathPrefix. Used only when ingress.configured is true. Removed in 2.0.",
+          "type": "string",
+          "deprecated": true
+        },
+        "rewritePath": {
+          "description": "Deprecated: use the top-level rewritePath. If either is false, the prefix is not rewritten. Removed in 2.0.",
+          "type": "boolean",
+          "deprecated": true
+        }
+      }
+    },
+    "httpRoute": {
+      "description": "Create a Gateway API HTTPRoute (gateway.networking.k8s.io/v1) for the app. The Gateway must allow routes from the app's namespace.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "description": "Create an HTTPRoute. Needs at least one parentRefs entry.",
+          "type": "boolean",
+          "default": false
+        },
+        "parentRefs": {
+          "description": "The Gateways to attach to, as in the HTTPRoute spec.parentRefs field, for example [{name: my-gateway, namespace: gateway-system}].",
+          "type": "array",
+          "items": { "type": "object" },
+          "default": []
+        },
+        "hostnames": {
+          "description": "The host names for the route. Empty matches the Gateway's host names.",
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      },
+      "if": {
+        "properties": { "enabled": { "const": true } },
+        "required": ["enabled"]
+      },
+      "then": {
+        "properties": { "parentRefs": { "minItems": 1 } },
+        "required": ["parentRefs"]
+      }
+    },
+    "service": {
+      "description": "The Service for the app.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "The Service type. LoadBalancer gives the app an external address. Use ClusterIP behind an Ingress or a Gateway, or with kubectl port-forward.",
+          "type": "string",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"],
+          "default": "LoadBalancer"
+        },
+        "port": {
+          "description": "The port the Service exposes.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 80
+        }
+      }
+    },
+    "deployment": {
+      "description": "The Deployment for the app.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "replicaCount": {
+          "description": "The number of pods.",
+          "type": "integer",
+          "minimum": 0,
+          "default": 2
+        },
+        "container": {
+          "description": "The app container.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "image": {
+              "description": "The container image.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "repository": {
+                  "description": "The image repository, for example paulbouwer/hello-kubernetes or ghcr.io/paulbouwer/hello-kubernetes.",
+                  "type": "string",
+                  "minLength": 1,
+                  "default": "paulbouwer/hello-kubernetes"
+                },
+                "tag": {
+                  "description": "The image tag. Empty uses the chart's appVersion. A number, such as 1.11 from --set, is used as written.",
+                  "type": ["string", "number"],
+                  "default": ""
+                },
+                "pullPolicy": {
+                  "description": "When the kubelet pulls the image.",
+                  "type": "string",
+                  "enum": ["Always", "IfNotPresent", "Never"],
+                  "default": "IfNotPresent"
+                }
+              }
+            },
+            "port": {
+              "description": "The port the app listens on. The probes and the Service follow it.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535,
+              "default": 8080
+            },
+            "securityContext": {
+              "description": "The container securityContext, as in the Kubernetes container spec. The default meets the restricted Pod Security Standard with podSecurityContext.",
+              "type": ["object", "null"]
+            }
+          }
+        },
+        "podSecurityContext": {
+          "description": "The pod securityContext, as in the Kubernetes pod spec. The default runs the app as the numeric user 1000, which also lets older images pass runAsNonRoot.",
+          "type": ["object", "null"]
+        },
+        "nodeSelector": {
+          "description": "The node selector for the pods. The image runs on linux/amd64 and linux/arm64 nodes.",
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "resources": {
+          "description": "The container resource requests and limits, as in the Kubernetes container spec.",
+          "type": "object",
+          "default": {}
+        },
+        "tolerations": {
+          "description": "The tolerations for the pods, as in the Kubernetes pod spec.",
+          "type": "array",
+          "items": { "type": "object" },
+          "default": []
+        },
+        "affinity": {
+          "description": "The affinity for the pods, as in the Kubernetes pod spec.",
+          "type": "object",
+          "default": {}
+        }
+      }
+    }
+  }
+}

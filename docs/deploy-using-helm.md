@@ -16,9 +16,11 @@ If you are using the [VS Code Remote Containers](https://marketplace.visualstudi
 
 The following table lists the configuration parameters of the hello-kubernetes chart and their default values.
 
+Helm checks your values against the chart's `values.schema.json` on every install and upgrade. A misspelled or unknown key, a wrong type or a value that isn't allowed stops the install, with a message that names the value. Editors that read JSON Schema show each value's description and allowed values.
+
 | Parameter | Type | Default | Description |
 | --------- | ---- | ------- | ----------- |
-| `message` | `string` | `""` | A custom message to display instead of the default. |
+| `message` | `string` | `""` | A custom message to display instead of the default. It must be a string: quote it in a values file, or use `--set-string message=42`, even when it is only a number. |
 | `pathPrefix` | `string` | `""` | Serve the app under a path prefix, for example `/app/hello`, behind an Ingress, an HTTPRoute or your own proxy. |
 | `rewritePath` | `bool` | `true` | `true`: the proxy strips the prefix, and the app serves at `/`. `false` (recommended): the proxy passes the prefix on, and the app serves under it, with no Ingress annotations needed. |
 | `ingress.enabled` | `bool` | `false` | Create a `networking.k8s.io/v1` Ingress for `pathPrefix`. Set `service.type` to `ClusterIP` with it. |
@@ -34,7 +36,7 @@ The following table lists the configuration parameters of the hello-kubernetes c
 | `service.port` | `int` | `80` | The port exposed by the service. |
 | `deployment.replicaCount` | `int` | `2` | The number of replicas for the hello-kubernetes deployment. |
 | `deployment.container.image.repository` | `string` | `paulbouwer/hello-kubernetes` | The container image to run in the  hello-kubernetes pods. |
-| `deployment.container.image.tag` | `string` | `""` | The container image tag. If not specified, the chart's appVersion is used. |
+| `deployment.container.image.tag` | `string` or `number` | `""` | The container image tag. If not specified, the chart's appVersion is used. |
 | `deployment.container.image.pullPolicy` | `string` | `"IfNotPresent"` | The pull policy for the container image. |
 | `deployment.container.port` | `int` | `"8080"` | The port that hello-kubernetes app listens on. |
 | `deployment.container.securityContext` | `object` | `{"allowPrivilegeEscalation":false, "readOnlyRootFilesystem":true, "capabilities":{"drop":["ALL"]}}` | The container security context. With `deployment.podSecurityContext`, it meets the restricted Pod Security Standard. |

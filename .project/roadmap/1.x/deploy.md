@@ -80,7 +80,7 @@ Notes:
 
 - **`pathPrefix` and `rewritePath` move to the top level**, because they apply to both the Ingress and the HTTPRoute (and to a user's own Ingress). The chart keeps reading `ingress.pathPrefix`, `ingress.rewritePath` and `ingress.configured` for one major version, then drops them.
 - **The default Service type** stays `LoadBalancer` in 1.x, so the quick start must say so. `LoadBalancer` suits the quick start on a cloud cluster, but leaves "EXTERNAL-IP pending" on kind and bare metal (old issues #1/#14), and is wrong behind an ingress or gateway. Switching to `ClusterIP`, with `kubectl port-forward` in the quick start, is a breaking change, so it's considered for 2.0.
-- Add all of these to `values.schema.json` (see [site.md](site.md)).
+- All of these are in `values.schema.json` (4.3, #117). It rejects unknown keys in the parts the chart owns, allows `global`, keeps the old `ingress.*` names valid as deprecated, and requires `message` to be a string (see [site.md](site.md)).
 
 ### Example: NGINX
 
