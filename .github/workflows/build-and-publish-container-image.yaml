@@ -265,6 +265,7 @@ jobs:
 
       - name: Check the pushed chart
         run: |
+          mkdir -p pulled
           helm pull "$CHART_REPO/hello-kubernetes" --version "$CHART_VERSION" --destination pulled
           if ! diff <(grep -v '^# hello-kubernetes chart\|^# Apply it\|^# https://' dist/hello-kubernetes.yaml) \
             <(helm template hello-kubernetes "pulled/hello-kubernetes-$CHART_VERSION.tgz"); then
