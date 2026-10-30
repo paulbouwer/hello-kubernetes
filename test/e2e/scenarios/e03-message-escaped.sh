@@ -1,6 +1,4 @@
 # E3: a custom message with HTML and quotes is installed, and shown escaped.
-EXPECTED_FAILURE="4.1: the chart doesn't quote the message, so a double quote breaks the YAML"
-EXPECTED_ERROR='YAML parse error'
 scenario() {
   install custom-message "$NAMESPACE" --set-string message='<b>Hi</b> & "you"'
   wait_ready custom-message "$NAMESPACE" 2

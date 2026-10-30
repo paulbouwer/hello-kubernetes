@@ -54,3 +54,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-29-publish-images](2026-10-29-publish-images/plan.md) | Publish each release for amd64 and arm64 to Docker Hub and GHCR, with an SBOM and signed provenance, only from main and only after the tests pass. | done |
 | [2026-10-29-pr-issue-resolver](2026-10-29-pr-issue-resolver/plan.md) | Find the PR's issue with one shared resolver in the issue check and the labels workflow, and fail a PR that points at more than one open issue. | done |
 | [2026-10-29-devcontainer-tools](2026-10-29-devcontainer-tools/plan.md) | Make the devcontainer install Node.js, kubectl, Helm, Trivy, kind and k3d from the same pinned table as CI. | done |
+| [2026-10-30-chart-secure-defaults](2026-10-30-chart-secure-defaults/plan.md) | Give the chart secure defaults that meet the restricted Pod Security Standard, fix its bugs, and run the e2e tests on arm64. | active |

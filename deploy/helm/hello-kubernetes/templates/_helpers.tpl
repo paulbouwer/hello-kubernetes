@@ -22,3 +22,10 @@ Selector labels
 app.kubernetes.io/name: {{ .Chart.Name }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+The container image: the repository, and the tag or the chart appVersion
+*/}}
+{{- define "hello-kubernetes.image" -}}
+{{- printf "%s:%s" .Values.deployment.container.image.repository (.Values.deployment.container.image.tag | default .Chart.AppVersion) }}
+{{- end }}
