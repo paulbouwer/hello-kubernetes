@@ -78,6 +78,18 @@ e2e-kind-oldest: e2e-image ## e2e E1, E6 and E7 on kind with the oldest supporte
 .PHONY: e2e
 e2e: e2e-kind e2e-k3d ## e2e tests on kind, then k3d
 
+.PHONY: cluster-kind
+cluster-kind: e2e-image ## start a local kind cluster to try the docs on (kept until make cluster-clean)
+	IMAGE=$(E2E_IMAGE) test/e2e/local.sh kind
+
+.PHONY: cluster-k3d
+cluster-k3d: e2e-image ## start a local k3d cluster to try the docs on (kept until make cluster-clean)
+	IMAGE=$(E2E_IMAGE) test/e2e/local.sh k3d
+
+.PHONY: cluster-clean
+cluster-clean: ## delete the local and e2e clusters
+	test/e2e/local.sh clean
+
 .PHONY: e2e-clean
 e2e-clean: ## delete the e2e clusters
 	-kind delete cluster --name hk-e2e-kind
