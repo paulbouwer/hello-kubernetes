@@ -2,7 +2,7 @@
 title: Chart secure defaults
 description: Give the chart secure defaults that meet the restricted Pod Security Standard, fix its bugs, and run the e2e tests on arm64.
 type: plan
-status: active
+status: done
 areas: [deploy, ci]
 issues: [113]
 created: 2026-10-30

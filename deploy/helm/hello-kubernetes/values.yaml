@@ -1,11 +1,33 @@
 # Provide a custom message
 message: ""
 
-# Remember to set service.type=ClusterIP if you are using an ingress
+# Serve the app under a path prefix, for example /app/hello, behind an
+# Ingress, an HTTPRoute or your own proxy.
+pathPrefix: ""
+# false (recommended): the proxy passes the prefix on, and the app serves under
+#   it. Works with any Ingress controller or Gateway, with no annotations.
+# true (the 1.x default): the proxy strips the prefix, and the app serves at /.
+#   The HTTPRoute does this with the standard URLRewrite filter. An Ingress
+#   needs your controller's rewrite annotation in ingress.annotations.
+rewritePath: true
+
+# Create an Ingress (networking.k8s.io/v1) for the app. Set service.type to
+# ClusterIP, so the app is reached only through the Ingress.
+# The old ingress.configured, ingress.pathPrefix and ingress.rewritePath values
+# still work in 1.x. Use pathPrefix and rewritePath instead.
 ingress:
-  configured: false
-  rewritePath: true
-  pathPrefix: ""
+  enabled: false
+  className: "" # for example nginx or traefik
+  annotations: {}
+  host: "" # all hosts when empty
+  tls: []
+
+# Create a Gateway API HTTPRoute (gateway.networking.k8s.io/v1) for the app.
+# The Gateway must allow routes from the app's namespace.
+httpRoute:
+  enabled: false
+  parentRefs: [] # the Gateways to attach to, for example [{name: my-gateway, namespace: gateway-system}]
+  hostnames: []
 
 service:
   type: LoadBalancer

@@ -99,6 +99,9 @@ jobs:
       - name: Install the tools
         run: test/ci/install-tools.sh ${{ matrix.cluster }} helm kubectl
 
+      - name: Chart tests
+        run: test/chart/run.sh
+
       - name: Build the image for ${{ matrix.arch }}
         run: make e2e-image
 

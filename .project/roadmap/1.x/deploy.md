@@ -50,7 +50,9 @@ Because the app can serve under a prefix itself, `rewritePath: false` is the sim
 
 Changing the default is a breaking change for anyone who relies on today's `true` default with their own rewriting Ingress. It waits for 2.0, so users migrate once (decided 2026-10-26, see the [1.x work plan](../../work/2026-10-26-roadmap-1x/plan.md#decisions)). Until then, the docs and examples set `rewritePath=false` explicitly.
 
-### Proposed values
+### Values
+
+Added in 4.2 (#115), as proposed here. The old `ingress.*` names map to the new ones: `pathPrefix` wins over `ingress.pathPrefix`, which still needs `ingress.configured`, and a `false` `rewritePath` in either name wins. The install notes list any old names in use.
 
 ```yaml
 # Serve the app under a path prefix, behind an ingress or gateway
