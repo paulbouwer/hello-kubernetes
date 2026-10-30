@@ -46,6 +46,7 @@ From PR C:
 - E15 runs on k3d, not on kind as testing.md first planned, because the guides' examples use Traefik and k3s's Traefik Gateway.
 - Run in order, the guides' examples collided: the Gateway example reused the Ingress example's release name and path. Its release is now `hello-gateway`, at `/app/hello-gateway`.
 - The Helm guide's install block ended with a `port-forward`, which runs until stopped. It is now its own block, not marked.
+- On the k3d arm64 runner, `k3d image import` failed on every node (`no such file or directory` for its shared image file) and still exited 0, so the pods got `ErrImageNeverPull`. `cluster.sh` now imports with `--mode direct`, checks that every node has the image, and tries up to 3 times.
 
 ## Tracking
 

@@ -87,8 +87,31 @@ load_image() {
   echo "Loading $1 into $cluster"
   case "$CLUSTER_TYPE" in
     kind) kind load docker-image "$1" --name "$cluster" >/dev/null ;;
-    k3d) k3d image import "$1" --cluster "$cluster" >/dev/null ;;
+    k3d)
+      # k3d image import can fail on some nodes and still exit 0, so check
+      # each node, and try again. --mode direct streams the image into each
+      # node, rather than through a shared file that a node can read too soon.
+      local attempt
+      for attempt in 1 2 3; do
+        k3d image import "$1" --cluster "$cluster" --mode direct >/dev/null 2>&1 || true
+        image_on_k3d_nodes "$1" && return 0
+        echo "The image is missing from a node after import $attempt of 3" >&2
+      done
+      return 1
+      ;;
   esac
+}
+
+# Succeeds if every k3d server and agent node has the image.
+# image_on_k3d_nodes IMAGE
+image_on_k3d_nodes() {
+  local node nodes=0
+  for node in $(docker ps --filter "label=k3d.cluster=$cluster" --format '{{.Names}} {{.Label "k3d.role"}}' |
+    awk '$2 == "server" || $2 == "agent" { print $1 }'); do
+    docker exec "$node" ctr -n k8s.io images ls -q | grep -qE "(^|/)$1\$" || return 1
+    nodes=$((nodes + 1))
+  done
+  ((nodes > 0))
 }
 
 delete_cluster_now() {
