@@ -1,7 +1,13 @@
 # Artifact Hub metadata for the chart repository
 # oci://ghcr.io/paulbouwer/charts/hello-kubernetes. The publish workflow pushes
-# it with each release, as the artifacthub.io tag, once repositoryID is set.
+# it with each release, as the artifacthub.io tag.
 #
-# After the repository is added on artifacthub.io, set repositoryID to the ID
-# that Artifact Hub shows for it. The listing then shows a verified publisher.
-# repositoryID:
+# repositoryID is the ID that Artifact Hub gave the repository when it was
+# added (2026-10-30). With it, the listing shows a verified publisher.
+repositoryID: 17d7ad01-2cf8-4a62-843b-0a403bef1a25
+
+# Test publishes push versions such as 1.11.0-test.45 to the same repository.
+# Don't list them.
+ignore:
+  - name: hello-kubernetes
+    version: -test\.

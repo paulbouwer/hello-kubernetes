@@ -27,7 +27,7 @@ Made on 2026-10-30 (maintainer).
 | Release | The workflow creates a **draft** release with generated notes and the file attached. The maintainer adds the credits and publishes it. |
 | Versions | The chart, the app and the image share one version. The release check fails unless the tag, `package.json`, the chart `version`, `appVersion` and the `artifacthub.io/images` tag all match. |
 | Chart registry | `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`, with signed provenance. The maintainer makes the package public after its first push. |
-| Artifact Hub | Keep it. It needs no stored credential: the maintainer adds the repository once on artifacthub.io, and Artifact Hub reads the public GHCR repo. The workflow pushes `deploy/helm/artifacthub-repo.yml` with the GHCR token, once `repositoryID` is set in it. #23 closes when the listing appears (6.2). |
+| Artifact Hub | Keep it. It needs no stored credential: Artifact Hub reads the public GHCR repo. The maintainer added the repository on 2026-10-30, and its `repositoryID` is in `deploy/helm/artifacthub-repo.yml`, which the workflow pushes with the GHCR token on each release. The file's `ignore` rule keeps the `-test.` versions off the listing. #23 closes when the listing appears (6.2). |
 | Test mode | A `publish-test-*` tag pushes the chart as `<version>-test.<run>` and keeps the file as a workflow artifact. No release, no Artifact Hub metadata. The maintainer deletes the test versions. |
 | Tools | `oras` 1.3.5 (released 2026-10-19) joins the tool table, to push the Artifact Hub metadata. `actions/upload-artifact` v7.0.2 (2026-10-07) keeps the test file. |
 
