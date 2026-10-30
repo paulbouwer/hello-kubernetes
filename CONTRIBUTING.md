@@ -34,6 +34,7 @@ If you work without an agent, read AGENTS.md anyway: the conventions are the sam
 - **Name your branch for the issue:** `{type}/{issue}-{slug}`, for example `fix/35-numeric-user`. A PR belongs to exactly one issue: a check fails a PR that has no open issue, or that points at more than one.
 - **Link the PR to the issue.** On a release branch, closing keywords don't work, so the maintainer links it in the PR's Development section.
 - **Verify before you ask for review.** Check each acceptance criterion, and record the results in a comment on the issue.
+- **Keep the docs runnable.** The e2e tests run every code block marked ```` ```bash e2e ```` in the README and the deployment guides. Mark a new block when it runs without input, and leave it unmarked when it doesn't.
 
 ## What every PR needs
 

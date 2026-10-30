@@ -2,7 +2,7 @@
 title: E2E scenarios
 description: Add the Ingress, Gateway API, cluster, version and docs e2e scenarios on kind and k3d.
 type: plan
-status: active
+status: done
 areas: [ci, deploy]
 issues: [123]
 created: 2026-10-30
@@ -40,6 +40,12 @@ From PR B:
 
 - A rolling upgrade dropped one request in each run (E12), because the app exits as soon as it gets SIGTERM, before the Service and the proxy stop sending it requests. The chart now has a `preStop` sleep of 5 seconds, which Kubernetes runs with no shell and restricted Pod Security allows. Without it, E12 failed 3 of 3 runs on kind; with it, it passed 3 of 3.
 - `pgrep -x` matches process names of up to 15 characters, and `cloud-provider-kind` has 19, so `cluster.sh` matches the command line instead.
+
+From PR C:
+
+- E15 runs on k3d, not on kind as testing.md first planned, because the guides' examples use Traefik and k3s's Traefik Gateway.
+- Run in order, the guides' examples collided: the Gateway example reused the Ingress example's release name and path. Its release is now `hello-gateway`, at `/app/hello-gateway`.
+- The Helm guide's install block ended with a `port-forward`, which runs until stopped. It is now its own block, not marked.
 
 ## Tracking
 

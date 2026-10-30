@@ -107,3 +107,24 @@ jobs:
 
       - name: E2E tests on ${{ matrix.cluster }}, ${{ matrix.arch }}
         run: IMAGE=hello-kubernetes:e2e test/e2e/run.sh ${{ matrix.cluster }}
+
+  # E13: the default chart, an Ingress and restricted Pod Security on the
+  # oldest Kubernetes version the chart supports.
+  e2e-oldest:
+    name: e2e (kind, amd64, Kubernetes 1.35)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the tools
+        run: test/ci/install-tools.sh kind cloud-provider-kind helm kubectl
+
+      - name: Build the image
+        run: make e2e-image
+
+      - name: E2E tests on Kubernetes 1.35
+        run: E2E_KUBERNETES=oldest IMAGE=hello-kubernetes:e2e test/e2e/run.sh kind e01 e06 e07

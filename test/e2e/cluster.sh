@@ -19,8 +19,13 @@
 cluster_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cluster="hk-e2e-$CLUSTER_TYPE"
 
-# Node images, pinned by digest. Both run Kubernetes 1.37.
+# Node images, pinned by digest. Both run Kubernetes 1.37, the newest version.
+# E2E_KUBERNETES=oldest runs kind on 1.35, the oldest version the chart
+# supports (E13). The node images are the ones kind 0.33.0 lists.
 kind_node_image="kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5"
+if [[ "${E2E_KUBERNETES:-}" == oldest ]]; then
+  kind_node_image="kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0"
+fi
 k3s_image="rancher/k3s:v1.37.1-k3s1@sha256:ca7f37d993d82ef0dcdcfecb2e0e2618ea541dbaffc620c8cedebe01a82acd0d"
 
 # Gateway API CRDs for kind, the version NGINX Gateway Fabric 2.8.0 is built

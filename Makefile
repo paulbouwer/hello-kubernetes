@@ -71,6 +71,10 @@ e2e-kind: e2e-image ## e2e tests on a kind cluster
 e2e-k3d: e2e-image ## e2e tests on a k3d cluster
 	IMAGE=$(E2E_IMAGE) test/e2e/run.sh k3d
 
+.PHONY: e2e-kind-oldest
+e2e-kind-oldest: e2e-image ## e2e E1, E6 and E7 on kind with the oldest supported Kubernetes (E13)
+	E2E_KUBERNETES=oldest IMAGE=$(E2E_IMAGE) test/e2e/run.sh kind e01 e06 e07
+
 .PHONY: e2e
 e2e: e2e-kind e2e-k3d ## e2e tests on kind, then k3d
 
