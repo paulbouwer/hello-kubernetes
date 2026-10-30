@@ -106,7 +106,7 @@ These check the image itself and guard against the problems found in the review 
 | C11 | the old `ingress.pathPrefix` alone | No prefix, as before |
 | C12 | the defaults and the values of C2, C4 and others | The schema accepts them |
 | C13 | an unknown key, a wrong type, a `service.type` or `pullPolicy` not allowed, a port out of range, a non-string annotation | The schema rejects each, and the error names the value |
-| C14 | `--set message=42`, `--set-string message=42`, `--set deployment.container.image.tag=1.11` | A number as the message is rejected; as a string it works. A number as the tag works |
+| C14 | `--set message=42`, `--set-string message=42`; the image tag as the integer `1` from `--set`, the number `1.11` from a values file, a string, a pre-release, empty and unset | A number as the message is rejected; as a string it works. Each tag renders the right image and `CONTAINER_IMAGE`, with no `%!` formatting error (#131) |
 | C15 | the old `ingress.*` names, `global` | The schema accepts them |
 | C16 | `values.yaml` and `values.schema.json` | Every value has a description, and the schema has nothing `values.yaml` doesn't, except the old names and `global` |
 | C17 | `docs/deploy-using-helm.md` | The values table lists every value in the schema, except `global` (#121) |

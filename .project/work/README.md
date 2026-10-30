@@ -61,3 +61,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-30-deployment-docs](2026-10-30-deployment-docs/plan.md) | Rewrite the deployment docs for kubectl, Helm and Kustomize, with no clone of the repo, clear prerequisites, and Ingress and Gateway API examples. | done |
 | [2026-10-30-e2e-scenarios](2026-10-30-e2e-scenarios/plan.md) | Add the Ingress, Gateway API, cluster, version and docs e2e scenarios on kind and k3d. | done |
 | [2026-10-30-local-clusters](2026-10-30-local-clusters/plan.md) | Start a local kind or k3d cluster, set up as the e2e tests set it up, to try the deployment docs. | done |
+| [2026-10-30-numeric-image-tags](2026-10-30-numeric-image-tags/plan.md) | Render numeric image tags as text, so the image name is valid, and test real numeric values. | done |

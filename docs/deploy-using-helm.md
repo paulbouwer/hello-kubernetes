@@ -92,7 +92,7 @@ kubectl delete namespace hello-kubernetes
 | `service.port` | int | `80` | The port the Service exposes. |
 | `deployment.replicaCount` | int | `2` | The number of pods. |
 | `deployment.container.image.repository` | string | `paulbouwer/hello-kubernetes` | The image, such as `ghcr.io/paulbouwer/hello-kubernetes`. |
-| `deployment.container.image.tag` | string or number | `""` | The image tag. Empty uses the chart's `appVersion`. |
+| `deployment.container.image.tag` | string or number | `""` | The image tag, such as `1`, `1.11` or `1.11.0`. Empty uses the chart's `appVersion`. In a values file, quote it: YAML reads `1.10` as the number 1.1. |
 | `deployment.container.image.pullPolicy` | string | `IfNotPresent` | `Always`, `IfNotPresent` or `Never`. |
 | `deployment.container.port` | int | `8080` | The port the app listens on. The probes and the Service follow it. |
 | `deployment.container.securityContext` | object | no privilege escalation, all capabilities dropped, read-only root filesystem | The container security context. With `deployment.podSecurityContext`, it meets the restricted Pod Security Standard. |

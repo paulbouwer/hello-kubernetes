@@ -197,9 +197,25 @@ result "C13 the schema rejects invalid values"
 rejects "a number as the message" "at '/message': got number, want string" --set message=42
 rejects "a boolean as the message" "at '/message': got boolean, want string" --set message=true
 accepts "a number as a string message" --set-string message=42
-accepts "a number as the image tag" --set deployment.container.image.tag=1.11
-out=$(render --set deployment.container.image.tag=1.11) || true
-has 'image: "paulbouwer/hello-kubernetes:1.11"' "the tag as written"
+# The image tag can be a number. --set turns a whole number into one, and a
+# values file turns 1.11 into one; --set 1.11 stays a string (#131).
+numeric_tag=$(mktemp)
+printf 'deployment:\n  container:\n    image:\n      tag: 1.11\n' >"$numeric_tag"
+check_image() {
+  local what="$1" want="$2"
+  shift 2
+  out=$(render "$@") || true
+  has "image: \"paulbouwer/hello-kubernetes:$want\"" "the image for $what"
+  has "value: \"paulbouwer/hello-kubernetes:$want\"" "CONTAINER_IMAGE for $what"
+  lacks "%!" "a formatting error for $what"
+}
+check_image "the integer tag 1, from --set" 1 --set deployment.container.image.tag=1
+check_image "the number 1.11, from a values file" 1.11 -f "$numeric_tag"
+check_image "the string 1.11, from --set" 1.11 --set deployment.container.image.tag=1.11
+check_image "a pre-release tag" 1.11.0-rc.1 --set deployment.container.image.tag=1.11.0-rc.1
+check_image "an empty tag" 1.11.0 --set deployment.container.image.tag=
+check_image "no tag" 1.11.0
+rm -f "$numeric_tag"
 result "C14 message is text; the image tag can be a number"
 
 accepts "the old names" --set ingress.configured=true --set ingress.pathPrefix=hello --set ingress.rewritePath=false

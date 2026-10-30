@@ -24,10 +24,13 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-The container image: the repository, and the tag or the chart appVersion
+The container image: the repository, and the tag or the chart appVersion. The
+tag can be a number, such as 1 from --set or 1.11 in a values file, so it is
+turned into text after the default is chosen.
 */}}
 {{- define "hello-kubernetes.image" -}}
-{{- printf "%s:%s" .Values.deployment.container.image.repository (.Values.deployment.container.image.tag | default .Chart.AppVersion) }}
+{{- $tag := .Values.deployment.container.image.tag | default .Chart.AppVersion | toString -}}
+{{- printf "%s:%s" .Values.deployment.container.image.repository $tag }}
 {{- end }}
 
 {{/*

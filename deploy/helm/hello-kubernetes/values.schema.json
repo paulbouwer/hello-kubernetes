@@ -153,7 +153,7 @@
                   "default": "paulbouwer/hello-kubernetes"
                 },
                 "tag": {
-                  "description": "The image tag. Empty uses the chart's appVersion. A number, such as 1.11 from --set, is used as written.",
+                  "description": "The image tag, such as 1, 1.11 or 1.11.0. Empty uses the chart's appVersion. A number is used as text, but quote a version tag in a values file: YAML reads 1.10 as the number 1.1.",
                   "type": ["string", "number"],
                   "default": ""
                 },
