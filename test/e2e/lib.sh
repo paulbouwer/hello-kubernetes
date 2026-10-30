@@ -1,5 +1,6 @@
 # Helpers for the e2e scenarios. Sourced by run.sh, which sets KUBECONFIG,
-# CLUSTER_TYPE, CHART, IMAGE_REPOSITORY and IMAGE_TAG.
+# CLUSTER_TYPE, CHART, IMAGE_REPOSITORY and IMAGE_TAG, and, from cluster.sh,
+# INGRESS_CLASS, INGRESS_URL, GATEWAY_NAME, GATEWAY_NAMESPACE and GATEWAY_URL.
 
 # Stops the scenario with a failure message.
 die() {
@@ -92,6 +93,84 @@ not_contains() {
 # page_field TEXT FIELD
 page_field() {
   tr -d '\r' <<<"$1" | grep -A1 -E "<th>$2:</th>" | sed -nE 's/.*<td>(.*)<\/td>.*/\1/p' | head -n1
+}
+
+# Prints a page through an Ingress or a Gateway, with a Host header. Retries
+# for up to 60 seconds while the route reaches the proxy.
+# routed BASE_URL HOST PATH
+routed() {
+  local body
+  for _ in $(seq 1 30); do
+    if body=$(curl -fsS -H "Host: $2" "$1$3" 2>/dev/null); then
+      printf '%s\n' "$body"
+      return 0
+    fi
+    sleep 2
+  done
+  curl -sS -o /dev/null -w "    last response: %{http_code}\n" -H "Host: $2" "$1$3" >&2 || true
+  die "GET $3 with Host $2 through $1 failed"
+}
+
+# Fails unless the release serves its page under PREFIX through BASE_URL, with
+# TEXT on it, and links its stylesheet and image under PREFIX, both loading.
+# check_routed RELEASE BASE_URL HOST PREFIX TEXT
+check_routed() {
+  local release="$1" base="$2" host="$3" prefix="$4" text="$5" html asset code
+  html=$(routed "$base" "$host" "$prefix/")
+  contains "$html" "$text" "\"$text\" at $prefix/"
+  contains "$html" "hello-kubernetes-$release-" "a pod of $release"
+  for asset in css/main.css images/kubernetes.png; do
+    contains "$html" "$prefix/$asset" "the link to $prefix/$asset"
+    code=$(curl -sS -o /dev/null -w '%{http_code}' -H "Host: $host" "$base$prefix/$asset")
+    [[ "$code" == 200 ]] || die "GET $prefix/$asset returned $code"
+    info "$prefix/$asset: 200"
+  done
+}
+
+# Fails if a probe got an HTTP error in the namespace, such as a 404 from a
+# probe path outside the prefix. "connection refused" while the app starts is
+# not an HTTP error, so it doesn't count.
+# no_probe_failures NAMESPACE
+no_probe_failures() {
+  local failures
+  failures=$(kubectl -n "$1" get events --field-selector reason=Unhealthy \
+    -o jsonpath='{range .items[*]}{.message}{"\n"}{end}' 2>/dev/null | grep -F "statuscode" || true)
+  [[ -z "$failures" ]] || die "probes failed in $1: $(head -n1 <<<"$failures")"
+  info "no probe got an HTTP error"
+}
+
+# Prints the annotations of a resource, except the ones Helm adds.
+# own_annotations NAMESPACE KIND NAME
+own_annotations() {
+  kubectl -n "$1" get "$2" "$3" -o json | jq -r '.metadata.annotations // {} | with_entries(select(.key | startswith("meta.helm.sh/") | not)) | select(length > 0) | tostring'
+}
+
+# Sets REWRITE_ARGS to the helm arguments that make the cluster's Ingress
+# controller strip PREFIX: the NGINX Ingress Controller's nginx.org/rewrites
+# annotation on kind, and a Traefik stripPrefix Middleware on k3d.
+# rewrite_args RELEASE NAMESPACE PREFIX
+rewrite_args() {
+  local release="$1" namespace="$2" prefix="$3"
+  case "$CLUSTER_TYPE" in
+    kind)
+      REWRITE_ARGS=(--set-string "ingress.annotations.nginx\\.org/rewrites=serviceName=hello-kubernetes-$release rewrite=/")
+      ;;
+    k3d)
+      kubectl create namespace "$namespace" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
+      kubectl apply -f - >/dev/null <<EOF
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-$release
+  namespace: $namespace
+spec:
+  stripPrefix:
+    prefixes:
+      - $prefix
+EOF
+      REWRITE_ARGS=(--set-string "ingress.annotations.traefik\\.ingress\\.kubernetes\\.io/router\\.middlewares=$namespace-strip-$release@kubernetescrd")
+      ;;
+  esac
 }
 
 # Prints the state of a namespace, for a failed scenario.

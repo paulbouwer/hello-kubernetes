@@ -46,7 +46,7 @@
           "default": {}
         },
         "host": {
-          "description": "The host name for the Ingress rule. Empty matches all hosts.",
+          "description": "The host name for the Ingress rule. Empty matches all hosts, but the NGINX Ingress Controller needs a host, and allows one Ingress per host.",
           "type": "string",
           "default": ""
         },

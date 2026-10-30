@@ -1,9 +1,17 @@
 # kind cluster for the e2e tests: 1 control plane and 2 workers, so that pods
-# spread across nodes. The node image is pinned in run.sh.
-# No port mappings yet: the Ingress scenarios (4.6) add them.
+# spread across nodes. The node image is pinned in cluster.sh.
+# The NGINX Ingress Controller and NGINX Gateway Fabric listen on NodePorts
+# 30080 and 30081, which these mappings expose on localhost.
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
   - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 18080
+        listenAddress: 127.0.0.1
+      - containerPort: 30081
+        hostPort: 18081
+        listenAddress: 127.0.0.1
   - role: worker
   - role: worker

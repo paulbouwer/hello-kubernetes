@@ -1,0 +1,18 @@
+# Turns on the Gateway API provider of k3s's built-in Traefik, and lets its
+# Gateway, traefik-gateway in kube-system, take HTTPRoutes from every
+# namespace. The same settings are in docs/deploy-with-ingress.md.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    providers:
+      kubernetesGateway:
+        enabled: true
+    gateway:
+      listeners:
+        web:
+          namespacePolicy:
+            from: All
