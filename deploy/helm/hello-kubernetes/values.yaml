@@ -19,7 +19,7 @@ ingress:
   enabled: false
   className: "" # for example nginx or traefik
   annotations: {}
-  host: "" # all hosts when empty
+  host: "" # all hosts when empty; the NGINX Ingress Controller needs one
   tls: []
 
 # Create a Gateway API HTTPRoute (gateway.networking.k8s.io/v1) for the app.

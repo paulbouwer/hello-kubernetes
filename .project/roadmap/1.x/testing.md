@@ -123,7 +123,7 @@ Every scenario runs on both kind and k3d unless the "Clusters" column says other
 | E2 | Page details are correct | same as E1 | The architecture shown matches the node's `kubernetes.io/arch` label | both | #40 |
 | E3 | Custom message, escaped | `--set message='<b>Hi</b> & "you"'` | Install succeeds. Page has `&lt;b&gt;Hi&lt;/b&gt; &amp; &quot;you&quot;` and does **not** contain a raw `<b>Hi</b>` tag. Failed until 4.1 (#113), which quotes the message and `pathPrefix` | both | message injection, chart quoting bug |
 | E4 | Custom port | `--set deployment.container.port=9090` | Pods become ready (probes follow the port), page served through the service | both | #34 |
-| E5 | Ingress with rewrite | Two releases (`hello-world`, `custom-message`) with `ingress.enabled=true`, `rewritePath=true`, prefixes `/app/hello-world` and `/app/custom`. Controller-specific annotations: `nginx.org/rewrites` on kind; a Traefik `stripPrefix` Middleware on k3d | `curl http://localhost:<port>/app/hello-world/` and `/app/custom/` each return their own page; CSS and image links resolve (200) | both | #31 docs |
+| E5 | Ingress with rewrite | Two releases (`hello-world`, `custom-message`) with `ingress.enabled=true`, `rewritePath=true`, prefixes `/app/hello-world` and `/app/custom`, each with its own host. Controller-specific annotations: `nginx.org/rewrites` on kind; a Traefik `stripPrefix` Middleware on k3d | `curl http://localhost:<port>/app/hello-world/` and `/app/custom/` each return their own page; CSS and image links resolve (200) | both | #31 docs |
 | E6 | Ingress without rewrite (recommended) | One release with `ingress.enabled=true`, `ingress.className` for the cluster, `pathPrefix=/app/hello`, `rewritePath=false`, no annotations | Pods **ready** (no probe failures in `kubectl get events`); page, `css/main.css` and `images/kubernetes.png` all 200 under `/app/hello/` | both | #30, #44, #38 |
 | E7 | Restricted Pod Security | Namespace labelled `pod-security.kubernetes.io/enforce=restricted`, chart installed with defaults | Install succeeds with no admission warnings; pods run with `runAsUser: 1000`; `kubectl exec ... -- id -u` prints `1000` | both | #35 |
 | E8 | LoadBalancer service | `--set service.type=LoadBalancer`. kind: run `cloud-provider-kind`; k3d: built-in ServiceLB | Service gets an `EXTERNAL-IP` within 60s; page served through it | both | #1, #14 |
@@ -140,79 +140,20 @@ Every scenario runs on both kind and k3d unless the "Clusters" column says other
 
 E15 needs a light convention in the docs, for example marking testable blocks as ```` ```sh e2e ````. It's the only scenario that changes the docs, so it can come last.
 
-### Per-cluster extras
+### Per-cluster setup
 
-The chart now creates the Ingress and HTTPRoute itself, so the tests only supply what's specific to each controller. These double as the examples in `deploy.md` and `docs/deploy-with-ingress.md`:
+`test/e2e/cluster.sh` (#123) creates each cluster and sets up its Ingress controller and Gateway, so every routing scenario runs unchanged on both. It exports the Ingress class, the Gateway and the URL each one answers on.
 
-- `test/e2e/extras/traefik-middleware.yaml`: a `stripPrefix` `Middleware` (`traefik.io/v1alpha1`) for E5 on k3d, referenced from `ingress.annotations` as `<ns>-<name>@kubernetescrd`.
-- `test/e2e/extras/gateway-kind.yaml`: a `Gateway` using NGINX Gateway Fabric's `GatewayClass`, with `allowedRoutes` from all namespaces.
-- `test/e2e/extras/gateway-k3d.yaml`: the same `Gateway` using Traefik's `GatewayClass`.
+| | kind | k3d |
+|---|---|---|
+| Ingress controller | F5 NGINX Ingress Controller 5.7.0 (chart 2.8.0), NodePort 30080 mapped to `localhost:18080` | k3s's built-in Traefik, on the load balancer's port 80, mapped to `localhost:18082` |
+| Gateway | NGINX Gateway Fabric 2.8.0, with `extras/gateway-kind.yaml` (`hk-gateway`), NodePort 30081 mapped to `localhost:18081` | Traefik's `traefik-gateway`, turned on by `extras/traefik-gateway-provider.yaml` |
+| Gateway API CRDs | v1.6.2, the version NGINX Gateway Fabric 2.8.0 is built against | v1.4.0, shipped with k3s |
+| Rewriting for E5 | the `nginx.org/rewrites` annotation | a `stripPrefix` `Middleware`, created by `rewrite_args` in `lib.sh` |
 
-The NGINX rewrite for E5 on kind is an annotation (`nginx.org/rewrites`), passed through `ingress.annotations`, so it needs no extra file.
+The charts, the controller images and the CRD manifest are pinned, and checked against their digests or SHA-256.
 
-## Cluster setup
-
-### kind
-
-```yaml
-# test/e2e/kind-config.yaml
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-nodes:
-  - role: control-plane
-    labels:
-      ingress-ready: "true"
-    extraPortMappings:
-      - containerPort: 80
-        hostPort: 8080
-      - containerPort: 443
-        hostPort: 8443
-  - role: worker
-  - role: worker
-```
-
-```sh
-kind create cluster --name hk-e2e --config test/e2e/kind-config.yaml   # add --image kindest/node:<version> for E13
-kind load docker-image paulbouwer/hello-kubernetes:<tag> --name hk-e2e
-kubectl apply -f <Gateway API standard CRDs, pinned version>
-helm install nginx-ingress <F5 NGINX Ingress Controller chart, pinned version> -n nginx-ingress --create-namespace   # hostPorts 80/443 on the ingress-ready node
-helm install ngf <NGINX Gateway Fabric chart, pinned version> -n nginx-gateway --create-namespace
-kubectl apply -f test/e2e/extras/gateway-kind.yaml
-cloud-provider-kind &   # for E8, and to give the Gateway's service an address
-```
-
-The NGINX Ingress Controller takes ports 80/443 through kind's port mappings. NGINX Gateway Fabric provisions its own data-plane service per `Gateway`; reach it through the address `cloud-provider-kind` gives it, or a NodePort added to `extraPortMappings`. Check both charts' kind instructions when writing `run.sh`.
-
-The community Ingress-NGINX controller would have been the obvious choice on kind, but it was retired in March 2026 (see `deploy.md`).
-
-### k3d
-
-```yaml
-# test/e2e/k3d-config.yaml
-apiVersion: k3d.io/v1alpha5
-kind: Simple
-metadata:
-  name: hk-e2e
-servers: 1
-agents: 2
-image: rancher/k3s:<pinned version>
-ports:
-  - port: 8081:80
-    nodeFilters: [loadbalancer]
-```
-
-```sh
-k3d cluster create --config test/e2e/k3d-config.yaml
-k3d image import paulbouwer/hello-kubernetes:<tag> --cluster hk-e2e
-kubectl apply -f <Gateway API standard CRDs, pinned version>
-kubectl apply -f test/e2e/extras/traefik-gateway-provider.yaml   # HelmChartConfig enabling Traefik's kubernetesGateway provider
-kubectl -n kube-system wait --for=condition=Available deploy/traefik --timeout=180s
-kubectl apply -f test/e2e/extras/gateway-k3d.yaml
-```
-
-k3s ships Traefik with only the Ingress provider on. The Gateway API provider is enabled with a `HelmChartConfig` that sets `providers.kubernetesGateway.enabled: true`; check the exact values against the Traefik version in the pinned k3s.
-
-Both clusters need the image tagged with a real version (never `latest`) so the chart's `imagePullPolicy: IfNotPresent` uses the loaded image instead of pulling from Docker Hub.
+The NGINX Ingress Controller needs a host on each Ingress, and allows one Ingress per host, so each routing scenario gives each release its own host, and sends it as the `Host` header. `nginx.org/rewrites` works with the chart's path, which has no trailing slash (#123).
 
 ## Proposed layout
 

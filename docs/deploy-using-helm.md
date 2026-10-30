@@ -78,7 +78,7 @@ kubectl delete namespace hello-kubernetes
 | `ingress.enabled` | bool | `false` | Create a `networking.k8s.io/v1` Ingress for `pathPrefix`. |
 | `ingress.className` | string | `""` | The Ingress class, such as `nginx` or `traefik`. Empty uses the cluster's default class. |
 | `ingress.annotations` | object | `{}` | Annotations for the Ingress, such as your controller's rewrite annotation when `rewritePath` is `true`. |
-| `ingress.host` | string | `""` | The host name for the Ingress rule. Empty matches all hosts. |
+| `ingress.host` | string | `""` | The host name for the Ingress rule. Empty matches all hosts, but the NGINX Ingress Controller needs a host. |
 | `ingress.tls` | list | `[]` | The Ingress TLS settings, as in the Ingress `spec.tls` field. |
 | `httpRoute.enabled` | bool | `false` | Create a Gateway API `HTTPRoute` for `pathPrefix`. With `rewritePath` `true`, it strips the prefix with the standard `URLRewrite` filter. |
 | `httpRoute.parentRefs` | list | `[]` | The Gateways to attach to. Required when `httpRoute.enabled` is `true`. |

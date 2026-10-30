@@ -12,6 +12,8 @@ You bring the Ingress controller or the Gateway. The chart doesn't install eithe
 
 The community Ingress-NGINX controller (`kubernetes/ingress-nginx`) was retired in March 2026. The Ingress API itself is stable and still supported.
 
+The NGINX Ingress Controller needs a host on each Ingress, and allows one Ingress per host. With it, set `ingress.host`, and give each release its own host. Traefik and the Gateway API have neither limit.
+
 ## Path prefixes and rewriting
 
 Behind a prefix, either the proxy strips the prefix before it passes a request on, or the app serves under the prefix itself:
@@ -29,7 +31,7 @@ Behind an Ingress or a Gateway, set `service.type=ClusterIP`. The Ingress or the
 
 ### Without rewriting (recommended)
 
-Install two releases, each under its own path. Set `ingress.className` to your controller's class: `nginx` for the NGINX Ingress Controller, or `traefik` for Traefik.
+Install two releases, each under its own path. Set `ingress.className` to your controller's class: `nginx` for the NGINX Ingress Controller, or `traefik` for Traefik. These use Traefik; for NGINX, also add a different `--set ingress.host=…` to each.
 
 ```bash
 helm install hello-world oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
@@ -55,7 +57,7 @@ You see two Ingresses, `hello-kubernetes-hello-world` and `hello-kubernetes-cust
 - `http://<ingress address>/app/hello-world/`: **Hello world!**
 - `http://<ingress address>/app/custom-message/`: **This is my custom message!**
 
-To use a host name, add `--set ingress.host=hello.example.com`. For TLS, add `ingress.tls` in a values file, as in the Ingress `spec.tls` field.
+To use a host name, add `--set ingress.host=hello.example.com`, and open `http://hello.example.com/app/hello-world/`. For TLS, add `ingress.tls` in a values file, as in the Ingress `spec.tls` field.
 
 ### With rewriting
 
@@ -87,7 +89,20 @@ helm install hello oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
 
 Open `http://<ingress address>/app/hello/`. You see **Hello world!**.
 
-**NGINX:** use `rewritePath=false`, as above. It needs no annotation, and works with any NGINX-based controller.
+**NGINX:** the NGINX Ingress Controller strips the prefix with its `nginx.org/rewrites` annotation, which names the chart's Service, `hello-kubernetes-<release name>`:
+
+```bash
+helm install hello oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-kubernetes \
+  --set ingress.enabled=true --set ingress.className=nginx \
+  --set ingress.host=hello.example.com \
+  --set pathPrefix=/app/hello \
+  --set-string 'ingress.annotations.nginx\.org/rewrites=serviceName=hello-kubernetes-hello rewrite=/' \
+  --set service.type=ClusterIP \
+  --wait
+```
+
+Open `http://hello.example.com/app/hello/`. You see **Hello world!**. With NGINX, `rewritePath=false` is still simpler: it needs no annotation.
 
 ## Gateway API
 

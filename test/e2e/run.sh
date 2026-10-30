@@ -9,9 +9,10 @@
 #   IMAGE         the local image to test (default hello-kubernetes:e2e)
 #   KEEP_CLUSTER  1 keeps the cluster, and a failed scenario's namespace, at the end
 #
-# The cluster is created if it doesn't exist, and deleted at the end unless
-# KEEP_CLUSTER=1 or it existed before the run. Its kubeconfig is kept apart from
-# ~/.kube/config. Needs docker, kind or k3d, kubectl, helm and curl.
+# The cluster is created if it doesn't exist, with its Ingress controller and
+# Gateway (cluster.sh), and deleted at the end unless KEEP_CLUSTER=1 or it
+# existed before the run. Its kubeconfig is kept apart from ~/.kube/config.
+# Needs docker, kind or k3d, kubectl, helm and curl.
 #
 # A scenario that sets EXPECTED_FAILURE must also set EXPECTED_ERROR, an
 # extended regular expression for the error it expects. It is reported as XFAIL
@@ -26,12 +27,7 @@ shift || true
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(cd "$here/../.." && pwd)"
 
-# Node images, pinned by digest. Both run Kubernetes 1.37.
-kind_node_image="kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5"
-k3s_image="rancher/k3s:v1.37.1-k3s1@sha256:ca7f37d993d82ef0dcdcfecb2e0e2618ea541dbaffc620c8cedebe01a82acd0d"
-
 image="${IMAGE:-hello-kubernetes:e2e}"
-cluster="hk-e2e-$cluster_type"
 
 case "$cluster_type" in
   kind | k3d) ;;
@@ -46,55 +42,19 @@ docker image inspect "$image" >/dev/null 2>&1 || {
   exit 2
 }
 
-export KUBECONFIG="${TMPDIR:-/tmp}/$cluster.kubeconfig"
+export KUBECONFIG="${TMPDIR:-/tmp}/hk-e2e-$cluster_type.kubeconfig"
 export CLUSTER_TYPE="$cluster_type"
 export CHART="$repo/deploy/helm/hello-kubernetes"
 export IMAGE_REPOSITORY="${image%:*}"
 export IMAGE_TAG="${image##*:}"
-
-cluster_exists() {
-  case "$cluster_type" in
-    kind) kind get clusters 2>/dev/null | grep -qx "$cluster" ;;
-    k3d) k3d cluster list --no-headers 2>/dev/null | awk '{print $1}' | grep -qx "$cluster" ;;
-  esac
-}
-
-create_cluster() {
-  echo "Creating $cluster_type cluster $cluster"
-  case "$cluster_type" in
-    kind)
-      kind create cluster --name "$cluster" --image "$kind_node_image" \
-        --config "$here/kind-config.yaml" --kubeconfig "$KUBECONFIG" --wait 120s
-      ;;
-    k3d)
-      k3d cluster create "$cluster" --config "$here/k3d-config.yaml" --image "$k3s_image" --wait --timeout 180s
-      ;;
-  esac
-}
-
-write_kubeconfig() {
-  case "$cluster_type" in
-    kind) kind get kubeconfig --name "$cluster" >"$KUBECONFIG" ;;
-    k3d) k3d kubeconfig get "$cluster" >"$KUBECONFIG" ;;
-  esac
-}
-
-load_image() {
-  echo "Loading $image into $cluster"
-  case "$cluster_type" in
-    kind) kind load docker-image "$image" --name "$cluster" >/dev/null ;;
-    k3d) k3d image import "$image" --cluster "$cluster" >/dev/null ;;
-  esac
-}
+# shellcheck source=cluster.sh
+source "$here/cluster.sh"
 
 # Runs on exit. A failed deletion is reported and fails the run.
 delete_cluster() {
   local status=$? output
   echo "Deleting $cluster_type cluster $cluster"
-  if ! output=$(case "$cluster_type" in
-    kind) kind delete cluster --name "$cluster" 2>&1 ;;
-    k3d) k3d cluster delete "$cluster" 2>&1 ;;
-  esac); then
+  if ! output=$(delete_cluster_now); then
     echo "$output" >&2
     echo "FAIL: could not delete $cluster_type cluster $cluster. Delete it with make e2e-clean." >&2
     exit 1
@@ -115,7 +75,8 @@ else
 fi
 write_kubeconfig
 kubectl wait --for=condition=Ready nodes --all --timeout=120s >/dev/null
-load_image
+load_image "$image"
+setup_routing
 
 # Select the scenarios.
 scenarios=()

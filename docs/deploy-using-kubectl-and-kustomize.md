@@ -128,7 +128,7 @@ kind: Ingress
 metadata:
   name: hello-kubernetes-demo
 spec:
-  ingressClassName: traefik # or nginx
+  ingressClassName: traefik # or nginx, which also needs a host: below
   rules:
     - http:
         paths:
