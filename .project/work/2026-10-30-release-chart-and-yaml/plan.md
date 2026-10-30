@@ -23,7 +23,7 @@ Made on 2026-10-30 (maintainer).
 
 | Decision | Result |
 |---|---|
-| Static YAML | Keep one file, rendered from the defaults: no Ingress or route, and a `LoadBalancer` Service. It works with no changes on cloud clusters and on Docker Desktop, Rancher Desktop, OrbStack, k3s and k3d. On kind, minikube and bare metal the pods run and `kubectl port-forward` works. 4.5 documents this as a table. It is also the simplest Kustomize base. |
+| Static YAML | Keep one file, rendered from the defaults with the release name `demo`, so the resources are named `hello-kubernetes-demo`: no Ingress or route, and a `LoadBalancer` Service. It works with no changes on cloud clusters and on Docker Desktop, Rancher Desktop, OrbStack, k3s and k3d. On kind, minikube and bare metal the pods run and `kubectl port-forward` works. 4.5 documents this as a table. It is also the simplest Kustomize base. |
 | Release | The workflow creates a **draft** release with generated notes and the file attached. The maintainer adds the credits and publishes it. |
 | Versions | The chart, the app and the image share one version. The release check fails unless the tag, `package.json`, the chart `version`, `appVersion` and the `artifacthub.io/images` tag all match. |
 | Chart registry | `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`, with signed provenance. The maintainer makes the package public after its first push. |
