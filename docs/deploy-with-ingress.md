@@ -134,10 +134,11 @@ spec:
           namespacePolicy:
             from: All
 EOF
-kubectl get gateway --namespace kube-system --watch
+until kubectl get gateway traefik-gateway --namespace kube-system >/dev/null 2>&1; do sleep 5; done
+kubectl wait gateway/traefik-gateway --namespace kube-system --for=condition=Programmed --timeout=180s
 ```
 
-Wait until `traefik-gateway` shows `PROGRAMMED` `True`, then press Ctrl+C. Install the chart with `httpRoute.parentRefs[0].name=traefik-gateway` and `httpRoute.parentRefs[0].namespace=kube-system`. With k3d, create the cluster with `-p "8080:80@loadbalancer"`, and the address is `localhost:8080`.
+You see `gateway.gateway.networking.k8s.io/traefik-gateway condition met`. Install the chart with `httpRoute.parentRefs[0].name=traefik-gateway` and `httpRoute.parentRefs[0].namespace=kube-system`. With k3d, create the cluster with `-p "8080:80@loadbalancer"`, and the address is `localhost:8080`.
 
 ## Clean up
 
