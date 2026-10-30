@@ -200,7 +200,7 @@ kubectl apply -f https://github.com/paulbouwer/hello-kubernetes/releases/latest/
 
 Kustomize users can list the same URL as a resource and patch it. It could also replace the `cd deploy/helm` step in the README quick start for people without Helm. Much of the real-world usage found in the review (tutorials, 42-school projects) is plain `kubectl apply`.
 
-Render with release name `hello-kubernetes` and default values (no Ingress or HTTPRoute). The chart derives resource names from the release name, and the patches below rely on those names.
+Render with release name `demo` and default values (no Ingress or HTTPRoute), so the resources are named `hello-kubernetes-demo` (decided 2026-10-30; the release name `hello-kubernetes` gave `hello-kubernetes-hello-kubernetes`). The chart derives resource names from the release name, and the patches below rely on those names.
 
 ## Changing options without Helm
 
