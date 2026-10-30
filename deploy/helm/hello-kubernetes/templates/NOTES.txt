@@ -1,27 +1,59 @@
 {{- $name := include "hello-kubernetes.name" . -}}
 {{- $ns := .Release.Namespace -}}
+{{- $prefix := include "hello-kubernetes.pathPrefix" . -}}
+{{- $rewrite := eq (include "hello-kubernetes.rewritePath" .) "true" -}}
+{{- $routed := or .Values.ingress.enabled .Values.httpRoute.enabled .Values.ingress.configured -}}
 hello-kubernetes {{ .Chart.AppVersion }} is installed as {{ $name }} in the {{ $ns }} namespace.
 
 Wait for the pods to be ready:
 
   kubectl rollout status deployment/{{ $name }} -n {{ $ns }}
 
-{{ if .Values.ingress.configured -}}
-Open the app through your ingress, at the path /{{ .Values.ingress.pathPrefix }}.
+{{ if .Values.ingress.enabled -}}
+Open the app through the Ingress, at http://{{ .Values.ingress.host | default "<ingress address>" }}{{ $prefix }}/
+
+  kubectl get ingress {{ $name }} -n {{ $ns }}
+{{- if and $prefix $rewrite (not .Values.ingress.annotations) }}
+
+rewritePath is true, so the Ingress controller must strip {{ $prefix }}. Add your
+controller's rewrite annotation in ingress.annotations, or set rewritePath=false.
+{{- end }}
+{{- else if .Values.httpRoute.enabled -}}
+Open the app through your Gateway, at http://{{ first .Values.httpRoute.hostnames | default "<gateway address>" }}{{ $prefix }}/
+
+  kubectl get httproute {{ $name }} -n {{ $ns }}
+{{- else if .Values.ingress.configured -}}
+Open the app through your own ingress, at the path {{ $prefix | default "/" }}/
 {{- else if eq .Values.service.type "LoadBalancer" -}}
 Get the external address of the service. It can take a minute to appear:
 
   kubectl get service {{ $name }} -n {{ $ns }}
 
-Then open http://<EXTERNAL-IP>{{ if ne (int .Values.service.port) 80 }}:{{ .Values.service.port }}{{ end }}/
+Then open http://<EXTERNAL-IP>{{ if ne (int .Values.service.port) 80 }}:{{ .Values.service.port }}{{ end }}{{ $prefix }}/
 {{- else if eq .Values.service.type "NodePort" -}}
-Get the node port, and open http://<node address>:<node port>/
+Get the node port, and open http://<node address>:<node port>{{ $prefix }}/
 
   kubectl get service {{ $name }} -n {{ $ns }} -o jsonpath='{.spec.ports[0].nodePort}'
 {{- else -}}
-Forward a local port to the service, then open http://localhost:8080/
+Forward a local port to the service, then open http://localhost:8080{{ $prefix }}/
 
   kubectl port-forward service/{{ $name }} 8080:{{ .Values.service.port }} -n {{ $ns }}
+{{- end }}
+{{- if and $routed (eq .Values.service.type "LoadBalancer") }}
+
+The service type is LoadBalancer, so the app also has its own external
+address, which bypasses the Ingress or Gateway. Set service.type=ClusterIP to
+reach it only through them.
+{{- end }}
+{{- $old := list -}}
+{{- range $key := list "configured" "pathPrefix" "rewritePath" -}}
+{{- if hasKey $.Values.ingress $key }}{{ $old = append $old (printf "ingress.%s" $key) }}{{ end -}}
+{{- end }}
+{{- if $old }}
+
+DEPRECATED: {{ join ", " $old }}.
+Use the top-level pathPrefix and rewritePath instead, with ingress.enabled or
+httpRoute.enabled to create the route. The old names are removed in 2.0.
 {{- end }}
 
 To remove it:

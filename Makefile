@@ -41,6 +41,10 @@ test-image: ## image tests (test/image/run.sh) against $(IMAGE):$(IMAGE_VERSION)
 test-proxy: ## proxy tests (test/proxy/run.sh) against $(IMAGE):$(IMAGE_VERSION)
 	test/proxy/run.sh "$(IMAGE):$(IMAGE_VERSION)"
 
+.PHONY: test-chart
+test-chart: ## chart tests (test/chart/run.sh): render the chart and check it
+	test/chart/run.sh
+
 # npm ci writes node_modules/.package-lock.json, so it is newer than the
 # lockfile after an install, and older than it after the lockfile changes.
 src/app/node_modules/.package-lock.json: src/app/package-lock.json

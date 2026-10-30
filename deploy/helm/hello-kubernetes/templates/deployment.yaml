@@ -1,3 +1,5 @@
+{{- $prefix := include "hello-kubernetes.pathPrefix" . -}}
+{{- $rewrite := eq (include "hello-kubernetes.rewritePath" .) "true" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,19 +35,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              {{- if and .Values.ingress.configured (not .Values.ingress.rewritePath) }}
-              path: {{ printf "/%s" .Values.ingress.pathPrefix | quote }}
-              {{- else }}
-              path: /
-              {{- end }}
+              path: {{ ternary "/" (printf "%s/" $prefix) (or $rewrite (not $prefix)) | quote }}
               port: http
           readinessProbe:
             httpGet:
-              {{- if and .Values.ingress.configured (not .Values.ingress.rewritePath) }}
-              path: {{ printf "/%s" .Values.ingress.pathPrefix | quote }}
-              {{- else }}
-              path: /
-              {{- end }}
+              path: {{ ternary "/" (printf "%s/" $prefix) (or $rewrite (not $prefix)) | quote }}
               port: http
           env:
           {{- if ne (.Values.deployment.container.port | int) (8080 | int) }}
@@ -56,15 +50,11 @@ spec:
           - name: MESSAGE
             value: {{ .Values.message | quote }}
           {{- end }}
-          {{- if .Values.ingress.configured }}
+          {{- if $prefix }}
           - name: HANDLER_PATH_PREFIX
-            {{- if .Values.ingress.rewritePath }}
-            value: ""
-            {{- else }}
-            value: {{ .Values.ingress.pathPrefix | quote }}
-            {{- end }}
+            value: {{ ternary "" $prefix $rewrite | quote }}
           - name: RENDER_PATH_PREFIX
-            value: {{ .Values.ingress.pathPrefix | quote }}
+            value: {{ $prefix | quote }}
           {{- end }}
           - name: KUBERNETES_NAMESPACE
             valueFrom:

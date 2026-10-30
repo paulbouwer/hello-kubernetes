@@ -54,8 +54,9 @@ Windows and architectures other than amd64 and arm64 (arm/v7, riscv64, ppc64le, 
 ## Test layers
 
 1. **Image tests**: run the container directly, no cluster. Fast, run on every push.
-2. **End-to-end (e2e) tests**: install the chart (and the plain manifest) on kind and k3d, then check behaviour over HTTP and through the Kubernetes API. Run on every PR.
-3. **Manual release checks**: k3d on a real arm64 machine, a quick look in a browser, and the docs read through once.
+2. **Chart tests**: render the chart with `helm template`, no cluster. Fast, run in each e2e job.
+3. **End-to-end (e2e) tests**: install the chart (and the plain manifest) on kind and k3d, then check behaviour over HTTP and through the Kubernetes API. Run on every PR.
+4. **Manual release checks**: k3d on a real arm64 machine, a quick look in a browser, and the docs read through once.
 
 ## Image tests
 
@@ -85,6 +86,24 @@ These check the image itself and guard against the problems found in the review 
 | P1 | Serves the app at `/hello/` and strips the path | none | #38 |
 | P2 | Passes `/hello/` through | `RENDER_PATH_PREFIX` and `HANDLER_PATH_PREFIX` both `/hello` | the chart's recommended setup breaking |
 | P3 | Serves the app at `/hello/` and strips the path | both only `/` | asset URLs becoming `//css/…` |
+
+## Chart tests
+
+`test/chart/run.sh` (`make test-chart`), added in #115, renders the chart with `helm template` and checks what it creates, with no cluster. It covers the cases that are slow or need a controller to test on a cluster: each way of exposing the app, the old value names, and odd values.
+
+| ID | Values | Checks |
+|---|---|---|
+| C1 | defaults | No Ingress, no HTTPRoute, no prefix variables |
+| C2 | `ingress.enabled`, `pathPrefix`, `rewritePath=false` | A `networking.k8s.io/v1` Ingress with the class, host, TLS and annotations; both prefixes set; probes under the prefix |
+| C3 | `ingress.enabled`, `pathPrefix` | Only the render prefix set; probes at `/`; notes about the rewrite annotation and the service type |
+| C4 | `httpRoute.enabled`, `pathPrefix` | A `gateway.networking.k8s.io/v1` HTTPRoute with the parent refs and host names, and a `URLRewrite` filter |
+| C5 | `httpRoute.enabled`, `rewritePath=false` | No filter; probes under the prefix |
+| C6 | `httpRoute.enabled` with no parent refs | The install fails with a clear message |
+| C7 | the old `ingress.*` names | The same prefixes as before, and a deprecation note |
+| C8 | `rewritePath=false` in the old or the new name | `false` wins |
+| C9 | `app/hello`, `/app/hello`, `/app/hello/`, `/` | The same result; `/` means no prefix |
+| C10 | quotes in the message and the prefix | `helm lint --strict` passes |
+| C11 | the old `ingress.pathPrefix` alone | No prefix, as before |
 
 ## End-to-end scenarios
 
@@ -225,7 +244,7 @@ I'd write the tests as plain Bash with a small assert library rather than adding
 |---|---|---|
 | `image-tests (amd64)` | `ubuntu-latest` | builds the image natively, then `test/image/run.sh` (I1–I7, I5a) and `test/proxy/run.sh` (P1–P3) |
 | `image-tests (arm64)` | `ubuntu-24.04-arm` | the same, on a native arm64 runner |
-| `e2e (kind, amd64)` | `ubuntu-latest` | builds a single-platform image, then `test/e2e/run.sh kind` with the default chart |
+| `e2e (kind, amd64)` | `ubuntu-latest` | runs `test/chart/run.sh` (C1–C11), builds a single-platform image, then `test/e2e/run.sh kind` with the default chart |
 | `e2e (k3d, amd64)` | `ubuntu-latest` | the same on k3d |
 | `e2e (kind, arm64)` | `ubuntu-24.04-arm` | the same on kind, on a native arm64 runner |
 | `e2e (k3d, arm64)` | `ubuntu-24.04-arm` | the same on k3d, on a native arm64 runner |

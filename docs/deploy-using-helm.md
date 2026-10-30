@@ -19,9 +19,17 @@ The following table lists the configuration parameters of the hello-kubernetes c
 | Parameter | Type | Default | Description |
 | --------- | ---- | ------- | ----------- |
 | `message` | `string` | `""` | A custom message to display instead of the default. |
-| `ingress.configured` | `bool` | `false` | Indicates whether an ingress has been configured in the cluster. <br/>Note: this chart will not install or configure an ingress. You will need to install an ingress controller and add ingress record to the app namespace. |
-| `ingress.rewritePath` | `bool` | `true` | Indicates whether pathPrefix is rewritten by the ingress. <br/> If this is set to `true` then the hello-kubernetes dynamic content and static assets will be served from `/`, otherwise, they will be served from `/$pathPrefix`. |
-| `ingress.pathPrefix` | `string` | `""` | The path prefix configured in the ingress for the hello-kubernetes service.<br/> Must be provided when ingress is used. |
+| `pathPrefix` | `string` | `""` | Serve the app under a path prefix, for example `/app/hello`, behind an Ingress, an HTTPRoute or your own proxy. |
+| `rewritePath` | `bool` | `true` | `true`: the proxy strips the prefix, and the app serves at `/`. `false` (recommended): the proxy passes the prefix on, and the app serves under it, with no Ingress annotations needed. |
+| `ingress.enabled` | `bool` | `false` | Create a `networking.k8s.io/v1` Ingress for `pathPrefix`. Set `service.type` to `ClusterIP` with it. |
+| `ingress.className` | `string` | `""` | The Ingress class, for example `nginx` or `traefik`. |
+| `ingress.annotations` | `object` | `{}` | Annotations for the Ingress, for example a controller's rewrite annotation when `rewritePath` is `true`. |
+| `ingress.host` | `string` | `""` | The host name for the Ingress rule. All hosts when empty. |
+| `ingress.tls` | `list` | `[]` | The Ingress TLS settings. |
+| `httpRoute.enabled` | `bool` | `false` | Create a Gateway API `HTTPRoute` for `pathPrefix`. With `rewritePath` `true`, it strips the prefix with the standard `URLRewrite` filter. |
+| `httpRoute.parentRefs` | `list` | `[]` | The Gateways to attach to. Required when `httpRoute.enabled` is `true`. |
+| `httpRoute.hostnames` | `list` | `[]` | The host names for the route. |
+| `ingress.configured`, `ingress.pathPrefix`, `ingress.rewritePath` | | | Deprecated. They still work in 1.x, and are removed in 2.0. Use `pathPrefix` and `rewritePath`. |
 | `service.type` | `string` | `"LoadBalancer"` | The service type. |
 | `service.port` | `int` | `80` | The port exposed by the service. |
 | `deployment.replicaCount` | `int` | `2` | The number of replicas for the hello-kubernetes deployment. |

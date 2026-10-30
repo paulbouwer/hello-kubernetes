@@ -1,0 +1,36 @@
+{{- if .Values.httpRoute.enabled }}
+{{- if not .Values.httpRoute.parentRefs }}
+{{- fail "httpRoute.parentRefs must name at least one Gateway, for example --set 'httpRoute.parentRefs[0].name=my-gateway'" }}
+{{- end }}
+{{- $prefix := include "hello-kubernetes.pathPrefix" . -}}
+{{- $rewrite := eq (include "hello-kubernetes.rewritePath" .) "true" -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "hello-kubernetes.name" . }}
+  labels:
+    {{- include "hello-kubernetes.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    {{- toYaml .Values.httpRoute.parentRefs | nindent 4 }}
+  {{- with .Values.httpRoute.hostnames }}
+  hostnames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ $prefix | default "/" | quote }}
+      {{- if and $prefix $rewrite }}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      {{- end }}
+      backendRefs:
+        - name: {{ include "hello-kubernetes.name" . }}
+          port: {{ .Values.service.port }}
+{{- end }}
