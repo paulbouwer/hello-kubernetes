@@ -101,12 +101,13 @@ case "$CLUSTER_TYPE" in
   kind)
     cat <<EOF
   helm install hello deploy/helm/hello-kubernetes --set service.type=ClusterIP \\
-    --set ingress.enabled=true --set ingress.className=nginx --set ingress.host=hello.local \\
+    --set ingress.enabled=true --set ingress.className=nginx --set ingress.host=hello.localhost \\
     --set pathPrefix=/app/hello --set rewritePath=false --wait
-  curl -H "Host: hello.local" $INGRESS_URL/app/hello/
+  curl -H "Host: hello.localhost" $INGRESS_URL/app/hello/
 
-The NGINX Ingress Controller needs a host on each Ingress, so send it in the
-Host header, or add hello.local to your hosts file.
+The NGINX Ingress Controller needs a host on each Ingress. Browsers resolve
+every *.localhost name to 127.0.0.1, so open http://hello.localhost:18080/app/hello/
+with no hosts file entry.
 EOF
     ;;
   k3d)

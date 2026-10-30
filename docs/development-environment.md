@@ -68,7 +68,7 @@ Their contexts are written to `~/.kube/config` inside the container. The cluster
 
 It builds the image from your working tree, and loads it as the chart's default image, `paulbouwer/hello-kubernetes:<appVersion>`, so the docs' commands use your build. In that cluster, the tag is your local build, not the published image. Until that version is published, install from the local chart, `deploy/helm/hello-kubernetes`, in place of `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`.
 
-The command prints the `KUBECONFIG` to export and an example to try. The cluster is kept, and running the command again reuses it. The ports are forwarded to your machine (see VS Code's Ports view). The NGINX Ingress Controller needs a host on each Ingress, so send it as a `Host` header, for example `curl -H "Host: hello.local" http://127.0.0.1:18080/app/hello/`.
+The command prints the `KUBECONFIG` to export and an example to try. The cluster is kept, and running the command again reuses it. The ports are forwarded to your machine (see VS Code's Ports view). The NGINX Ingress Controller needs a host on each Ingress. Use a name that ends in `.localhost`, such as `--set ingress.host=hello.localhost`: browsers resolve every `*.localhost` name to 127.0.0.1, so `http://hello.localhost:18080/app/hello/` works with no hosts file entry. With `curl`, send it as a header: `curl -H "Host: hello.localhost" http://127.0.0.1:18080/app/hello/`.
 
 Delete both clusters with `make cluster-clean`. The e2e tests use the same clusters and ports, so `make e2e-kind` and `make e2e-k3d` reuse a running local cluster, and leave it running.
 
