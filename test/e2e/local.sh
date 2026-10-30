@@ -64,6 +64,7 @@ else
 fi
 write_kubeconfig
 kubectl wait --for=condition=Ready nodes --all --timeout=120s >/dev/null
+check_cluster_version
 
 # The chart's default image, so that the docs' commands use the local build.
 app_version=$(sed -nE 's/^appVersion: *"?([^"]*)"?$/\1/p' "$repo/deploy/helm/hello-kubernetes/Chart.yaml")

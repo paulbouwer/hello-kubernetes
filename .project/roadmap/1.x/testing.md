@@ -224,7 +224,7 @@ make e2e-clean
 
 A full local run of both clusters takes about 5 minutes, most of it cluster creation.
 
-`make cluster-kind` and `make cluster-k3d` (#127) start the same clusters and keep them, with the image loaded as the chart's default image, so the docs can be tried by hand. `make e2e-kind` and `make e2e-k3d` reuse a running one. `make cluster-clean` deletes them.
+`make cluster-kind` and `make cluster-k3d` (#127) start the same clusters and keep them, with the image loaded as the chart's default image, so the docs can be tried by hand. `make e2e-kind` and `make e2e-k3d` reuse a running one, after checking that it runs the Kubernetes version they ask for, and that every k3d node has the image just built (#133). `make cluster-clean` and `make e2e-clean` delete them, and stop `cloud-provider-kind`.
 
 ## Suggested order
 

@@ -106,7 +106,7 @@ The separate [workstream 3 efficiency review](workstream-03-efficiency-review.md
 | 4.6 | test(e2e): add Ingress and Gateway API scenarios on kind and k3d | enhancement, area:ci | 3.3, 4.2 | — | [work package](../2026-10-30-e2e-scenarios/plan.md), [testing.md](../../roadmap/1.x/testing.md#suggested-order) steps 2–4, 7, 8 |
 | 4.7 | feat(dev): start a local kind or k3d cluster to try the deployment docs | enhancement, area:operations | 4.6 | — | [work package](../2026-10-30-local-clusters/plan.md) |
 | 4.8 | fix(chart): render numeric image tags | bug, area:deploy | 4.3 | — | [work package](../2026-10-30-numeric-image-tags/plan.md), [workstream 4 review](workstream-04-review.md#finding-to-address) |
-| 4.9 | test(e2e): make reused local clusters safe | enhancement, area:ci | 4.7 | — | [workstream 4 review](workstream-04-review.md#minor-issues) |
+| 4.9 | test(e2e): make reused local clusters safe | enhancement, area:ci | 4.7 | — | [work package](../2026-10-30-reused-local-clusters/plan.md), [workstream 4 review](workstream-04-review.md#minor-issues) |
 
 - 4.1 covers the `securityContext`, removing `kubernetes.io/arch: amd64` from `nodeSelector`, quoting `message` and `pathPrefix`, `appVersion`, and `NOTES.txt`. It removes the `EXPECTED_FAILURE` markers from E3 and E7, and adds the arm64 e2e job to CI, which proves the default chart on arm64 (workstream 2 review). It also gives the image tests' error file in `test/image/run.sh` a unique name with `mktemp` (workstream 3 review).
 - 4.2 also adds the top-level `pathPrefix` and `rewritePath`, keeps the old names working, and adds the chart tests (C1–C11). #31 closes with 4.5, which replaces the broken Ingress example in the docs.

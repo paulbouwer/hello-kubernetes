@@ -78,6 +78,7 @@ else
 fi
 write_kubeconfig
 kubectl wait --for=condition=Ready nodes --all --timeout=120s >/dev/null
+check_cluster_version
 load_image "$image"
 setup_routing
 
