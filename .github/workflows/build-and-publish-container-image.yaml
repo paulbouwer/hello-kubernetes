@@ -224,6 +224,15 @@ jobs:
       - name: Install the tools
         run: test/ci/install-tools.sh helm oras
 
+      # The attestation action reads Docker's credentials; helm and oras log in
+      # separately below.
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Package the chart and render the defaults
         run: |
           helm package deploy/helm/hello-kubernetes --version "$CHART_VERSION" --destination dist
