@@ -1,11 +1,18 @@
 # Publishes the image for linux/amd64 and linux/arm64 to Docker Hub and GHCR,
-# with an SBOM and provenance, when a release tag is pushed.
+# with an SBOM and provenance, when a release tag is pushed. Then publishes the
+# Helm chart to oci://ghcr.io/paulbouwer/charts, and the chart rendered with
+# its defaults as hello-kubernetes.yaml.
 #
-# - A v* tag publishes X.Y.Z, X.Y and X to both registries (no latest). It
-#   must be on main, and match the version in src/app/package.json.
-# - A publish-test-* tag publishes only to GHCR, as test-<run number>, and
-#   never touches Docker Hub or a real tag. Delete the git tag and the GHCR
-#   test version afterwards.
+# - A v* tag publishes X.Y.Z, X.Y and X to both registries (no latest), and the
+#   chart as X.Y.Z. It must be on main, and match the version in
+#   src/app/package.json, the chart version and appVersion, and the image in
+#   the chart's artifacthub.io/images annotation. It creates a draft GitHub
+#   release with generated notes and hello-kubernetes.yaml attached. The
+#   maintainer adds the credits and publishes it.
+# - A publish-test-* tag publishes only to GHCR, as test-<run number>, and the
+#   chart as X.Y.Z-test.<run number>. It never touches Docker Hub, a real tag or
+#   a GitHub release; hello-kubernetes.yaml is a workflow artifact. Delete the
+#   git tag and the GHCR test versions afterwards.
 # - Nothing is published unless the full test suite (tests.yaml) passes.
 #
 # The provenance is signed with GitHub artifact attestations. Check it with:
@@ -35,6 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.check.outputs.version }}
+      chart-version: ${{ steps.check.outputs.chart-version }}
       test: ${{ steps.check.outputs.test }}
       created: ${{ steps.check.outputs.created }}
     steps:
@@ -49,11 +57,16 @@ jobs:
         env:
           TAG: ${{ github.ref_name }}
         run: |
+          chart=deploy/helm/hello-kubernetes/Chart.yaml
           version=$(jq -r .version src/app/package.json)
+          chart_version=$(sed -n 's/^version: *//p' "$chart")
+          app_version=$(sed -n 's/^appVersion: *"\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' "$chart")
+          image=$(sed -n 's|^ *image: paulbouwer/hello-kubernetes:||p' "$chart")
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "created=$(git log -1 --format=%cI "$GITHUB_SHA")" >> "$GITHUB_OUTPUT"
           if [[ "$TAG" == publish-test-* ]]; then
-            echo "Test publish: GHCR test tag only."
+            echo "Test publish: GHCR test tag and test chart version only."
+            echo "chart-version=$chart_version-test.$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
             echo "test=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -61,6 +74,13 @@ jobs:
             echo "::error::Tag $TAG doesn't match version $version in src/app/package.json."
             exit 1
           fi
+          for pair in "chart version:$chart_version" "chart appVersion:$app_version" "artifacthub.io/images tag:$image"; do
+            if [[ "${pair##*:}" != "$version" ]]; then
+              echo "::error::The ${pair%%:*} in $chart is '${pair##*:}', not $version."
+              exit 1
+            fi
+          done
+          echo "chart-version=$chart_version" >> "$GITHUB_OUTPUT"
           if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
             echo "::error::Tag $TAG isn't on main. Release from main."
             exit 1
@@ -179,4 +199,111 @@ jobs:
             echo '```'
             echo "$TAGS"
             echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  chart:
+    name: publish the chart
+    needs: [check, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    env:
+      CHART_REPO: oci://ghcr.io/paulbouwer/charts
+      CHART_IMAGE: ghcr.io/paulbouwer/charts/hello-kubernetes
+      CHART_VERSION: ${{ needs.check.outputs.chart-version }}
+      TEST: ${{ needs.check.outputs.test }}
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the tools
+        run: test/ci/install-tools.sh helm oras
+
+      - name: Package the chart and render the defaults
+        run: |
+          helm package deploy/helm/hello-kubernetes --version "$CHART_VERSION" --destination dist
+          {
+            echo "# hello-kubernetes chart $CHART_VERSION, rendered with its default values."
+            echo "# Apply it with kubectl apply -f. To change the options, use the Helm chart:"
+            echo "# https://github.com/paulbouwer/hello-kubernetes/blob/main/docs/deploy-using-helm.md"
+            helm template hello-kubernetes "dist/hello-kubernetes-$CHART_VERSION.tgz"
+          } > dist/hello-kubernetes.yaml
+
+      - name: Push the chart to GHCR
+        id: push
+        env:
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GH_TOKEN" | helm registry login ghcr.io --username "$GH_ACTOR" --password-stdin
+          output=$(helm push "dist/hello-kubernetes-$CHART_VERSION.tgz" "$CHART_REPO" 2>&1)
+          echo "$output"
+          digest=$(sed -n 's/^Digest: *//p' <<<"$output")
+          [[ "$digest" == sha256:* ]] || { echo "::error::No digest in the helm push output."; exit 1; }
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Sign the chart provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ env.CHART_IMAGE }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+      - name: Check the pushed chart
+        run: |
+          helm pull "$CHART_REPO/hello-kubernetes" --version "$CHART_VERSION" --destination pulled
+          if ! diff <(grep -v '^# hello-kubernetes chart\|^# Apply it\|^# https://' dist/hello-kubernetes.yaml) \
+            <(helm template hello-kubernetes "pulled/hello-kubernetes-$CHART_VERSION.tgz"); then
+            echo "::error::The chart pulled from GHCR doesn't render the same as hello-kubernetes.yaml."
+            exit 1
+          fi
+          echo "The pulled chart renders the same as hello-kubernetes.yaml."
+
+      - name: Push the Artifact Hub metadata
+        if: env.TEST == 'false'
+        env:
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! grep -q '^repositoryID:' deploy/helm/artifacthub-repo.yml; then
+            echo "::notice::No repositoryID in deploy/helm/artifacthub-repo.yml yet, so the Artifact Hub metadata isn't pushed."
+            exit 0
+          fi
+          echo "$GH_TOKEN" | oras login ghcr.io --username "$GH_ACTOR" --password-stdin
+          cd deploy/helm
+          oras push "$CHART_IMAGE:artifacthub.io" \
+            --config /dev/null:application/vnd.cncf.artifacthub.config.v1+yaml \
+            artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml
+
+      - name: Create the draft release
+        if: env.TEST == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" --draft --verify-tag --generate-notes --title "$TAG" dist/hello-kubernetes.yaml
+
+      - name: Keep hello-kubernetes.yaml for a test
+        if: env.TEST == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: hello-kubernetes.yaml
+          path: dist/hello-kubernetes.yaml
+
+      - name: Summary
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          {
+            echo "### Chart published"
+            echo
+            echo "\`$CHART_IMAGE:$CHART_VERSION\`"
+            echo
+            echo "Digest: \`$DIGEST\`"
           } >> "$GITHUB_STEP_SUMMARY"

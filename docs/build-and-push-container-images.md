@@ -78,6 +78,20 @@ make verify-published PUBLISHED=paulbouwer/hello-kubernetes:1.11.0
 SCAN=1 test/image/verify-published.sh ghcr.io/paulbouwer/hello-kubernetes:1
 ```
 
-It checks that the image is one index for `linux/amd64` and `linux/arm64` (V1), that each platform has an SBOM (V2) and provenance from this repo's CI (V3), that the signed attestation verifies for this repo (V4), and that each platform runs as user `1000` with version and revision labels (V5). With `SCAN=1`, it also fails on fixable HIGH and CRITICAL vulnerabilities (V6).
+It checks that the image is one index for `linux/amd64` and `linux/arm64` (V1), that each platform has an SBOM (V2) and provenance from this repo's CI (V3), that the signed attestation verifies for this repo (V4), and that each platform runs as user `1000` with version and revision labels (V5). With `SCAN=1`, it also fails on fixable HIGH and CRITICAL vulnerabilities (V6), and reports a Trivy error, such as a failed database download, as its own failure.
+
+It reads the digest of the tag once, then checks everything through that digest, so a tag that moves during the run can't mix two images.
 
 It needs Docker with Buildx, `jq`, and the GitHub CLI signed in. Only published images have an SBOM, provenance and a signature: an image you build locally keeps none of them. For a local image, use `make test-image`.
+
+## Verifying the published chart
+
+Each release also publishes the Helm chart to `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`, with the same version as the image and signed provenance. To check it:
+
+```bash
+helm pull oci://ghcr.io/paulbouwer/charts/hello-kubernetes --version 1.11.0
+# prints the chart digest, then:
+gh attestation verify oci://ghcr.io/paulbouwer/charts/hello-kubernetes@<digest> --repo paulbouwer/hello-kubernetes
+```
+
+The release also has `hello-kubernetes.yaml`, the chart rendered with its default values, for `kubectl apply -f` without Helm.

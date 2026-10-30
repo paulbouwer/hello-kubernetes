@@ -31,8 +31,10 @@ for tool in docker jq gh; do
   command -v "$tool" >/dev/null || { echo "$tool is not installed" >&2; exit 2; }
 done
 
+# Reads part of the image. After the digest is known, it reads through the
+# digest, so every check sees the same image even if the tag moves.
 inspect() {
-  docker buildx imagetools inspect "$image" --format "{{json .$1}}"
+  docker buildx imagetools inspect "${ref:-$image}" --format "{{json .$1}}"
 }
 
 if ! manifest=$(inspect Manifest 2>/dev/null); then
@@ -53,6 +55,8 @@ first="${name%%/*}"
 if [[ "$name" != */* || ( "$first" != *.* && "$first" != *:* && "$first" != localhost ) ]]; then
   name="docker.io/$name"
 fi
+ref="$name@$digest"
+echo "Checking: $ref"
 
 # V1: the image is one index for linux/amd64 and linux/arm64.
 platforms=$(jq -r '[.manifests[]?.platform | select(.os != "unknown") | "\(.os)/\(.architecture)"] | sort | join(",")' <<<"$manifest")
@@ -110,11 +114,17 @@ done
 if [[ "${SCAN:-0}" == 1 ]]; then
   if ! command -v trivy >/dev/null; then
     fail V6 "trivy is not installed, so the image can't be scanned"
-  elif trivy image --quiet --image-src remote --scanners vuln --severity HIGH,CRITICAL \
-    --ignore-unfixed --exit-code 1 --format table "$image" >/dev/null 2>&1; then
-    pass V6 "no fixable HIGH or CRITICAL vulnerabilities"
   else
-    fail V6 "fixable HIGH or CRITICAL vulnerabilities found. Run: trivy image --image-src remote $image"
+    # Trivy exits 3 for findings, so that its own errors (network, auth, the
+    # vulnerability database) aren't reported as vulnerabilities.
+    status=0
+    scan=$(trivy image --quiet --image-src remote --scanners vuln --severity HIGH,CRITICAL \
+      --ignore-unfixed --exit-code 3 --format table "$ref" 2>&1) || status=$?
+    case "$status" in
+      0) pass V6 "no fixable HIGH or CRITICAL vulnerabilities" ;;
+      3) fail V6 "fixable HIGH or CRITICAL vulnerabilities found. Run: trivy image --image-src remote $ref" ;;
+      *) fail V6 "Trivy could not scan the image (exit $status): $(tail -n 3 <<<"$scan")" ;;
+    esac
   fi
 fi
 
