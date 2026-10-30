@@ -131,14 +131,14 @@ Every scenario runs on both kind and k3d unless the "Clusters" column says other
 | E10 | Single-file manifest | `kubectl apply -f hello-kubernetes.yaml` (the rendered release asset), no Helm | Same checks as E1 | both | #29 |
 | E11 | Clean uninstall | After E1: `helm uninstall hello-world -n hk-e1` then `kubectl delete ns hk-e1 --wait` | No Deployment, Service, ServiceAccount or pods left with the chart's labels | both | #28 |
 | E12 | Rolling upgrade | Install with `message=v1`, then `helm upgrade --set message=v2 --wait` | All pods replaced, page shows `v2`, no downtime: a background `curl` loop during the upgrade sees no non-200 responses | kind | upgrades |
-| E13 | Kubernetes version range | E1 + E6 + E7 on the oldest and newest Kubernetes versions the chart supports | Same pass criteria | kind (`kindest/node:<version>`) | API removals like #31 |
+| E13 | Kubernetes version range | E1 + E6 + E7 on the oldest Kubernetes version the chart supports, 1.35 (the newest, 1.37, runs every scenario) | Same pass criteria | kind amd64, `E2E_KUBERNETES=oldest` (`make e2e-kind-oldest`) | API removals like #31 |
 | E14 | arm64 nodes | E1 + E2 on an arm64 host | Architecture shown is `linux/arm64` | both, arm64 runner. Since 4.1, every scenario runs on arm64, and E2 checks the architecture | #16 |
-| E15 | Docs still work | Pull the shell commands from `README.md` quick start and `docs/deploy-with-ingress.md` (fenced blocks tagged for testing) and run them against the cluster | Each command exits 0 and the doc's described result is reached | kind | stops #31 recurring |
+| E15 | Docs still work | Run, in order, the blocks marked ```` ```bash e2e ```` in `README.md`, `docs/deploy-using-helm.md` and `docs/deploy-with-ingress.md`, with the local chart, image and release file in place of the published ones | Each block exits 0, and the docs' own clean-up steps remove everything | k3d, because the guides' examples use Traefik | stops #31 recurring |
 | E16 | HTTPRoute with rewrite | Two releases with `httpRoute.enabled=true`, `parentRefs` pointing at the test `Gateway`, `rewritePath=true`, prefixes `/app/hello-world` and `/app/custom` | Same as E5, through the Gateway. The rendered HTTPRoute has a `URLRewrite` filter and no controller-specific settings | both | Gateway API scope |
 | E17 | HTTPRoute without rewrite | One release with `httpRoute.enabled=true`, `pathPrefix=/app/hello` | Same as E6, through the Gateway; the HTTPRoute is `Accepted` in its status | both | Gateway API scope |
 | E18 | Old value names still work | Install with the old `ingress.configured=true`, `ingress.pathPrefix`, `ingress.rewritePath` and a hand-written Ingress | Same as E6 or E5, depending on `rewritePath` | kind | migration to top-level `pathPrefix`/`rewritePath` |
 
-E15 needs a light convention in the docs, for example marking testable blocks as ```` ```sh e2e ````. It's the only scenario that changes the docs, so it can come last.
+E15 runs the blocks marked ```` ```bash e2e ````. GitHub still highlights them as bash. A marked block must run without input, and the blocks in a file must run in order. Leave a block unmarked when it runs until stopped (`port-forward`), needs a published release (the signature check), or needs another cluster (the NGINX example). Testing showed that a typo in a marked README command fails E15 and names the block (#123).
 
 ### Per-cluster setup
 
@@ -198,6 +198,7 @@ I'd write the tests as plain Bash with a small assert library rather than adding
 | `e2e (kind, amd64)` | `ubuntu-latest` | runs `test/chart/run.sh` (C1–C17), builds a single-platform image, then `test/e2e/run.sh kind` with the default chart |
 | `e2e (k3d, amd64)` | `ubuntu-latest` | the same on k3d |
 | `e2e (kind, arm64)` | `ubuntu-24.04-arm` | the same on kind, on a native arm64 runner |
+| `e2e (kind, amd64, Kubernetes 1.35)` | `ubuntu-latest` | E1, E6 and E7 on the oldest supported Kubernetes (E13) |
 | `e2e (k3d, arm64)` | `ubuntu-24.04-arm` | the same on k3d, on a native arm64 runner |
 
 Each job builds and tests its own architecture, with no QEMU. An earlier plan built a multi-arch image once and tested other platforms under emulation. Native runners test the real image, and avoid `kind load` failing on multi-platform images (#87). The arm64 e2e jobs came with 4.1 (#113), when the chart stopped pinning pods to amd64.

@@ -20,7 +20,7 @@ The [development environment](development-environment.md) has both.
 
 The chart is published on GHCR as an OCI artifact, with the same version as the app and the image. It is also listed on [Artifact Hub](https://artifacthub.io/packages/search?repo=hello-kubernetes).
 
-```bash
+```bash e2e
 helm install hello-world oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
   --namespace hello-kubernetes --create-namespace \
   --wait
@@ -32,12 +32,17 @@ To install a specific version, add `--version`, for example `--version 1.11.0`. 
 
 Set values with `--set` or with a values file:
 
-```bash
+```bash e2e
 helm install custom-message oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
   --namespace hello-kubernetes --create-namespace \
   --set-string message="I just deployed this on Kubernetes!" \
   --set service.type=ClusterIP \
   --wait
+```
+
+Forward a local port to it:
+
+```bash
 kubectl port-forward service/hello-kubernetes-custom-message 8080:80 --namespace hello-kubernetes
 ```
 
@@ -49,7 +54,7 @@ Helm checks your values against the chart's `values.schema.json` on every instal
 
 Change a value, or move to a newer chart, with `helm upgrade`. `--reuse-values` keeps the values you set before:
 
-```bash
+```bash e2e
 helm upgrade custom-message oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
   --namespace hello-kubernetes --reuse-values \
   --set-string message="Upgraded!" \
@@ -60,7 +65,7 @@ The pods are replaced one at a time, and the page then shows **Upgraded!**.
 
 ## Uninstall
 
-```bash
+```bash e2e
 helm uninstall hello-world --namespace hello-kubernetes
 helm uninstall custom-message --namespace hello-kubernetes
 kubectl delete namespace hello-kubernetes
@@ -100,7 +105,7 @@ kubectl delete namespace hello-kubernetes
 
 To see the descriptions and defaults from the chart itself:
 
-```bash
+```bash e2e
 helm show values oci://ghcr.io/paulbouwer/charts/hello-kubernetes
 ```
 

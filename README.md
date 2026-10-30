@@ -28,7 +28,7 @@ Each one creates a `LoadBalancer` Service, which gives the app an external addre
 
 Each release has `hello-kubernetes.yaml`: the Helm chart rendered with its default values. Apply it to your current namespace:
 
-```bash
+```bash e2e
 kubectl apply -f https://github.com/paulbouwer/hello-kubernetes/releases/latest/download/hello-kubernetes.yaml
 kubectl rollout status deployment/hello-kubernetes-demo
 ```
@@ -37,7 +37,7 @@ You see `deployment "hello-kubernetes-demo" successfully rolled out`. It created
 
 Get the external address. It can take a minute to appear:
 
-```bash
+```bash e2e
 kubectl get service hello-kubernetes-demo
 ```
 
@@ -45,7 +45,7 @@ Open `http://<EXTERNAL-IP>/`. You see **Hello world!**. If `EXTERNAL-IP` stays `
 
 Remove it:
 
-```bash
+```bash e2e
 kubectl delete -f https://github.com/paulbouwer/hello-kubernetes/releases/latest/download/hello-kubernetes.yaml
 ```
 
@@ -55,13 +55,13 @@ To change its settings without Helm, for example with Kustomize, see [Deploy usi
 
 The chart is published on GHCR as an OCI artifact. Install it with its default values, as the release `demo`, in your current namespace:
 
-```bash
+```bash e2e
 helm install demo oci://ghcr.io/paulbouwer/charts/hello-kubernetes --wait
 ```
 
 You see `STATUS: deployed`, and notes that say how to reach the app. Get the external address:
 
-```bash
+```bash e2e
 kubectl get service hello-kubernetes-demo
 ```
 
@@ -69,7 +69,7 @@ Open `http://<EXTERNAL-IP>/`. You see **Hello world!**. If `EXTERNAL-IP` stays `
 
 Remove it:
 
-```bash
+```bash e2e
 helm uninstall demo
 ```
 
@@ -77,7 +77,7 @@ helm uninstall demo
 
 Install the chart as the release `custom-message`, in a new `hello` namespace, with your own message:
 
-```bash
+```bash e2e
 helm install custom-message oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
   --namespace hello --create-namespace \
   --set-string message="I just deployed this on Kubernetes!" \
@@ -89,7 +89,7 @@ Open `http://<EXTERNAL-IP>/`. You see **I just deployed this on Kubernetes!**. U
 
 Remove it, and the namespace:
 
-```bash
+```bash e2e
 helm uninstall custom-message --namespace hello
 kubectl delete namespace hello
 ```

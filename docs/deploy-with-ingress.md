@@ -33,7 +33,7 @@ Behind an Ingress or a Gateway, set `service.type=ClusterIP`. The Ingress or the
 
 Install two releases, each under its own path. Set `ingress.className` to your controller's class: `nginx` for the NGINX Ingress Controller, or `traefik` for Traefik. These use Traefik; for NGINX, also add a different `--set ingress.host=…` to each.
 
-```bash
+```bash e2e
 helm install hello-world oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
   --namespace hello-kubernetes --create-namespace \
   --set ingress.enabled=true --set ingress.className=traefik \
@@ -65,7 +65,7 @@ With `rewritePath=true`, the controller must strip the prefix. That needs an ann
 
 **Traefik** strips a prefix with a `Middleware`, which the Ingress names in an annotation as `<namespace>-<middleware name>@kubernetescrd`:
 
-```bash
+```bash e2e
 kubectl apply -f - <<'EOF'
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
@@ -110,20 +110,20 @@ An `HTTPRoute` attaches to a `Gateway` that you name in `httpRoute.parentRefs`. 
 
 With `rewritePath=true`, the route strips the prefix with the standard `URLRewrite` filter, so it needs no settings for your Gateway implementation. `URLRewrite` is an extended Gateway API feature: check that your implementation supports it, or use `rewritePath=false`.
 
-```bash
-helm install hello-world oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+```bash e2e
+helm install hello-gateway oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
   --namespace hello-kubernetes --create-namespace \
   --set httpRoute.enabled=true \
   --set 'httpRoute.parentRefs[0].name=my-gateway' \
   --set 'httpRoute.parentRefs[0].namespace=gateway-system' \
-  --set pathPrefix=/app/hello-world \
+  --set pathPrefix=/app/hello-gateway \
   --set service.type=ClusterIP \
   --wait
 
 kubectl get httproute --namespace hello-kubernetes
 ```
 
-You see the route `hello-kubernetes-hello-world`. Open `http://<gateway address>/app/hello-world/`. You see **Hello world!**.
+You see the route `hello-kubernetes-hello-gateway`. Open `http://<gateway address>/app/hello-gateway/`. You see **Hello world!**.
 
 Add `--set rewritePath=false` to pass the prefix on instead, and `--set 'httpRoute.hostnames[0]=hello.example.com'` for a host name.
 
@@ -131,7 +131,7 @@ Add `--set rewritePath=false` to pass the prefix on instead, and `--set 'httpRou
 
 k3s and k3d include the Gateway API resources, and Traefik can serve them. Turn on Traefik's Gateway API provider, and let its Gateway accept routes from every namespace:
 
-```bash
+```bash e2e
 kubectl apply -f - <<'EOF'
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
@@ -159,7 +159,7 @@ You see `gateway.gateway.networking.k8s.io/traefik-gateway condition met`. Insta
 
 Uninstall every release in the namespace, then delete it:
 
-```bash
+```bash e2e
 helm list --namespace hello-kubernetes --short | xargs helm uninstall --namespace hello-kubernetes
 kubectl delete namespace hello-kubernetes
 ```

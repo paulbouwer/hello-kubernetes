@@ -14,6 +14,9 @@
 # existed before the run. Its kubeconfig is kept apart from ~/.kube/config.
 # Needs docker, kind or k3d, kubectl, helm and curl.
 #
+# A scenario that sets CLUSTERS, for example CLUSTERS="k3d", runs only on those
+# cluster types, and is reported as SKIP on the others.
+#
 # A scenario that sets EXPECTED_FAILURE must also set EXPECTED_ERROR, an
 # extended regular expression for the error it expects. It is reported as XFAIL
 # only when it fails and its output matches EXPECTED_ERROR. Any other failure is
@@ -97,10 +100,17 @@ done
 
 pass=0
 xfail=0
+skipped=0
 problems=()
 for file in "${scenarios[@]}"; do
   name=$(basename "$file" .sh)
   namespace="hk-${name%%-*}"
+  clusters=$(sed -nE 's/^CLUSTERS="(.*)"$/\1/p' "$file")
+  if [[ -n "$clusters" && " $clusters " != *" $cluster_type "* ]]; then
+    echo "SKIP $name: runs only on $clusters"
+    skipped=$((skipped + 1))
+    continue
+  fi
   echo "== $name ($cluster_type)"
   expected=$(sed -nE 's/^EXPECTED_FAILURE="(.*)"$/\1/p' "$file")
   expected_error=$(sed -nE "s/^EXPECTED_ERROR='(.*)'$/\\1/p" "$file")
@@ -148,7 +158,7 @@ for file in "${scenarios[@]}"; do
 done
 
 echo
-echo "$cluster_type: $pass passed, $xfail expected failures, ${#problems[@]} problems"
+echo "$cluster_type: $pass passed, $xfail expected failures, $skipped skipped, ${#problems[@]} problems"
 if ((${#problems[@]} > 0)); then
   echo "Problems: ${problems[*]}"
   exit 1
