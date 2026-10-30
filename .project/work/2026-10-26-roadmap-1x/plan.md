@@ -100,13 +100,14 @@ The separate [workstream 3 efficiency review](workstream-03-efficiency-review.md
 |---|---|---|---|---|---|
 | 4.1 | fix(chart): add secure defaults and fix the chart bugs | bug, area:deploy | 2.1 | #35 (chart) | [work package](../2026-10-30-chart-secure-defaults/plan.md), [deploy.md](../../roadmap/1.x/deploy.md#helm-version), [review.md](../../roadmap/1.x/review.md#fixes-effort-and-impact) row 6 |
 | 4.2 | feat(chart): create an Ingress or an HTTPRoute from the chart | enhancement, area:deploy | 4.1 | #31 | [work package](../2026-10-30-chart-ingress-httproute/plan.md), [deploy.md](../../roadmap/1.x/deploy.md#exposing-the-app) |
-| 4.3 | feat(chart): add values.schema.json | enhancement, area:deploy | 4.2 | — | [site.md](../../roadmap/1.x/site.md#agent-experience-ax) |
+| 4.3 | feat(chart): add values.schema.json | enhancement, area:deploy | 4.2 | — | [work package](../2026-10-30-chart-values-schema/plan.md), [site.md](../../roadmap/1.x/site.md#agent-experience-ax) |
 | 4.4 | ci(release): publish the rendered YAML and the OCI chart with each release | enhancement, area:ci, area:deploy | 3.2, 4.2 | #29, #23 | [deploy.md](../../roadmap/1.x/deploy.md#rendered-yaml-on-each-release) |
 | 4.5 | docs(deploy): rewrite the deployment docs for Helm, kubectl and Kustomize | documentation, area:deploy | 4.2, 4.4 | #28, #31 | [deploy.md](../../roadmap/1.x/deploy.md) |
 | 4.6 | test(e2e): add Ingress and Gateway API scenarios on kind and k3d | enhancement, area:ci | 3.3, 4.2 | — | [testing.md](../../roadmap/1.x/testing.md#suggested-order) steps 2–4, 7, 8 |
 
 - 4.1 covers the `securityContext`, removing `kubernetes.io/arch: amd64` from `nodeSelector`, quoting `message` and `pathPrefix`, `appVersion`, and `NOTES.txt`. It removes the `EXPECTED_FAILURE` markers from E3 and E7, and adds the arm64 e2e job to CI, which proves the default chart on arm64 (workstream 2 review). It also gives the image tests' error file in `test/image/run.sh` a unique name with `mktemp` (workstream 3 review).
 - 4.2 also adds the top-level `pathPrefix` and `rewritePath`, keeps the old names working, and adds the chart tests (C1–C11). #31 closes with 4.5, which replaces the broken Ingress example in the docs.
+- 4.3 rejects unknown keys in the parts the chart owns, and requires `message` to be a string; the image tag can be a number (decided 2026-10-30).
 - 4.4 includes the Artifact Hub listing. It also makes `verify-published.sh` check the digest it reads, not the tag, and report a Trivy failure apart from vulnerabilities, before 6.2 uses it (workstream 3 review).
 - 4.5 covers the quick start with clean-up, Helm 4 (decided 2026-10-30: Helm 3 is not tested), the NGINX, Traefik and Gateway API examples, the Kustomize guide and the values reference.
 - 4.6 covers E5, E6, E8–E10 and E12–E18.
