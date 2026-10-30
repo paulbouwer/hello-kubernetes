@@ -56,6 +56,22 @@ k3d cluster create hello-kubernetes
 
 Their contexts are written to `~/.kube/config` inside the container. The clusters and contexts are lost when the container is rebuilt.
 
+### Try the docs on a local cluster
+
+`make cluster-kind` or `make cluster-k3d` starts a cluster that is ready for the [deployment docs](../README.md#quick-start), set up as the e2e tests set it up:
+
+| | `make cluster-kind` | `make cluster-k3d` |
+|---|---|---|
+| Ingress controller | the NGINX Ingress Controller, class `nginx`, at `http://127.0.0.1:18080` | Traefik, class `traefik`, at `http://127.0.0.1:18082` |
+| Gateway | NGINX Gateway Fabric: `hk-gateway` in `hk-gateway`, at `http://127.0.0.1:18081` | Traefik: `traefik-gateway` in `kube-system`, at `http://127.0.0.1:18082` |
+| LoadBalancer Services | get an address from `cloud-provider-kind` | need another port than 80, such as `--set service.port=8080`, because Traefik holds port 80 |
+
+It builds the image from your working tree, and loads it as the chart's default image, `paulbouwer/hello-kubernetes:<appVersion>`, so the docs' commands use your build. In that cluster, the tag is your local build, not the published image. Until that version is published, install from the local chart, `deploy/helm/hello-kubernetes`, in place of `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`.
+
+The command prints the `KUBECONFIG` to export and an example to try. The cluster is kept, and running the command again reuses it. The ports are forwarded to your machine (see VS Code's Ports view). The NGINX Ingress Controller needs a host on each Ingress, so send it as a `Host` header, for example `curl -H "Host: hello.local" http://127.0.0.1:18080/app/hello/`.
+
+Delete both clusters with `make cluster-clean`. The e2e tests use the same clusters and ports, so `make e2e-kind` and `make e2e-k3d` reuse a running local cluster, and leave it running.
+
 ### Using clusters from your host
 
 Your host's `~/.kube` folder isn't mounted by default. To use clusters defined on your host, mount it read-only in `.devcontainer/devcontainer.json` and rebuild the container:

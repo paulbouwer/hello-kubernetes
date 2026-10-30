@@ -14,8 +14,11 @@
   },
 
   // Port forwarding
-  "forwardPorts": [8080],
+  "forwardPorts": [8080, 18080, 18081, 18082],
   "portsAttributes": {
-    "8080": { "label": "hello-kubernetes", "onAutoForward": "notify" }
+    "8080": { "label": "hello-kubernetes", "onAutoForward": "notify" },
+    "18080": { "label": "kind Ingress (make cluster-kind)", "onAutoForward": "silent" },
+    "18081": { "label": "kind Gateway (make cluster-kind)", "onAutoForward": "silent" },
+    "18082": { "label": "k3d Ingress and Gateway (make cluster-k3d)", "onAutoForward": "silent" }
   }
 }
