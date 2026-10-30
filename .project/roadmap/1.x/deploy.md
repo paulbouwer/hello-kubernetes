@@ -262,7 +262,7 @@ Then `kubectl apply -k .`. The same pattern covers a custom message, replicas or
 
 Caveats:
 
-- This hasn't been run yet, and the release URL won't exist until the workflow publishes the YAML.
+- 4.5 (#121) ran this, with the release name `demo`, in [docs/deploy-using-kubectl-and-kustomize.md](../../../docs/deploy-using-kubectl-and-kustomize.md). The release URL exists from 1.11.0.
 - JSON-patch `env/-` appends to the list. Adding a variable the YAML already has (e.g. `MESSAGE`) creates a duplicate; use a strategic-merge patch for those.
 
 ### Chart values and what they change
