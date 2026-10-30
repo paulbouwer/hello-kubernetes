@@ -91,10 +91,8 @@ cluster-clean: ## delete the local and e2e clusters
 	test/e2e/local.sh clean
 
 .PHONY: e2e-clean
-e2e-clean: ## delete the e2e clusters
-	-kind delete cluster --name hk-e2e-kind
-	-k3d cluster delete hk-e2e-k3d
-	rm -f $${TMPDIR:-/tmp}/hk-e2e-kind.kubeconfig $${TMPDIR:-/tmp}/hk-e2e-k3d.kubeconfig
+e2e-clean: ## delete the e2e clusters, and stop cloud-provider-kind
+	test/e2e/local.sh clean
 
 .PHONY: verify-published
 verify-published: ## verify a published image: make verify-published PUBLISHED=ghcr.io/paulbouwer/hello-kubernetes:1.11.0 [SCAN=1]

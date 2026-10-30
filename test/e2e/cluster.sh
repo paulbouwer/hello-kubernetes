@@ -102,16 +102,48 @@ load_image() {
   esac
 }
 
-# Succeeds if every k3d server and agent node has the image.
+# Succeeds if every k3d server and agent node has the image, as built: its
+# ID must match Docker's, so an older image with the same tag doesn't count.
+# Docker's ID is the image's manifest digest with the containerd image store,
+# which ctr shows, and its config digest with the classic store, which crictl
+# shows, so either matches.
 # image_on_k3d_nodes IMAGE
 image_on_k3d_nodes() {
-  local node nodes=0
+  local want node ids nodes=0
+  want=$(docker image inspect -f '{{.Id}}' "$1") || return 1
   for node in $(docker ps --filter "label=k3d.cluster=$cluster" --format '{{.Names}} {{.Label "k3d.role"}}' |
     awk '$2 == "server" || $2 == "agent" { print $1 }'); do
-    docker exec "$node" ctr -n k8s.io images ls -q | grep -qE "(^|/)$1\$" || return 1
+    ids=$(
+      docker exec "$node" ctr -n k8s.io images ls 2>/dev/null |
+        awk -v ref="$1" '$1 == ref || substr($1, length($1) - length(ref)) == "/" ref { print $3 }'
+      docker exec "$node" crictl inspecti -o json "$1" 2>/dev/null | jq -r '.status.id // empty'
+    )
+    grep -qxF "$want" <<<"$ids" || return 1
     nodes=$((nodes + 1))
   done
   ((nodes > 0))
+}
+
+# The Kubernetes version the cluster type's node image runs, such as v1.37.0.
+expected_kubernetes_version() {
+  case "$CLUSTER_TYPE" in
+    kind) sed -E 's/.*:(v[0-9]+\.[0-9]+\.[0-9]+).*/\1/' <<<"$kind_node_image" ;;
+    k3d) sed -E 's/.*:(v[0-9]+\.[0-9]+\.[0-9]+).*/\1/' <<<"$k3s_image" ;;
+  esac
+}
+
+# Fails if a reused cluster runs another Kubernetes version than this run
+# asks for, for example a 1.37 cluster kept from make cluster-kind when
+# make e2e-kind-oldest asks for 1.35.
+check_cluster_version() {
+  local want have
+  want=$(expected_kubernetes_version)
+  have=$(kubectl version -o json 2>/dev/null | jq -r '.serverVersion.gitVersion // empty')
+  if [[ "$have" != "$want" && "$have" != "$want"[+-]* ]]; then
+    echo "The running $CLUSTER_TYPE cluster $cluster runs Kubernetes ${have:-unknown}, not $want." >&2
+    echo "Delete it with make cluster-clean, then run again." >&2
+    return 1
+  fi
 }
 
 delete_cluster_now() {
