@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [app, image, deploy, ci, site, operations]
 created: 2026-10-26
-updated: 2026-10-29
+updated: 2026-10-30
 ---
 
 # 1.x roadmap
@@ -91,6 +91,8 @@ The [workstream 2 review](workstream-02-review.md) records the outcome and the f
 - 3.4 comes from the workstream 1 review. It must land before 6.2, when automatic PR labelling goes live on `main`.
 
 The [workstream 3 review](workstream-03-review.md) records the outcome, the release gates in 4.1 and 6.2, and where its minor issues are fixed.
+
+The separate [workstream 3 efficiency review](workstream-03-efficiency-review.md) covers all GitHub Actions workflows and measured redundant test work. Its proposals are deferred until after 1.11 and must preserve the required checks and release gates.
 
 #### 4. Chart and deployment
 
@@ -298,6 +300,7 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 - **Before automatic PR labelling goes live in 6.2:** tracked as 3.4 (#95), from the [workstream 1 review](workstream-01-review.md#finding-to-address).
 - **Before arm64 CI:** placed in 3.3 and 4.1, and a release gate in 6.2, from the [workstream 2 review](workstream-02-review.md#follow-up-before-arm64-ci).
 - **From the workstream 3 review:** no new major defect. Its release gates are in 4.1 and 6.2, and its minor issues are placed in 4.1 and 4.4, from the [workstream 3 review](workstream-03-review.md#minor-issues).
+- **After 1.11: CI efficiency.** Run the image and e2e tests only when their inputs change, as proposed in the [workstream 3 efficiency review](workstream-03-efficiency-review.md). Design it once all the 1.11 workflows exist (decided 2026-10-30).
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **An image override with the old tags breaks with the new chart defaults.** The 1.10.1 and older images run as the non-numeric `USER node`, so `runAsNonRoot: true` rejects them (#35). Document this in the 4.1 release notes, or set `runAsUser: 1000` in the chart so that the kubelet can verify it. Decide in 4.1.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
