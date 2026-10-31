@@ -1,0 +1,178 @@
+---
+title: With Kustomize
+description: Use the release file as a Kustomize base, and patch the namespace, message, Service and path prefix without Helm.
+sidebar:
+  order: 3
+  attrs:
+    data-icon: puzzle
+---
+
+Kustomize is built into `kubectl`. Use the [release file](/hello-kubernetes/docs/deploy/kubectl/) as a base, and patch what you need. You don't need Helm.
+
+| Needs | Installs into | You get |
+|---|---|---|
+| `kubectl` and a cluster | the namespace in your `kustomization.yaml` | the app with your changes |
+
+Each example is a folder with a `kustomization.yaml`. Pin the release file to a version, so the base doesn't change under you.
+
+## A namespace, a message and ClusterIP
+
+```yaml title="kustomization.yaml"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hello
+resources:
+  - namespace.yaml
+  - https://github.com/paulbouwer/hello-kubernetes/releases/download/v1.11.0/hello-kubernetes.yaml
+patches:
+  - target: { kind: Service, name: hello-kubernetes-demo }
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: ClusterIP
+  - target: { kind: Deployment, name: hello-kubernetes-demo }
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: { name: MESSAGE, value: "Deployed with Kustomize" }
+```
+
+```yaml title="namespace.yaml"
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hello
+```
+
+Apply it:
+
+```bash
+kubectl apply -k .
+kubectl rollout status deployment/hello-kubernetes-demo --namespace hello
+```
+
+`op: add` with `env/-` adds to the end of the list. The release file already sets `KUBERNETES_NAMESPACE`, `KUBERNETES_POD_NAME`, `KUBERNETES_NODE_NAME` and `CONTAINER_IMAGE`. To change one of those, use `op: replace` on its position instead, or a strategic merge patch.
+
+## A load balancer on port 8080
+
+On k3s, k3d and Rancher Desktop, the built-in Traefik already uses port 80. Keep the `LoadBalancer` Service, and move it to port 8080:
+
+```yaml title="kustomization.yaml"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - https://github.com/paulbouwer/hello-kubernetes/releases/download/v1.11.0/hello-kubernetes.yaml
+patches:
+  - target: { kind: Service, name: hello-kubernetes-demo }
+    patch: |-
+      - op: replace
+        path: /spec/ports/0/port
+        value: 8080
+```
+
+Apply it with `kubectl apply -k .`. `kubectl get service hello-kubernetes-demo` then shows an `EXTERNAL-IP`, and the app is at `http://<EXTERNAL-IP>:8080/`. With k3d, create the cluster with `-p "8080:8080@loadbalancer"`, and open `http://localhost:8080/`.
+
+## An Ingress
+
+The release file has no Ingress. Add your own, and patch the app to serve under the prefix. This passes the prefix on, as `rewritePath: false` does in the chart, so the Ingress needs no annotations. The same pattern adds an `HTTPRoute` instead.
+
+```yaml title="ingress.yaml"
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-kubernetes-demo
+spec:
+  ingressClassName: traefik # or nginx, which also needs a host: below
+  rules:
+    - http:
+        paths:
+          - path: /app/hello
+            pathType: Prefix
+            backend:
+              service:
+                name: hello-kubernetes-demo
+                port:
+                  number: 80
+```
+
+```yaml title="kustomization.yaml"
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hello
+resources:
+  - namespace.yaml
+  - https://github.com/paulbouwer/hello-kubernetes/releases/download/v1.11.0/hello-kubernetes.yaml
+  - ingress.yaml
+patches:
+  - target: { kind: Service, name: hello-kubernetes-demo }
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: ClusterIP
+  - target: { kind: Deployment, name: hello-kubernetes-demo }
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: { name: HANDLER_PATH_PREFIX, value: /app/hello }
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: { name: RENDER_PATH_PREFIX, value: /app/hello }
+      - op: replace
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/path
+        value: /app/hello/
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/path
+        value: /app/hello/
+```
+
+Use the same `namespace.yaml` as the first example. Apply it with `kubectl apply -k .`, and open `http://<ingress address>/app/hello/`.
+
+## What each chart value changes
+
+To make a change that the chart has a value for, change the YAML like this:
+
+| Chart value | What it changes in the YAML |
+|---|---|
+| `message` | Adds the `MESSAGE` env var to the container |
+| `pathPrefix` | Sets `RENDER_PATH_PREFIX`; the path on the Ingress or HTTPRoute |
+| `rewritePath: false` | Also sets `HANDLER_PATH_PREFIX` to `pathPrefix`; the probes use `<pathPrefix>/` |
+| `rewritePath: true` | Sets `HANDLER_PATH_PREFIX` to `""`; the HTTPRoute gets a `URLRewrite` filter; an Ingress needs your controller's annotation |
+| `service.type`, `service.port` | The Service `spec.type` and port |
+| `ingress.*` | Creates an Ingress, with the class, host, TLS and annotations |
+| `httpRoute.*` | Creates an HTTPRoute, with the parent refs and host names |
+| `deployment.replicaCount` | The Deployment `spec.replicas` |
+| `deployment.container.image.*` | The container `image` and `imagePullPolicy`, and the `CONTAINER_IMAGE` env var |
+| `deployment.container.port` | The `containerPort`, the probes' port, and a `PORT` env var when it isn't `8080` |
+| `deployment.container.securityContext` | The container `securityContext` |
+| `deployment.podSecurityContext` | The pod `securityContext` |
+| `deployment.resources`, `nodeSelector`, `tolerations`, `affinity` | Copied into the pod spec as they are |
+
+The root filesystem is read-only, so the Deployment mounts an `emptyDir` at `/tmp`. Keep it if you change the security settings. The container also has a `preStop` sleep of 5 seconds, so that an upgrade doesn't drop requests while the pods are replaced.
+
+## Verify
+
+```bash
+kubectl port-forward service/hello-kubernetes-demo 8080:80 --namespace hello
+```
+
+Open `http://localhost:8080/`. In the first example, you see **Deployed with Kustomize**, from one of 3 pods.
+
+## Upgrade
+
+Change the version in the release file's URL, and apply again with `kubectl apply -k .`. Your patches apply to the new base.
+
+## Uninstall
+
+```bash
+kubectl delete -k .
+```
+
+This also deletes the namespace, when the folder has `namespace.yaml`.
+
+## Requirements
+
+- Kubernetes 1.35 or newer, and the `kubectl` that matches it. CI tests 1.35 and the current release, on kind and k3d.
+- `linux/amd64` or `linux/arm64` nodes.

@@ -35,11 +35,17 @@ sidebar:
 ---
 ```
 
-`data-icon` is the name of one of [Starlight's icons](https://starlight.astro.build/reference/icons/).
+`data-icon` is the name of one of [Starlight's icons](https://starlight.astro.build/reference/icons/), or `cncf:helm` or `cncf:kubernetes` for the CNCF marks in `site/src/icons/`. To add a mark, put its black SVG in that folder, record where it came from in `site/src/icons/SOURCE.md`, and list it on the Licences page.
 
 Links to other pages use the full path, starting with `/hello-kubernetes/`, for example `/hello-kubernetes/docs/start-here/quick-start/`. The build rejects relative links.
 
 Write in the repo's plain-English style (AGENTS.md): short sentences, active voice, one idea per sentence.
+
+A Deploy page starts with what it needs, where it installs and what you get, and ends with Verify, Upgrade, Uninstall and Requirements.
+
+### Commands that are tested
+
+Mark a `bash` block `e2e`, as in ` ```bash e2e `, and E15 runs it on a k3d cluster, in page order, with the chart and image under test. Mark a block in a code group with its group, as in ` ```bash e2e=helm `: the page then runs once per group. Leave a block unmarked when it runs until stopped (`port-forward`), needs a published release, or needs another cluster. The list of pages E15 reads is in `test/e2e/scenarios/e15-docs.sh`.
 
 ### Code blocks
 
@@ -87,4 +93,4 @@ npm install --save-exact --before=2026-10-25T00:00:00Z <package>@<version>
 
 Dependabot proposes updates for `site/` weekly, with the same 7-day wait.
 
-The fonts are self-hosted from `@fontsource` packages. `site/scripts/copy-font-licences.mjs` copies each font's licence into the built site, and the footer links to them.
+The fonts are self-hosted from `@fontsource` packages. `site/scripts/copy-font-licences.mjs` copies each font's licence into the built site, and the Licences page links to them. Add any new font, icon or copied code to that page.

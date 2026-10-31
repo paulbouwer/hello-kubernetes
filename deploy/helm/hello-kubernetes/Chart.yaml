@@ -28,4 +28,4 @@ annotations:
         - linux/arm64
   artifacthub.io/links: |
     - name: Deploy using Helm
-      url: https://github.com/paulbouwer/hello-kubernetes/blob/main/docs/deploy-using-helm.md
+      url: https://paulbouwer.github.io/hello-kubernetes/docs/deploy/helm/

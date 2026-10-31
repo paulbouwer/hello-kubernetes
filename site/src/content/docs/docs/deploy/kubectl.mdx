@@ -1,0 +1,86 @@
+---
+title: With kubectl
+description: Deploy hello-kubernetes from the release file with kubectl alone, and reach it on any cluster.
+sidebar:
+  order: 2
+  attrs:
+    data-icon: cncf:kubernetes
+---
+
+Each release has `hello-kubernetes.yaml`: the [Helm chart](/hello-kubernetes/docs/deploy/helm/) rendered with its default values and the release name `demo`. You don't need Helm.
+
+| Needs | Installs into | You get |
+|---|---|---|
+| `kubectl` and a cluster | your current namespace, or the one you give with `--namespace` | the app with its default settings |
+
+The file creates:
+
+| Resource | Name | Notes |
+|---|---|---|
+| ServiceAccount | `hello-kubernetes-demo` | |
+| Service | `hello-kubernetes-demo` | `LoadBalancer`, port `80` |
+| Deployment | `hello-kubernetes-demo` | 2 pods, the image `paulbouwer/hello-kubernetes` at the release's version, user `1000`, a read-only root filesystem, and the restricted Pod Security settings |
+
+## Apply it
+
+```bash e2e
+kubectl apply -f https://github.com/paulbouwer/hello-kubernetes/releases/latest/download/hello-kubernetes.yaml
+kubectl rollout status deployment/hello-kubernetes-demo
+```
+
+```text output
+serviceaccount/hello-kubernetes-demo created
+service/hello-kubernetes-demo created
+deployment.apps/hello-kubernetes-demo created
+deployment "hello-kubernetes-demo" successfully rolled out
+```
+
+`latest` follows the newest release. To keep one version, use its URL, for example `https://github.com/paulbouwer/hello-kubernetes/releases/download/v1.11.0/hello-kubernetes.yaml`.
+
+To change its settings, use it as a base [with Kustomize](/hello-kubernetes/docs/deploy/kustomize/).
+
+## Verify
+
+Get the external address. It can take a minute to appear:
+
+```bash e2e
+kubectl get service hello-kubernetes-demo
+```
+
+Open `http://<EXTERNAL-IP>/`. You see **Hello world!**.
+
+### Where the external address works
+
+| Cluster | `LoadBalancer` Service |
+|---|---|
+| Cloud clusters, such as EKS, GKE and AKS | Works. You get a public address, and your cloud may charge for the load balancer. |
+| Docker Desktop, OrbStack | Works. The address is `localhost`. |
+| k3s, k3d, Rancher Desktop | `EXTERNAL-IP` stays `<pending>`, because their built-in Traefik already uses port 80. Move the Service to port 8080 [with Kustomize](/hello-kubernetes/docs/deploy/kustomize/#a-load-balancer-on-port-8080) or with Helm (`--set service.port=8080`). With k3d, also create the cluster with `-p "8080:8080@loadbalancer"`, and open `http://localhost:8080/`. |
+| kind, minikube, bare metal | `EXTERNAL-IP` stays `<pending>`. The app still runs. minikube also has `minikube tunnel`, and kind has `cloud-provider-kind`. |
+
+Where `EXTERNAL-IP` stays `<pending>`, forward a local port:
+
+```bash
+kubectl port-forward service/hello-kubernetes-demo 8080:80
+```
+
+Open `http://localhost:8080/`. You see **Hello world!**. Press Ctrl+C to stop.
+
+## Upgrade
+
+Apply the newer release file. `kubectl apply` changes only what differs, and the pods are replaced one at a time:
+
+```bash
+kubectl apply -f https://github.com/paulbouwer/hello-kubernetes/releases/download/v1.11.0/hello-kubernetes.yaml
+```
+
+## Uninstall
+
+```bash e2e
+kubectl delete -f https://github.com/paulbouwer/hello-kubernetes/releases/latest/download/hello-kubernetes.yaml
+```
+
+## Requirements
+
+- Kubernetes 1.35 or newer. CI tests 1.35 and the current release, on kind and k3d.
+- `linux/amd64` or `linux/arm64` nodes.

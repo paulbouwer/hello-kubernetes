@@ -1,0 +1,116 @@
+---
+title: With Helm
+description: Install hello-kubernetes from the OCI Helm chart, set values, pin a version, upgrade and uninstall.
+sidebar:
+  order: 1
+  attrs:
+    data-icon: cncf:helm
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import CodeGroup from '../../../../components/CodeGroup.astro';
+
+The chart is published on GHCR as an OCI artifact, with the same version as the app and the image. It is also listed on [Artifact Hub](https://artifacthub.io/packages/search?repo=hello-kubernetes).
+
+| Needs | Installs into | You get |
+|---|---|---|
+| `kubectl`, [Helm 4](https://helm.sh/docs/intro/install/) and a cluster | the namespace you choose | a ServiceAccount, a Service (`LoadBalancer` by default) and a Deployment with 2 pods, all named `hello-kubernetes-<release name>`. An Ingress or an HTTPRoute, if you turn one on. |
+
+## Install
+
+Install the chart as the release `hello-world`, in a new `hello-kubernetes` namespace:
+
+```bash e2e
+helm install hello-world oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-kubernetes --create-namespace \
+  --wait
+```
+
+You see `STATUS: deployed`, and notes that say how to reach the app for the Service type you chose.
+
+To install a specific version, add `--version`, for example `--version 1.11.0`. Without it, Helm installs the newest release.
+
+## Set values
+
+Set values with `--set`, or put them in a values file:
+
+<CodeGroup>
+<Tabs syncKey="values">
+<TabItem label="--set">
+
+```bash e2e
+helm install custom-message oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-kubernetes --create-namespace \
+  --set-string message="I just deployed this on Kubernetes!" \
+  --set service.type=ClusterIP \
+  --wait
+```
+
+</TabItem>
+<TabItem label="values.yaml">
+
+```yaml title="values.yaml"
+message: "I just deployed this on Kubernetes!"
+service:
+  type: ClusterIP
+```
+
+</TabItem>
+</Tabs>
+</CodeGroup>
+
+With a values file, install with `--values values.yaml`. Use `--set-string` for the message, so Helm keeps it as text even if it looks like a number or `yes`. In a values file, quote it.
+
+Helm checks your values against the chart's schema on every install and upgrade. A misspelled or unknown key, a wrong type or a value that isn't allowed stops the install, with a message that names the value, for example `additional properties 'pathPrefx' not allowed`. Editors that read JSON Schema show each value's description and allowed values.
+
+Every value is in the [values reference](/hello-kubernetes/docs/configure/values/). To see them from the chart itself:
+
+```bash e2e
+helm show values oci://ghcr.io/paulbouwer/charts/hello-kubernetes
+```
+
+## Verify
+
+Forward a local port to the Service:
+
+```bash
+kubectl port-forward service/hello-kubernetes-custom-message 8080:80 --namespace hello-kubernetes
+```
+
+Open `http://localhost:8080/`. You see **I just deployed this on Kubernetes!**. With a `LoadBalancer` Service, `kubectl get service` shows its external address; see [where the external address works](/hello-kubernetes/docs/deploy/kubectl/#where-the-external-address-works).
+
+To check that the chart is the one this repo published, verify its signed provenance. `helm pull` prints the chart's digest:
+
+```bash
+helm pull oci://ghcr.io/paulbouwer/charts/hello-kubernetes --version 1.11.0
+gh attestation verify oci://ghcr.io/paulbouwer/charts/hello-kubernetes@<digest> --repo paulbouwer/hello-kubernetes
+```
+
+## Upgrade
+
+Change a value, or move to a newer chart, with `helm upgrade`. `--reuse-values` keeps the values you set before:
+
+```bash e2e
+helm upgrade custom-message oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-kubernetes --reuse-values \
+  --set-string message="Upgraded!" \
+  --wait
+```
+
+The pods are replaced one at a time, and the page then shows **Upgraded!**.
+
+## Uninstall
+
+```bash e2e
+helm uninstall hello-world --namespace hello-kubernetes
+helm uninstall custom-message --namespace hello-kubernetes
+kubectl delete namespace hello-kubernetes
+```
+
+`helm list --all-namespaces` shows the releases, if you don't remember their names.
+
+## Requirements
+
+- Helm 4. The chart is tested with Helm 4 only.
+- Kubernetes 1.35 or newer. CI tests 1.35 and the current release, on kind and k3d.
+- `linux/amd64` or `linux/arm64` nodes.

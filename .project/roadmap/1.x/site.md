@@ -74,7 +74,7 @@ Taken from screenshots of the live sites with Playwright on 2026-10-31. We match
   For AI agents             llms.txt, the schema, using the docs from an agent
 ```
 
-Contributing, the dev environment, CI and how the site is built stay in `docs/` and `CONTRIBUTING.md`. The footer links to them on GitHub.
+Contributing, the dev environment, CI and how the site is built stay in `docs/` and `CONTRIBUTING.md`. The GitHub link in the header leads to them. A **Licences** page, last in the sidebar, lists the fonts, icons and code the site uses from other projects (#141).
 
 Deploy pages follow Herdr's install page: the method, then **Verify** (a command and its expected result), **Upgrade**, **Uninstall** and **Requirements**.
 
@@ -107,7 +107,9 @@ There is no "Ask Assistant" button, which would need a hosted AI service.
 
 ## Page layout
 
-The page column is up to 1000px wide (`--sl-content-width: 62.5rem`). Section headings are 24px (h2), 19px (h3) and 17px (h4) at every width; page titles keep Starlight's size. The previous and next links are small and quiet, and span the column. Buttons are rounded rectangles, never pills. Pages have no "Edit page" link. The footer links to report an issue, to contribute, and to the font licences (#139).
+The page column is up to 1000px wide (`--sl-content-width: 62.5rem`). Section headings are 24px (h2), 19px (h3) and 17px (h4) at every width; page titles keep Starlight's size. The previous and next links are small and quiet, and span the column. Buttons are rounded rectangles, never pills. Pages have no "Edit page" link (#139), and no footer links: the GitHub link in the header leads to issues and contributing (maintainer, 2026-10-31, #141).
+
+**Sidebar icons:** each page has a small icon, drawn in the text colour. The Helm and Kubernetes pages use the black marks from [CNCF artwork](https://github.com/cncf/artwork) (`site/src/icons/`), under the Linux Foundation trademark guidelines; the rest are Starlight's (#141).
 
 ## Landing page
 
@@ -171,7 +173,7 @@ It gives:
 |---|---|
 | Search | Starlight's built-in Pagefind, with no third-party service |
 | Analytics | None |
-| Feedback | A footer link to open an issue. No "Edit page" links, for a cleaner page (maintainer, 2026-10-31) |
+| Feedback | The GitHub link in the header. No footer links and no "Edit page" links, for a cleaner page (maintainer, 2026-10-31) |
 | Also built | A sitemap, a 404 page, and a phone-width layout for every page |
 | Languages | English only |
 | Build | Node from the tool table, `npm ci` with a lockfile in `site/`, the 7-day cooldown, and Dependabot for `site/` |
