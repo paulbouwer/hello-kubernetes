@@ -1,0 +1,78 @@
+# Builds and checks the website (site/) on every PR and push, and publishes it
+# to GitHub Pages from main only, so the live site always matches the latest
+# release (.project/roadmap/1.x/site.md#decisions).
+#
+# - site: make site-test. It installs the site's packages from the lockfile,
+#   runs astro check and astro build (which checks every internal link and
+#   anchor), then loads every page in Playwright, in light and dark mode: it
+#   fails on a console error, a request to another site, or a serious or
+#   critical accessibility problem (axe). A required check. The built site and
+#   the screenshots of each page are kept as artifacts, for review.
+# - deploy: publishes the built site to GitHub Pages, on a push to main.
+#
+# Node comes from test/ci/install-tools.sh, and Playwright from its image,
+# pinned by digest in the Makefile.
+name: Website
+
+on:
+  pull_request:
+    branches: [main, "release-*"]
+  push:
+    branches: [main, "release-*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a PR cancels that PR's older runs. Runs on branches are never
+# cancelled, so a deploy is never cut short.
+concurrency:
+  group: pages-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  site:
+    name: site
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        run: test/ci/install-tools.sh node
+
+      - name: Build and check the site
+        run: make site-test
+
+      - name: Keep the screenshots
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site-screenshots
+          path: site/test-results/screenshots/
+          if-no-files-found: ignore
+
+      - name: Keep the built site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site/dist/
+
+  deploy:
+    name: deploy
+    needs: site
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Publish to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

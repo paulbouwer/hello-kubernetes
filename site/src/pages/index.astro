@@ -1,0 +1,19 @@
+---
+// A temporary landing page, until 5.6 adds the real one.
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { LinkButton } from '@astrojs/starlight/components';
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Hello, Kubernetes.',
+    description: 'A small web app to deploy on a Kubernetes cluster. It shows which pod answered.',
+    template: 'splash',
+  }}
+>
+  <p>
+    hello-kubernetes is a small web app to deploy on a Kubernetes cluster. Its page shows a message,
+    and the namespace, pod and node that answered.
+  </p>
+  <LinkButton href={`${import.meta.env.BASE_URL}docs/start-here/overview/`}>Read the docs</LinkButton>
+</StarlightPage>

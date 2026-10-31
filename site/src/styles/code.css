@@ -1,0 +1,161 @@
+/* Code blocks, after microsandbox's: one rounded frame with a thin
+   blue-tinted border, the copy button in the header, a terminal icon on
+   commands, file names in the header, a quieter frame for output, and code
+   groups with their tabs inside the frame's header.
+   See .project/roadmap/1.x/site.md#code-blocks. */
+
+/* Headers: one height and look for every code block, like a code group's tab
+   bar. A block's only title, such as "Terminal" or "values.yaml", looks like a
+   selected tab. */
+.expressive-code .frame.has-title .header,
+.expressive-code .frame.is-terminal .header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  height: var(--hk-code-header-height);
+  padding: 0 0.5rem;
+  background: var(--hk-code-header);
+  border-bottom: 1px solid var(--hk-code-border);
+}
+.expressive-code .frame.has-title .header::before,
+.expressive-code .frame.has-title .header::after,
+.expressive-code .frame.is-terminal .header::before,
+.expressive-code .frame.is-terminal .header::after,
+.expressive-code .frame.has-title .title::after {
+  display: none;
+}
+.expressive-code .frame.has-title .header .title,
+.expressive-code .frame.is-terminal .header .title,
+.code-group starlight-tabs [role='tab'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0 0.6rem;
+  height: calc(var(--hk-code-header-height) - 1px);
+  font-family: var(--sl-font);
+  font-size: var(--sl-text-sm);
+  font-weight: 500;
+  line-height: 1;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  color: var(--sl-color-gray-3);
+}
+.expressive-code .frame.has-title .header .title,
+.expressive-code .frame.is-terminal .header .title,
+.code-group starlight-tabs [role='tab'][aria-selected='true'] {
+  color: var(--sl-color-accent-high);
+}
+/* Only a choice of tabs is underlined. */
+.code-group starlight-tabs [role='tab'][aria-selected='true'] {
+  border-bottom-color: var(--sl-color-accent);
+}
+
+/* A terminal icon before the title of a command block. */
+.expressive-code .frame.is-terminal .header .title::before {
+  content: '';
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 17 6-5-6-5'/%3E%3Cpath d='M12 19h8'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+/* The copy button sits in the header, centred, and is always shown. */
+.expressive-code .frame.has-title .copy,
+.expressive-code .frame.is-terminal .copy {
+  inset-block-start: calc((var(--hk-code-header-height) - 2rem) / 2);
+}
+/* Just the icon: no box, border or background. */
+.expressive-code .copy button {
+  opacity: 0.7;
+  background: transparent;
+}
+.expressive-code .copy button::before,
+.expressive-code .copy button div {
+  display: none;
+}
+.expressive-code .copy button::after {
+  background-color: var(--sl-color-gray-3);
+}
+.expressive-code .copy button:hover::after,
+.expressive-code .copy button:focus-visible::after {
+  background-color: var(--sl-color-accent-high);
+}
+.expressive-code .copy button:hover {
+  opacity: 1;
+}
+.expressive-code .frame.output .copy {
+  display: none;
+}
+
+/* Output: no header, a dashed grey border, and quieter text. */
+.expressive-code .frame.output {
+  border: 1px dashed var(--sl-color-gray-4);
+  border-radius: 0.75rem;
+}
+.expressive-code .frame.output .header {
+  display: none;
+}
+.expressive-code .frame.output pre {
+  border: none;
+  background: transparent;
+}
+.expressive-code .frame.output .code {
+  opacity: 0.75;
+}
+
+/* Code groups: Starlight's tabs become the frame's header. */
+.code-group {
+  border: 1px solid var(--hk-code-border);
+  border-radius: 0.75rem;
+  background: var(--hk-code-background);
+  overflow: hidden;
+  margin-block: 1.25rem;
+}
+.code-group starlight-tabs {
+  display: block;
+  margin: 0;
+}
+.code-group .tablist-wrapper,
+.code-group [role='tablist'] {
+  margin: 0;
+}
+.code-group starlight-tabs .tablist-wrapper {
+  height: var(--hk-code-header-height);
+  background: var(--hk-code-header);
+  border-bottom: 1px solid var(--hk-code-border);
+  padding-inline: 0.5rem;
+}
+.code-group starlight-tabs [role='tablist'] {
+  border-bottom: none;
+  gap: 0.25rem;
+}
+.code-group starlight-tabs [role='tabpanel'] {
+  margin: 0;
+  padding: 0;
+}
+.code-group starlight-tabs [role='tabpanel'] > * + * {
+  margin-top: 0;
+}
+/* Inside a group, the blocks lose their own frame and header: the tabs are
+   the header. */
+.code-group .expressive-code .frame .header {
+  display: none;
+}
+.code-group .expressive-code .frame {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+.code-group .expressive-code {
+  margin: 0;
+}
+/* The group's header is its tab bar, so the copy button moves up into it. */
+.code-group .expressive-code .frame .copy {
+  inset-block-start: calc(-1 * var(--hk-code-header-height) + (var(--hk-code-header-height) - 2rem) / 2);
+}
+.code-group .expressive-code .frame.has-title .header,
+.code-group .expressive-code .frame.is-terminal .header {
+  border-radius: 0;
+}

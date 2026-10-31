@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+# Copied from the font packages by scripts/copy-font-licences.mjs
+public/licences/fonts/
+test-results/
+playwright-report/

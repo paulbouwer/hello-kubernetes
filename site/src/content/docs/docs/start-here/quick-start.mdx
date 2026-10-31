@@ -1,0 +1,70 @@
+---
+title: Quick start
+description: Deploy hello-kubernetes, reach it, and remove it, with kubectl or Helm.
+sidebar:
+  order: 2
+  attrs:
+    data-icon: rocket
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import CodeGroup from '../../../../components/CodeGroup.astro';
+
+Deploy hello-kubernetes into your current namespace, with its default settings.
+
+<CodeGroup>
+<Tabs syncKey="method">
+<TabItem label="kubectl">
+
+```bash
+kubectl apply -f https://github.com/paulbouwer/hello-kubernetes/releases/latest/download/hello-kubernetes.yaml
+kubectl rollout status deployment/hello-kubernetes-demo
+```
+
+</TabItem>
+<TabItem label="Helm">
+
+```bash
+helm install demo oci://ghcr.io/paulbouwer/charts/hello-kubernetes --wait
+```
+
+</TabItem>
+</Tabs>
+</CodeGroup>
+
+You see:
+
+```text output
+deployment "hello-kubernetes-demo" successfully rolled out
+```
+
+## Reach the app
+
+Forward a local port to the Service:
+
+```bash
+kubectl port-forward service/hello-kubernetes-demo 8080:80
+```
+
+Open `http://localhost:8080/`. You see **Hello world!**.
+
+## Remove it
+
+<CodeGroup>
+<Tabs syncKey="method">
+<TabItem label="kubectl">
+
+```bash
+kubectl delete -f https://github.com/paulbouwer/hello-kubernetes/releases/latest/download/hello-kubernetes.yaml
+```
+
+</TabItem>
+<TabItem label="Helm">
+
+```bash
+helm uninstall demo
+```
+
+</TabItem>
+</Tabs>
+</CodeGroup>

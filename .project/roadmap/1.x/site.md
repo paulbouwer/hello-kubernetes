@@ -33,7 +33,7 @@ The decisions below were agreed with the maintainer on 2026-10-31, question by q
 | 13 | **The defaults** below: Pagefind search, no analytics, English only, `paulbouwer.github.io/hello-kubernetes`. | Standard, and no third-party services. |
 | 14 | **Six items**, 5.1–5.6, in the order in the [1.x work plan](../../work/2026-10-26-roadmap-1x/plan.md#5-website). | The landing page's mock-up needs the preview, so the preview comes first. |
 
-A **Content Security Policy** in a `<meta>` tag is tried in 5.2, and kept only if Astro's generated hashes work with Starlight without workarounds. It would stop a compromised dependency from loading code or sending data elsewhere, and enforce "no third-party requests". As a `<meta>` tag it can't stop framing (`frame-ancestors`) or send reports, because GitHub Pages can't send custom headers.
+A **Content Security Policy** in a `<meta>` tag was tried in 5.2 (#139), and **dropped**. Astro's generated policy blocked 26 of Starlight's inline scripts, which Astro doesn't hash, and 260 inline styles on code tokens. Making it work would have needed our own hashing step and `'unsafe-inline'` for style attributes. The Playwright checks still fail on any request to another site, in CI. The trial was to keep it only if Astro's generated hashes worked with Starlight without workarounds. It would stop a compromised dependency from loading code or sending data elsewhere, and enforce "no third-party requests". As a `<meta>` tag it can't stop framing (`frame-ancestors`) or send reports, because GitHub Pages can't send custom headers.
 
 ## References
 
@@ -94,13 +94,20 @@ The old `docs/deploy-using-helm.md`, `docs/deploy-with-ingress.md` and `docs/dep
 Built on Starlight's code blocks (Expressive Code), themed in our colours:
 
 - **Code groups:** one frame, with Helm, kubectl and Kustomize tabs in its header, synced across pages and remembered.
-- **The frame:** rounded corners, a thin border tinted blue, a subtle background in light and dark, and the copy button in the header.
-- **Commands:** a terminal icon in the header, and no `$` prompt in the copied text.
-- **Files:** the file name in the header, such as `values.yaml`.
-- **Output:** a quieter "Output" frame under the command that produces it.
-- **Highlighted lines** for the setting being explained.
+- **The frame:** rounded corners, a thin blue border, and a dark blue-grey background (`#161d29`) in dark mode, or a pale blue (`#e7eefc`) in light mode, with a slightly different header bar.
+- **Headers:** one height for every block. A code group's selected tab is light blue and underlined in blue. A block's only title, "Terminal" or a file name such as `values.yaml`, is light blue with no underline, because there is nothing to choose.
+- **Copy:** a bare icon, with no box or background, always shown on the right of the header. In a code group it sits in the tab bar.
+- **Commands:** titled "Terminal", with a terminal icon, and no `$` prompt in the copied text.
+- **Output:** a block marked `output`: a dashed grey frame, quieter text, no header and no copy button.
+- **Highlighted lines:** available, but used only when they help.
+
+Settled with the maintainer on 2026-10-31, from screenshots (#139). The navy backgrounds tried first, from kubernetes.io's `#113e82`, were too strong.
 
 There is no "Ask Assistant" button, which would need a hosted AI service.
+
+## Page layout
+
+The page column is up to 1000px wide (`--sl-content-width: 62.5rem`). Section headings are 24px (h2), 19px (h3) and 17px (h4) at every width; page titles keep Starlight's size. The previous and next links are small and quiet, and span the column. Buttons are rounded rectangles, never pills. Pages have no "Edit page" link. The footer links to report an issue, to contribute, and to the font licences (#139).
 
 ## Landing page
 
@@ -155,7 +162,7 @@ It gives:
   - `astro check` and `astro build`
   - internal links and anchors (`starlight-links-validator`); external links aren't checked, to keep the build reliable
   - Playwright on every page, light and dark: fail on a console error, a CSP violation, or a request to another site
-  - axe accessibility checks on the main pages: fail on serious and critical problems, report the rest
+  - axe accessibility checks on every page: fail on serious and critical problems, report the rest. One exception: `label-content-name-mismatch` on Starlight's search button, which shows "Search Ctrl K" and is named "Search". The label is in the name, as WCAG 2.5.3 asks; axe counts the keyboard hint (#139).
 - **The builder and preview drift tests** run where the app image is built.
 
 ## Defaults
@@ -164,7 +171,7 @@ It gives:
 |---|---|
 | Search | Starlight's built-in Pagefind, with no third-party service |
 | Analytics | None |
-| Feedback | "Edit this page" links to the MDX on GitHub, and a footer link to open an issue |
+| Feedback | A footer link to open an issue. No "Edit page" links, for a cleaner page (maintainer, 2026-10-31) |
 | Also built | A sitemap, a 404 page, and a phone-width layout for every page |
 | Languages | English only |
 | Build | Node from the tool table, `npm ci` with a lockfile in `site/`, the 7-day cooldown, and Dependabot for `site/` |

@@ -1,0 +1,116 @@
+/* The hello-kubernetes identity: the app's charcoal and greys, Kubernetes blue
+   as the one accent, Archivo for headings, Inter for text and JetBrains Mono
+   for code. See .project/roadmap/1.x/site.md#identity. The fonts are
+   self-hosted; their licences are copied to /licences/fonts/ at build time. */
+@import '@fontsource/archivo/600.css';
+@import '@fontsource/archivo/700.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/600.css';
+
+:root {
+  --sl-font: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --sl-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --hk-font-heading: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --hk-blue: #326ce5;
+
+  /* A wider page column, and quieter section headings, as on microsandbox.
+     Page titles (h1) keep Starlight's sizes. */
+  --sl-content-width: 62.5rem;
+  --sl-text-h2: 1.5rem;
+  --sl-text-h3: 1.2rem;
+  --sl-text-h4: 1.05rem;
+
+  /* The height of a code block's header, and of a code group's tab bar. */
+  --hk-code-header-height: 2.5rem;
+
+  /* Dark mode */
+  --sl-color-accent-low: #15254a;
+  --sl-color-accent: #326ce5;
+  --sl-color-accent-high: #b9cdf8;
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #ececec;
+  --sl-color-gray-2: #c4c4c4;
+  --sl-color-gray-3: #909090;
+  --sl-color-gray-4: #5c5c5c;
+  --sl-color-gray-5: #3a3a3a;
+  --sl-color-gray-6: #262626;
+  --sl-color-black: #1b1b1b;
+
+  /* Code blocks: a dark blue-grey, with a lighter blue border. */
+  --hk-code-background: #161d29;
+  --hk-code-header: #1b2433;
+  --hk-code-border: color-mix(in srgb, var(--hk-blue) 45%, #262626);
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #dbe5fb;
+  --sl-color-accent: #2557c4;
+  --sl-color-accent-high: #173a85;
+  --sl-color-white: #171717;
+  --sl-color-gray-1: #262626;
+  --sl-color-gray-2: #3a3a3a;
+  --sl-color-gray-3: #5c5c5c;
+  --sl-color-gray-4: #8c8c8c;
+  --sl-color-gray-5: #c4c4c4;
+  --sl-color-gray-6: #ececec;
+  --sl-color-gray-7: #f6f6f6;
+  --sl-color-black: #ffffff;
+
+  --hk-code-background: #e7eefc;
+  --hk-code-header: #d8e4fa;
+  --hk-code-border: color-mix(in srgb, var(--hk-blue) 35%, #ffffff);
+}
+
+/* The wordmark: the site title, in the code font. */
+.site-title {
+  font-family: var(--sl-font-mono);
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  color: var(--sl-color-white);
+}
+
+h1,
+h2,
+h3,
+h4,
+.sl-markdown-content :is(h1, h2, h3, h4) {
+  font-family: var(--hk-font-heading);
+  letter-spacing: -0.01em;
+}
+
+/* Section headings sit closer to their text. */
+.sl-markdown-content h2 {
+  margin-top: 2.25rem;
+}
+
+/* Previous and next links: small and quiet, not cards. */
+.pagination-links {
+  gap: 0.75rem;
+}
+.pagination-links a {
+  padding: 0.6rem 0.9rem;
+  border-color: var(--sl-color-gray-5);
+  box-shadow: none;
+  font-size: var(--sl-text-xs);
+  color: var(--sl-color-gray-3);
+}
+.pagination-links a:hover {
+  border-color: var(--sl-color-accent);
+}
+.pagination-links .link-title {
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+  color: var(--sl-color-white);
+}
+.pagination-links svg {
+  --sl-icon-size: 1rem;
+}
+
+/* Buttons are rounded rectangles, never pills. */
+.sl-link-button {
+  border-radius: 0.375rem;
+}

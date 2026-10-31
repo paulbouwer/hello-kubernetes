@@ -2,11 +2,14 @@
 #
 # - workflow-tests: test/ci/find-pr-issue-test.sh, the tests for the resolver
 #   that the PR workflows share.
-# - image-tests: test/image/run.sh (I1 to I7, I5a) and test/proxy/run.sh
+# - image-tests: test/image/run.sh (I1 to I8, I5a) and test/proxy/run.sh
 #   (P1 to P3), on native amd64 and arm64 runners. Each job builds the image
 #   for its own architecture, so arm64 is built and run on real arm64.
-# - e2e: test/e2e/run.sh on kind and on k3d, on amd64. The chart pins pods to
-#   amd64 until 4.1, which adds the arm64 e2e job.
+# - e2e: the chart tests (test/chart/run.sh), then test/e2e/run.sh on kind and
+#   on k3d, each on native amd64 and arm64.
+# - e2e-oldest: E1, E6 and E7 on kind with the oldest supported Kubernetes.
+#
+# The website has its own workflow, pages.yaml.
 #
 # Tool versions come from test/ci/install-tools.sh, the only place they are set.
 # A failed e2e scenario prints its diagnostics in the job log.
