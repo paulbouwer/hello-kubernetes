@@ -112,7 +112,7 @@ For each stylesheet, the proxy tests also resolve its `url(…)` references, suc
 | C14 | `--set message=42`, `--set-string message=42`; the image tag as the integer `1` from `--set`, the number `1.11` from a values file, a string, a pre-release, empty and unset | A number as the message is rejected; as a string it works. Each tag renders the right image and `CONTAINER_IMAGE`, with no `%!` formatting error (#131) |
 | C15 | the old `ingress.*` names, `global` | The schema accepts them |
 | C16 | `values.yaml` and `values.schema.json` | Every value has a description, and the schema has nothing `values.yaml` doesn't, except the old names and `global` |
-| C17 | `docs/deploy-using-helm.md` | The values table lists every value in the schema, except `global` (#121) |
+| C17 | `site/src/content/docs/docs/configure/values.mdx` | The values reference lists every value in the schema, except `global` (#121; moved to the website in #141) |
 
 The schema (#117) is checked by C6 and C12–C16.
 
@@ -147,12 +147,14 @@ Every scenario runs on both kind and k3d unless the "Clusters" column says other
 | E12 | Rolling upgrade | Install with `message=v1`, then `helm upgrade --set message=v2 --wait` | All pods replaced, page shows `v2`, no downtime: a background `curl` loop during the upgrade sees no non-200 responses | kind | upgrades |
 | E13 | Kubernetes version range | E1 + E6 + E7 on the oldest Kubernetes version the chart supports, 1.35 (the newest, 1.37, runs every scenario) | Same pass criteria | kind amd64, `E2E_KUBERNETES=oldest` (`make e2e-kind-oldest`) | API removals like #31 |
 | E14 | arm64 nodes | E1 + E2 on an arm64 host | Architecture shown is `linux/arm64` | both, arm64 runner. Since 4.1, every scenario runs on arm64, and E2 checks the architecture | #16 |
-| E15 | Docs still work | Run, in order, the blocks marked ```` ```bash e2e ```` in `README.md`, `docs/deploy-using-helm.md` and `docs/deploy-with-ingress.md`, with the local chart, image and release file in place of the published ones | Each block exits 0, and the docs' own clean-up steps remove everything | k3d, because the guides' examples use Traefik | stops #31 recurring |
+| E15 | Docs still work | Run, in order, the blocks marked ```` ```bash e2e ```` in `README.md` and the website's Quick start and Deploy pages, with the local chart, image and release file in place of the published ones. A page with code groups runs once per group | Each block exits 0, and the docs' own clean-up steps remove everything | k3d, because the guides' examples use Traefik | stops #31 recurring |
 | E16 | HTTPRoute with rewrite | Two releases with `httpRoute.enabled=true`, `parentRefs` pointing at the test `Gateway`, `rewritePath=true`, prefixes `/app/hello-world` and `/app/custom` | Same as E5, through the Gateway. The rendered HTTPRoute has a `URLRewrite` filter and no controller-specific settings | both | Gateway API scope |
 | E17 | HTTPRoute without rewrite | One release with `httpRoute.enabled=true`, `pathPrefix=/app/hello` | Same as E6, through the Gateway; the HTTPRoute is `Accepted` in its status | both | Gateway API scope |
 | E18 | Old value names still work | Install with the old `ingress.configured=true`, `ingress.pathPrefix`, `ingress.rewritePath` and a hand-written Ingress | Same as E6 or E5, depending on `rewritePath` | kind | migration to top-level `pathPrefix`/`rewritePath` |
 
 E15 runs the blocks marked ```` ```bash e2e ````. GitHub still highlights them as bash. A marked block must run without input, and the blocks in a file must run in order. Leave a block unmarked when it runs until stopped (`port-forward`), needs a published release (the signature check), or needs another cluster (the NGINX example). Testing showed that a typo in a marked README command fails E15 and names the block (#123).
+
+On the website, a code group shows the same step for kubectl and Helm, which can't both run in one pass. So a block in a group is marked ```` ```bash e2e=<group> ````, such as `e2e=helm`. A page with groups runs once per group: its plain `e2e` blocks and that group's blocks, in page order. Each group must clean up after itself. A typo in the Helm tab of the quick start failed E15, and named the page and the group (#141).
 
 ### Per-cluster setup
 

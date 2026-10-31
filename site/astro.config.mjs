@@ -20,12 +20,16 @@ export default defineConfig({
       customCss: ['./src/styles/theme.css', './src/styles/code.css'],
       components: {
         Sidebar: './src/components/Sidebar.astro',
-        Footer: './src/components/Footer.astro',
       },
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/paulbouwer/hello-kubernetes' },
       ],
-      sidebar: [{ label: 'Start here', items: [{ autogenerate: { directory: 'docs/start-here' } }] }],
+      sidebar: [
+        { label: 'Start here', items: [{ autogenerate: { directory: 'docs/start-here' } }] },
+        { label: 'Deploy', items: [{ autogenerate: { directory: 'docs/deploy' } }] },
+        { label: 'Configure', items: [{ autogenerate: { directory: 'docs/configure' } }] },
+        'docs/licences',
+      ],
       plugins: [starlightLinksValidator({ errorOnLocalLinks: true })],
     }),
     preact(),

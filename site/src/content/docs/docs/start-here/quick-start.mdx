@@ -10,13 +10,13 @@ sidebar:
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import CodeGroup from '../../../../components/CodeGroup.astro';
 
-Deploy hello-kubernetes into your current namespace, with its default settings.
+Deploy hello-kubernetes into your current namespace, with its default settings. You need `kubectl` and a cluster; Helm also needs [Helm 4](https://helm.sh/docs/intro/install/).
 
 <CodeGroup>
 <Tabs syncKey="method">
 <TabItem label="kubectl">
 
-```bash
+```bash e2e=kubectl
 kubectl apply -f https://github.com/paulbouwer/hello-kubernetes/releases/latest/download/hello-kubernetes.yaml
 kubectl rollout status deployment/hello-kubernetes-demo
 ```
@@ -24,7 +24,7 @@ kubectl rollout status deployment/hello-kubernetes-demo
 </TabItem>
 <TabItem label="Helm">
 
-```bash
+```bash e2e=helm
 helm install demo oci://ghcr.io/paulbouwer/charts/hello-kubernetes --wait
 ```
 
@@ -32,11 +32,7 @@ helm install demo oci://ghcr.io/paulbouwer/charts/hello-kubernetes --wait
 </Tabs>
 </CodeGroup>
 
-You see:
-
-```text output
-deployment "hello-kubernetes-demo" successfully rolled out
-```
+It creates a ServiceAccount, a Service and a Deployment with 2 pods, all named `hello-kubernetes-demo`.
 
 ## Reach the app
 
@@ -46,7 +42,11 @@ Forward a local port to the Service:
 kubectl port-forward service/hello-kubernetes-demo 8080:80
 ```
 
-Open `http://localhost:8080/`. You see **Hello world!**.
+Open `http://localhost:8080/`. You see **Hello world!**, and the namespace, pod and node that answered. Press Ctrl+C to stop.
+
+`port-forward` connects to one pod, so the pod name stays the same when you refresh. Through the Service's external address, each request can reach a different pod.
+
+The Service is a `LoadBalancer`, so on many clusters it also gets an external address. See [where the external address works](/hello-kubernetes/docs/deploy/kubectl/#where-the-external-address-works).
 
 ## Remove it
 
@@ -54,14 +54,14 @@ Open `http://localhost:8080/`. You see **Hello world!**.
 <Tabs syncKey="method">
 <TabItem label="kubectl">
 
-```bash
+```bash e2e=kubectl
 kubectl delete -f https://github.com/paulbouwer/hello-kubernetes/releases/latest/download/hello-kubernetes.yaml
 ```
 
 </TabItem>
 <TabItem label="Helm">
 
-```bash
+```bash e2e=helm
 helm uninstall demo
 ```
 

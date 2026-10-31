@@ -1,0 +1,153 @@
+---
+title: Behind an Ingress
+description: Serve hello-kubernetes under a path prefix behind an Ingress, with Traefik or the NGINX Ingress Controller, with and without rewriting.
+sidebar:
+  order: 4
+  attrs:
+    data-icon: random
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import CodeGroup from '../../../../components/CodeGroup.astro';
+
+The chart can create an [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) for the app, under a path prefix such as `/app/hello`. Several releases can then share one address, each under its own path.
+
+| Needs | Installs into | You get |
+|---|---|---|
+| `kubectl`, [Helm 4](https://helm.sh/docs/intro/install/), and an Ingress controller | the namespace you choose | the app and a `networking.k8s.io/v1` Ingress for its path |
+
+You bring the Ingress controller, such as the [NGINX Ingress Controller](https://docs.nginx.com/nginx-ingress-controller/) or [Traefik](https://doc.traefik.io/traefik/providers/kubernetes-ingress/). Traefik is built into k3s and k3d. The chart doesn't install one, because the right one depends on your cluster.
+
+The community Ingress-NGINX controller (`kubernetes/ingress-nginx`) was retired in March 2026. The Ingress API itself is stable and still supported. For a new cluster, consider a [Gateway](/hello-kubernetes/docs/deploy/gateway/).
+
+## Path prefixes and rewriting
+
+Behind a prefix, either the proxy strips the prefix before it passes a request on, or the app serves under the prefix itself:
+
+| `rewritePath` | The proxy | The app | Works with |
+|---|---|---|---|
+| `false` (recommended) | passes `/app/hello/...` on unchanged | serves under `/app/hello` | every Ingress controller and Gateway, with no annotations |
+| `true` (the 1.x default) | strips `/app/hello` | serves at `/`, and links its assets under `/app/hello` | an HTTPRoute, which uses the standard `URLRewrite` filter; an Ingress needs your controller's rewrite annotation |
+
+Set `rewritePath=false` unless you have a reason not to. The default changes to `false` in 2.0.
+
+Set `service.type=ClusterIP` too. The Ingress or the Gateway reaches the Service inside the cluster, and a `LoadBalancer` Service would give the app a second, public address that bypasses them.
+
+## Install without rewriting
+
+Install two releases, each under its own path. Set `ingress.className` to your controller's class: `nginx` for the NGINX Ingress Controller, or `traefik` for Traefik. These use Traefik.
+
+```bash e2e
+helm install hello-world oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-kubernetes --create-namespace \
+  --set ingress.enabled=true --set ingress.className=traefik \
+  --set pathPrefix=/app/hello-world --set rewritePath=false \
+  --set service.type=ClusterIP \
+  --wait
+
+helm install custom-message oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-kubernetes \
+  --set ingress.enabled=true --set ingress.className=traefik \
+  --set pathPrefix=/app/custom-message --set rewritePath=false \
+  --set service.type=ClusterIP \
+  --set-string message="This is my custom message!" \
+  --wait
+```
+
+The NGINX Ingress Controller needs a host on each Ingress, and allows one Ingress per host. With it, also add a different `--set ingress.host=…` to each release. Traefik has neither limit.
+
+To use a host name, add `--set ingress.host=hello.example.com`. For TLS, set `ingress.tls` in a values file, as in the Ingress `spec.tls` field.
+
+## Install with rewriting
+
+With `rewritePath=true`, the controller must strip the prefix. That needs an annotation, which is different for each controller.
+
+<CodeGroup>
+<Tabs syncKey="ingress">
+<TabItem label="Traefik">
+
+```bash e2e
+kubectl apply -f - <<'EOF'
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-hello
+  namespace: hello-kubernetes
+spec:
+  stripPrefix:
+    prefixes:
+      - /app/hello
+EOF
+
+helm install hello oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-kubernetes \
+  --set ingress.enabled=true --set ingress.className=traefik \
+  --set pathPrefix=/app/hello \
+  --set-string 'ingress.annotations.traefik\.ingress\.kubernetes\.io/router\.middlewares=hello-kubernetes-strip-hello@kubernetescrd' \
+  --set service.type=ClusterIP \
+  --wait
+```
+
+</TabItem>
+<TabItem label="NGINX">
+
+```bash
+helm install hello oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-kubernetes \
+  --set ingress.enabled=true --set ingress.className=nginx \
+  --set ingress.host=hello.example.com \
+  --set pathPrefix=/app/hello \
+  --set-string 'ingress.annotations.nginx\.org/rewrites=serviceName=hello-kubernetes-hello rewrite=/' \
+  --set service.type=ClusterIP \
+  --wait
+```
+
+</TabItem>
+</Tabs>
+</CodeGroup>
+
+Traefik strips a prefix with a `Middleware`, which the Ingress names in an annotation as `<namespace>-<middleware name>@kubernetescrd`. The NGINX Ingress Controller strips it with its `nginx.org/rewrites` annotation, which names the chart's Service, `hello-kubernetes-<release name>`. With NGINX, `rewritePath=false` is still simpler: it needs no annotation.
+
+## Verify
+
+```bash e2e
+kubectl get ingress --namespace hello-kubernetes
+```
+
+You see an Ingress for each release, such as `hello-kubernetes-hello-world`, with your controller's address. Open:
+
+- `http://<ingress address>/app/hello-world/`: **Hello world!**
+- `http://<ingress address>/app/custom-message/`: **This is my custom message!**
+- `http://<ingress address>/app/hello/`: **Hello world!**, with the prefix stripped
+
+With a host name, open `http://hello.example.com/app/hello/`.
+
+## Upgrade
+
+Change a value with `helm upgrade --reuse-values`, as [with Helm](/hello-kubernetes/docs/deploy/helm/#upgrade). Changing `pathPrefix` moves the Ingress path and the app's own path together.
+
+## Uninstall
+
+Uninstall every release in the namespace, then delete it. This also removes the Traefik `Middleware`:
+
+```bash e2e
+helm list --namespace hello-kubernetes --short | xargs helm uninstall --namespace hello-kubernetes
+kubectl delete namespace hello-kubernetes
+```
+
+## Requirements
+
+- An Ingress controller that supports `networking.k8s.io/v1` and `ingressClassName`. CI tests Traefik on k3d and the NGINX Ingress Controller on kind.
+- Kubernetes 1.35 or newer, and Helm 4.
+
+## Moving from the old values
+
+Before 1.11, the chart didn't create an Ingress: you wrote your own, and set `ingress.configured`, `ingress.pathPrefix` and `ingress.rewritePath`. These still work in 1.x, and the install notes list them as deprecated. They are removed in 2.0.
+
+| Old value | New value |
+|---|---|
+| `ingress.configured=true` | Not needed. Set `pathPrefix`, and `ingress.enabled=true` or `httpRoute.enabled=true` for the chart to create the route. |
+| `ingress.pathPrefix` | `pathPrefix` |
+| `ingress.rewritePath` | `rewritePath` |
+
+If you keep your own Ingress, set only `pathPrefix` and `rewritePath`, and point your Ingress at the Service `hello-kubernetes-<release name>`, port `80`.

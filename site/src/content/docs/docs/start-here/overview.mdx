@@ -15,6 +15,16 @@ hello-kubernetes is a small web app to deploy on a Kubernetes cluster. Its page 
 
 Refresh the page, and another pod can answer. That makes it a simple way to show how a Service spreads requests across pods and nodes, to test an Ingress or a Gateway, or to check a new cluster.
 
-The image runs on `linux/amd64` and `linux/arm64` nodes, as a non-root user. It is published to Docker Hub as `paulbouwer/hello-kubernetes` and to GHCR as `ghcr.io/paulbouwer/hello-kubernetes`, and the Helm chart is at `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`.
+## What you get
 
-Start with the [quick start](/hello-kubernetes/docs/start-here/quick-start/).
+| | |
+|---|---|
+| **The image** | `paulbouwer/hello-kubernetes` on Docker Hub and `ghcr.io/paulbouwer/hello-kubernetes` on GHCR, for `linux/amd64` and `linux/arm64`. It runs as the non-root user 1000, with signed provenance and an SBOM. |
+| **The Helm chart** | `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`. Secure by default, and it can create an Ingress or a Gateway API HTTPRoute for the app. |
+| **The release file** | `hello-kubernetes.yaml`: the chart rendered with its defaults, for `kubectl apply` or as a Kustomize base. |
+
+## Where to start
+
+- [Quick start](/hello-kubernetes/docs/start-here/quick-start/): deploy it, reach it and remove it, in three commands.
+- [With Helm](/hello-kubernetes/docs/deploy/helm/), [with kubectl](/hello-kubernetes/docs/deploy/kubectl/) or [with Kustomize](/hello-kubernetes/docs/deploy/kustomize/): every option for each way to deploy.
+- [Behind an Ingress](/hello-kubernetes/docs/deploy/ingress/) or [behind a Gateway](/hello-kubernetes/docs/deploy/gateway/): serve it under a path, such as `/app/hello`.

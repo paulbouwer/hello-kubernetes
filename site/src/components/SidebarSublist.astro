@@ -1,10 +1,21 @@
 ---
 // Starlight's SidebarSublist, with an icon before a page that sets
-// sidebar.attrs.data-icon in its frontmatter to one of Starlight's icon names.
+// sidebar.attrs.data-icon in its frontmatter to one of Starlight's icon names,
+// or to cncf:<name> for an SVG in src/icons (see src/icons/SOURCE.md).
 // Based on @astrojs/starlight 0.42.7 (dist/components/SidebarSublist.astro),
 // MIT licence, copyright Astro contributors.
 import { Badge, Icon } from '@astrojs/starlight/components';
 import SidebarRestorePoint from '@astrojs/starlight/components/SidebarRestorePoint.astro';
+
+// The CNCF project icons, drawn in the text colour like Starlight's own.
+const cncfIcons = Object.fromEntries(
+	Object.entries(
+		import.meta.glob<string>('../icons/*.svg', { query: '?raw', import: 'default', eager: true })
+	).map(([path, svg]) => [
+		path.replace(/^.*\/(.*)\.svg$/, 'cncf:$1'),
+		svg.replace('<svg ', '<svg width="16" height="16" fill="currentColor" aria-hidden="true" '),
+	])
+);
 
 type SidebarEntry = App.Locals['starlightRoute']['sidebar'][number];
 type SidebarGroup = Extract<SidebarEntry, { type: 'group' }>;
@@ -34,7 +45,10 @@ const { sublist, nested } = Astro.props;
 						class:list={[{ large: !nested }, entry.attrs.class]}
 						{...entry.attrs}
 					>
-						{typeof entry.attrs['data-icon'] === 'string' && (
+						{typeof entry.attrs['data-icon'] === 'string' && cncfIcons[entry.attrs['data-icon']] && (
+							<span class="page-icon cncf-icon" set:html={cncfIcons[entry.attrs['data-icon']]} />
+						)}
+						{typeof entry.attrs['data-icon'] === 'string' && !cncfIcons[entry.attrs['data-icon']] && (
 							<Icon name={entry.attrs['data-icon'] as any} class="page-icon" size="1rem" />
 						)}
 						<span>{entry.label}</span>
@@ -156,6 +170,10 @@ const { sublist, nested } = Astro.props;
 		.page-icon {
 			flex-shrink: 0;
 			opacity: 0.8;
+		}
+
+		.cncf-icon {
+			display: inline-flex;
 		}
 
 		a > *:not(:last-child),

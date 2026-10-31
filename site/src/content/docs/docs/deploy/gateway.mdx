@@ -1,0 +1,102 @@
+---
+title: Behind a Gateway
+description: Serve hello-kubernetes under a path prefix with a Gateway API HTTPRoute, with Traefik or NGINX Gateway Fabric.
+sidebar:
+  order: 5
+  attrs:
+    data-icon: server
+---
+
+The chart can create a [Gateway API](https://gateway-api.sigs.k8s.io/) `HTTPRoute` for the app, under a path prefix such as `/app/hello`. Several releases can then share one Gateway, each under its own path.
+
+| Needs | Installs into | You get |
+|---|---|---|
+| `kubectl`, [Helm 4](https://helm.sh/docs/intro/install/), and a Gateway | the namespace you choose | the app and an `HTTPRoute` attached to your Gateway |
+
+You bring the Gateway API implementation, such as [NGINX Gateway Fabric](https://docs.nginx.com/nginx-gateway-fabric/) or [Traefik](https://doc.traefik.io/traefik/providers/kubernetes-gateway/), and a `Gateway`. The chart doesn't install either, because the right one depends on your cluster. The Gateway's listener must allow routes from the app's namespace (`allowedRoutes`).
+
+## Path prefixes and rewriting
+
+| `rewritePath` | The Gateway | The app |
+|---|---|---|
+| `false` (recommended) | passes `/app/hello/...` on unchanged | serves under `/app/hello` |
+| `true` (the 1.x default) | strips `/app/hello` with the standard `URLRewrite` filter | serves at `/`, and links its assets under `/app/hello` |
+
+With `rewritePath=true`, the route needs no settings for your implementation. But `URLRewrite` is an extended Gateway API feature, so check that your implementation supports it. `rewritePath=false` works everywhere. The default changes to `false` in 2.0.
+
+Set `service.type=ClusterIP` too. The Gateway reaches the Service inside the cluster, and a `LoadBalancer` Service would give the app a second, public address that bypasses it.
+
+## Install
+
+Name your Gateway in `httpRoute.parentRefs`:
+
+```bash e2e
+helm install hello-gateway oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-kubernetes --create-namespace \
+  --set httpRoute.enabled=true \
+  --set 'httpRoute.parentRefs[0].name=my-gateway' \
+  --set 'httpRoute.parentRefs[0].namespace=gateway-system' \
+  --set pathPrefix=/app/hello-gateway \
+  --set service.type=ClusterIP \
+  --wait
+```
+
+Add `--set rewritePath=false` to pass the prefix on, and `--set 'httpRoute.hostnames[0]=hello.example.com'` for a host name.
+
+### Example: Traefik's Gateway on k3s or k3d
+
+k3s and k3d include the Gateway API resources, and Traefik can serve them. Turn on Traefik's Gateway API provider, and let its Gateway accept routes from every namespace:
+
+```bash e2e
+kubectl apply -f - <<'EOF'
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    providers:
+      kubernetesGateway:
+        enabled: true
+    gateway:
+      listeners:
+        web:
+          namespacePolicy:
+            from: All
+EOF
+until kubectl get gateway traefik-gateway --namespace kube-system >/dev/null 2>&1; do sleep 5; done
+kubectl wait gateway/traefik-gateway --namespace kube-system --for=condition=Programmed --timeout=180s
+```
+
+```text output
+gateway.gateway.networking.k8s.io/traefik-gateway condition met
+```
+
+Then install the chart with `httpRoute.parentRefs[0].name=traefik-gateway` and `httpRoute.parentRefs[0].namespace=kube-system`. With k3d, create the cluster with `-p "8080:80@loadbalancer"`, and the Gateway's address is `localhost:8080`.
+
+## Verify
+
+```bash e2e
+kubectl get httproute --namespace hello-kubernetes
+```
+
+You see the route `hello-kubernetes-hello-gateway`. Open `http://<gateway address>/app/hello-gateway/`. You see **Hello world!**.
+
+If the page doesn't load, check that the Gateway accepted the route. `kubectl describe httproute --namespace hello-kubernetes` shows the `Accepted` and `ResolvedRefs` conditions for each parent.
+
+## Upgrade
+
+Change a value with `helm upgrade --reuse-values`, as [with Helm](/hello-kubernetes/docs/deploy/helm/#upgrade). Changing `pathPrefix` moves the route's path and the app's own path together.
+
+## Uninstall
+
+```bash e2e
+helm list --namespace hello-kubernetes --short | xargs helm uninstall --namespace hello-kubernetes
+kubectl delete namespace hello-kubernetes
+```
+
+## Requirements
+
+- A Gateway API implementation that serves `gateway.networking.k8s.io/v1` HTTPRoutes, and supports `URLRewrite` if you keep `rewritePath=true`. CI tests Traefik on k3d and NGINX Gateway Fabric on kind.
+- Kubernetes 1.35 or newer, and Helm 4.

@@ -21,7 +21,7 @@
 #   C14 message must be a string; the image tag can be a number.
 #   C15 The schema accepts the old ingress.* names and global.
 #   C16 Every value has a description, and the schema matches values.yaml.
-#   C17 The values table in docs/deploy-using-helm.md lists every value.
+#   C17 The values reference on the website lists every value.
 #
 # Each scenario prints PASS or FAIL. The script exits 1 if any fails.
 # Needs helm and node.
@@ -271,7 +271,7 @@ if ! out=$(node -e '
   };
   walk(schema, "");
   if (missing.length) { console.log("not in the values table: " + missing.join(", ")); process.exit(1); }
-' "$chart/values.schema.json" "$here/../../docs/deploy-using-helm.md" 2>&1); then
+' "$chart/values.schema.json" "$here/../../site/src/content/docs/docs/configure/values.mdx" 2>&1); then
   problems+=("$out")
 fi
 result "C17 the docs list every value"

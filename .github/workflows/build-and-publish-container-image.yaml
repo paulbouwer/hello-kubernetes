@@ -240,7 +240,7 @@ jobs:
             echo "# hello-kubernetes chart $CHART_VERSION, rendered with its default values and the"
             echo "# release name demo, so the resources are named hello-kubernetes-demo."
             echo "# Apply it with kubectl apply -f. To change the options, use the Helm chart:"
-            echo "# https://github.com/paulbouwer/hello-kubernetes/blob/main/docs/deploy-using-helm.md"
+            echo "# https://paulbouwer.github.io/hello-kubernetes/docs/deploy/helm/"
             helm template demo "dist/hello-kubernetes-$CHART_VERSION.tgz"
           } > dist/hello-kubernetes.yaml
 
