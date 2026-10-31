@@ -1,0 +1,20 @@
+---
+title: Overview
+description: What hello-kubernetes is, what its page shows, and what people use it for.
+sidebar:
+  order: 1
+  attrs:
+    data-icon: information
+---
+
+hello-kubernetes is a small web app to deploy on a Kubernetes cluster. Its page shows:
+
+- a message, **Hello world!** by default
+- the namespace, pod and node that answered
+- the container image and its architecture
+
+Refresh the page, and another pod can answer. That makes it a simple way to show how a Service spreads requests across pods and nodes, to test an Ingress or a Gateway, or to check a new cluster.
+
+The image runs on `linux/amd64` and `linux/arm64` nodes, as a non-root user. It is published to Docker Hub as `paulbouwer/hello-kubernetes` and to GHCR as `ghcr.io/paulbouwer/hello-kubernetes`, and the Helm chart is at `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`.
+
+Start with the [quick start](/hello-kubernetes/docs/start-here/quick-start/).

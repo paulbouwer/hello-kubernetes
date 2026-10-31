@@ -25,6 +25,19 @@ updates:
       npm-minor-and-patch:
         update-types: [minor, patch]
 
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    labels: [dependencies, "area:site"]
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      site-minor-and-patch:
+        update-types: [minor, patch]
+
   - package-ecosystem: docker
     directory: /src/app
     schedule:

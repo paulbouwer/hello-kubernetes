@@ -98,3 +98,24 @@ e2e-clean: ## delete the e2e clusters, and stop cloud-provider-kind
 verify-published: ## verify a published image: make verify-published PUBLISHED=ghcr.io/paulbouwer/hello-kubernetes:1.11.0 [SCAN=1]
 	@test -n "$(PUBLISHED)" || { echo "Set PUBLISHED, for example PUBLISHED=paulbouwer/hello-kubernetes:1.11.0"; exit 2; }
 	test/image/verify-published.sh "$(PUBLISHED)"
+
+# The website (site/). Playwright runs from its official image, pinned by
+# digest, so its browsers match @playwright/test in site/package.json.
+PLAYWRIGHT_IMAGE ?= mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
+
+.PHONY: site
+site: ## build the website into site/dist, after its type checks
+	cd site && npm ci --no-audit --no-fund && npm run check && npm run build
+
+.PHONY: site-dev
+site-dev: ## serve the website at http://localhost:4321/hello-kubernetes/, reloading on changes
+	cd site && npm ci --no-audit --no-fund && npm run dev -- --port 4321
+
+.PHONY: site-test
+site-test: site ## browser checks of the built site; screenshots go to site/test-results/screenshots
+	docker run --rm --ipc=host --network host -u "$$(id -u):$$(id -g)" -e HOME=/tmp \
+		-v "$(CURDIR)/site:/site" -w /site $(PLAYWRIGHT_IMAGE) npx playwright test
+
+.PHONY: screenshot
+screenshot: cluster-k3d ## screenshot the app on a k3d cluster into hello-kubernetes.png, for the README
+	PLAYWRIGHT_IMAGE=$(PLAYWRIGHT_IMAGE) test/screenshot.sh

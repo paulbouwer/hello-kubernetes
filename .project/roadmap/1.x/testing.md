@@ -116,6 +116,17 @@ For each stylesheet, the proxy tests also resolve its `url(…)` references, suc
 
 The schema (#117) is checked by C6 and C12–C16.
 
+## Website checks
+
+The website has its own checks, in `site/tests/site.spec.ts` (`make site-test`), run by the required `site` job in `.github/workflows/pages.yaml` (#139). `astro check` and `astro build` come first; the build fails on a broken internal link or anchor. Then Playwright loads every page in the sitemap, in light and dark mode:
+
+| Check | Fails on |
+|---|---|
+| Loads cleanly | a console error, an uncaught error, a CSP violation, or a request to another site |
+| Accessibility (axe) | a serious or critical problem; moderate and minor ones are reported |
+
+It saves screenshots of each page, desktop and phone, light and dark, as a CI artifact. Testing the checks: a Google Fonts stylesheet failed every page, an image with no alt text failed as critical, and a relative link failed the build.
+
 ## End-to-end scenarios
 
 Every scenario runs on both kind and k3d unless the "Clusters" column says otherwise. "Page" means the HTML returned by `GET /` (or `GET /<prefix>/`). The checks only use `kubectl`, `helm` and `curl`, so they behave the same locally and in CI.

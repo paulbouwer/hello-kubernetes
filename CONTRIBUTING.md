@@ -16,7 +16,7 @@ The maintainer triages each new issue. They set its labels and milestone, and gi
 
 We build with coding agents, such as GitHub Copilot or Claude Code. [AGENTS.md](AGENTS.md) has the rules, conventions and verification steps they follow. The fastest way to a PR that meets the conventions is to point your agent at the issue and let it follow AGENTS.md. Review what it does, as you would review a colleague's work.
 
-The repo has a [devcontainer](docs/development-environment.md) with every tool the agents and the tests need.
+The repo has a [devcontainer](docs/development-environment.md) with every tool the agents and the tests need. To work on the website, see [docs/website.md](docs/website.md).
 
 If you work without an agent, read AGENTS.md anyway: the conventions are the same for people.
 

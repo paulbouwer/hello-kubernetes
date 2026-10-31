@@ -127,7 +127,7 @@ Re-planned with the maintainer on 2026-10-31 (#135): the site owns the user docs
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
 | 5.1 | fix(image): bundle the Ubuntu font in the image | bug, area:image | — | — | [work package](../2026-10-31-bundled-font/plan.md), [site.md](../../roadmap/1.x/site.md#live-preview) |
-| 5.2 | feat(site): scaffold the site, its theme and its checks | enhancement, area:site, area:ci | 4.5 | — | [site.md](../../roadmap/1.x/site.md#look) |
+| 5.2 | feat(site): scaffold the site, its theme and its checks | enhancement, area:site, area:ci | 4.5 | — | [work package](../2026-10-31-site-scaffold/plan.md), [site.md](../../roadmap/1.x/site.md#look) |
 | 5.3 | docs(site): move the user docs to the site | documentation, area:site | 5.2 | — | [site.md](../../roadmap/1.x/site.md#site-map) |
 | 5.4 | feat(site): add llms.txt and Markdown copies of every page | enhancement, area:site | 5.3 | — | [site.md](../../roadmap/1.x/site.md#agent-experience-ax) |
 | 5.5 | feat(site): add the live preview and the config builder | enhancement, area:site | 4.3, 5.1, 5.3 | — | [site.md](../../roadmap/1.x/site.md#config-builder) |
