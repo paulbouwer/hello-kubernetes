@@ -1,0 +1,67 @@
+---
+title: Upgrading from 1.10
+description: What changes from hello-kubernetes 1.10 to 1.11, and how to upgrade a release, the image or your own manifests.
+sidebar:
+  order: 3
+  attrs:
+    data-icon: up-arrow
+---
+
+1.11 keeps working with your 1.10 settings. The old value names still work, the Service is still a `LoadBalancer` by default, and the page looks the same. The changes are in how the chart is published, how the pods run, and which nodes they run on.
+
+## Upgrade a Helm release
+
+In 1.10, you installed the chart from a copy of the repo. From 1.11, it is published on GHCR. Upgrade your release from there:
+
+```bash
+helm upgrade <release> oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace <namespace> --version 1.11.0 --reset-then-reuse-values --wait
+```
+
+Use `--reset-then-reuse-values`. It starts from the 1.11 defaults, then applies the values you set in 1.10. With `--reuse-values`, the upgrade fails, because the 1.10 values have none of the new settings:
+
+```text output
+Error: UPGRADE FAILED: hello-kubernetes/templates/httproute.yaml:1:14 ...
+```
+
+The release keeps its name, its Service and its address. The pods are replaced one at a time.
+
+## What changed in the chart
+
+| Change | What you do |
+|---|---|
+| **Published** on GHCR as `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`, and on Artifact Hub. | Install and upgrade from there. |
+| **Path values renamed:** `ingress.pathPrefix` and `ingress.rewritePath` are now `pathPrefix` and `rewritePath`. `ingress.configured` is no longer needed. | Nothing yet: the old names still work in 1.x, and the install notes list them as deprecated. Move to the new names before 2.0. See [the old path values](#the-old-path-values). |
+| **The chart can create the Ingress** (`ingress.enabled`) or a Gateway API **HTTPRoute** (`httpRoute.enabled`). | Optional. Your own Ingress still works. |
+| **Secure by default:** the pods run as user 1000, with no privileges and a read-only root filesystem, and meet the restricted Pod Security Standard. | Nothing, unless your own sidecars or mounts need to write. The chart mounts `/tmp`. See [Security defaults](/hello-kubernetes/docs/configure/security/). |
+| **Any architecture:** the pods are no longer pinned to `amd64` nodes. | Nothing. They can now run on `arm64` nodes too. |
+| **Values are checked** against a schema on every install and upgrade. | Fix any value the upgrade names, such as a misspelled key. In 1.10, Helm ignored it. |
+| **The image is the exact version,** `1.11.0`, from the chart's `appVersion`. In 1.10, it was the `1.10` tag. | Nothing. To follow a moving tag, set `deployment.container.image.tag`. |
+| **The message is quoted,** so a message with `"` or `:` installs. | Nothing. |
+
+## What changed in the image
+
+| Change | What you do |
+|---|---|
+| **Node.js 24** on Alpine, in place of Node.js 16. | Nothing. |
+| **`linux/amd64` and `linux/arm64`** in one tag. | Nothing. Your node pulls its own. |
+| **The user is the number `1000`,** in place of the name `node`. It is the same user. | Nothing. A cluster can now check `runAsNonRoot` without a `runAsUser`. |
+| **No npm in the image.** The app starts with `node server.js`. | If your manifest overrides the command with `npm start`, use `node server.js`. |
+| **Also on GHCR** as `ghcr.io/paulbouwer/hello-kubernetes`, with an SBOM and signed provenance. | Optional. See [Container image](/hello-kubernetes/docs/reference/container-image/). |
+| **No requests to other sites:** the page uses a bundled font, not Google Fonts. | Nothing. The page now loads everything from the app itself. |
+
+## The old path values
+
+Before 1.11, the chart didn't create an Ingress: you wrote your own, and set `ingress.configured`, `ingress.pathPrefix` and `ingress.rewritePath`. These still work in 1.x, and the install notes list them as deprecated. They are removed in 2.0.
+
+| Old value | New value |
+|---|---|
+| `ingress.configured=true` | Not needed. Set `pathPrefix`, and `ingress.enabled=true` or `httpRoute.enabled=true` for the chart to create the route. |
+| `ingress.pathPrefix` | `pathPrefix` |
+| `ingress.rewritePath` | `rewritePath` |
+
+If you keep your own Ingress, set only `pathPrefix` and `rewritePath`, and point your Ingress at the Service `hello-kubernetes-<release name>`, port `80`.
+
+## Your own manifests
+
+If you deploy 1.10 with your own YAML, change the image to `paulbouwer/hello-kubernetes:1.11.0`. The [app settings](/hello-kubernetes/docs/reference/app-settings/) are the same as in 1.10. To get the new defaults too, start from the [release file](/hello-kubernetes/docs/deploy/kubectl/), which is the chart rendered with its defaults.

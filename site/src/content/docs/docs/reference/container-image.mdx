@@ -1,0 +1,64 @@
+---
+title: Container image
+description: The hello-kubernetes image's registries, tags and platforms, and how to check its signature and SBOM.
+sidebar:
+  order: 1
+  attrs:
+    data-icon: seti:docker
+---
+
+## Where it is
+
+| Registry | Image |
+|---|---|
+| Docker Hub | `paulbouwer/hello-kubernetes` |
+| GitHub Container Registry | `ghcr.io/paulbouwer/hello-kubernetes` |
+
+Both have the same images. The chart uses Docker Hub by default; set `deployment.container.image.repository` to use GHCR.
+
+## Tags
+
+Each release publishes three tags:
+
+| Tag | Follows | Use it to |
+|---|---|---|
+| `1.11.0` | this release only | pin an exact version |
+| `1.11` | the newest `1.11.x` | get fixes, but no new features |
+| `1` | the newest `1.x` | stay on the current major version |
+
+There is no `latest` tag. The chart installs the exact version in its `appVersion`, so one chart version always installs the same image.
+
+## Platforms
+
+Every tag is one image index for `linux/amd64` and `linux/arm64`. Your node pulls its own architecture, and the page shows which one it runs, such as `linux/arm64`.
+
+## What's in it
+
+- Node.js 24 on Alpine Linux, with only the app's production dependencies.
+- The app runs as the numeric user `1000`, with no package manager in the image. See [Security defaults](/hello-kubernetes/docs/configure/security/#the-image).
+- It listens on port `8080`, set with [`PORT`](/hello-kubernetes/docs/reference/app-settings/).
+- OCI labels for the version, the source and the revision it was built from.
+
+## Check an image
+
+Each published image has an SBOM and SLSA provenance for each platform. Its provenance is signed with GitHub artifact attestations, so you can check that this repo's release workflow built it:
+
+```bash
+digest=$(docker buildx imagetools inspect ghcr.io/paulbouwer/hello-kubernetes:1.11.0 --format "{{json .Manifest}}" | jq -r .digest)
+gh attestation verify oci://ghcr.io/paulbouwer/hello-kubernetes@$digest --repo paulbouwer/hello-kubernetes
+```
+
+Check the image by its digest, so the tag can't move between the two commands. You need Docker with Buildx, `jq`, and the GitHub CLI.
+
+To list the packages in the SBOM of one platform:
+
+```bash
+docker buildx imagetools inspect paulbouwer/hello-kubernetes:1.11.0 --format "{{json .SBOM}}" |
+  jq -r '.["linux/amd64"].SPDX.packages[] | "\(.name) \(.versionInfo)"'
+```
+
+The chart is signed the same way. See [With Helm](/hello-kubernetes/docs/deploy/helm/#verify).
+
+## Build your own
+
+To build the image yourself, or push it to your own registry, see [Build and push container images](https://github.com/paulbouwer/hello-kubernetes/blob/main/docs/build-and-push-container-images.md) in the repo.

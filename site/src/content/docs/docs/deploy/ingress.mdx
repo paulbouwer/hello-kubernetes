@@ -4,7 +4,7 @@ description: Serve hello-kubernetes under a path prefix behind an Ingress, with 
 sidebar:
   order: 4
   attrs:
-    data-icon: random
+    data-icon: right-arrow
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -124,7 +124,9 @@ With a host name, open `http://hello.example.com/app/hello/`.
 
 ## Upgrade
 
-Change a value with `helm upgrade --reuse-values`, as [with Helm](/hello-kubernetes/docs/deploy/helm/#upgrade). Changing `pathPrefix` moves the Ingress path and the app's own path together.
+Change a value with `helm upgrade --reset-then-reuse-values`, as [with Helm](/hello-kubernetes/docs/deploy/helm/#upgrade). Changing `pathPrefix` moves the Ingress path and the app's own path together.
+
+If you set the old `ingress.configured`, `ingress.pathPrefix` or `ingress.rewritePath` values in 1.10, see [the old path values](/hello-kubernetes/docs/reference/upgrading/#the-old-path-values).
 
 ## Uninstall
 
@@ -139,15 +141,3 @@ kubectl delete namespace hello-kubernetes
 
 - An Ingress controller that supports `networking.k8s.io/v1` and `ingressClassName`. CI tests Traefik on k3d and the NGINX Ingress Controller on kind.
 - Kubernetes 1.35 or newer, and Helm 4.
-
-## Moving from the old values
-
-Before 1.11, the chart didn't create an Ingress: you wrote your own, and set `ingress.configured`, `ingress.pathPrefix` and `ingress.rewritePath`. These still work in 1.x, and the install notes list them as deprecated. They are removed in 2.0.
-
-| Old value | New value |
-|---|---|
-| `ingress.configured=true` | Not needed. Set `pathPrefix`, and `ingress.enabled=true` or `httpRoute.enabled=true` for the chart to create the route. |
-| `ingress.pathPrefix` | `pathPrefix` |
-| `ingress.rewritePath` | `rewritePath` |
-
-If you keep your own Ingress, set only `pathPrefix` and `rewritePath`, and point your Ingress at the Service `hello-kubernetes-<release name>`, port `80`.

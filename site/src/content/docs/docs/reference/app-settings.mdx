@@ -1,0 +1,61 @@
+---
+title: App settings
+description: The environment variables hello-kubernetes reads, for running the image without the Helm chart.
+sidebar:
+  order: 2
+  attrs:
+    data-icon: setting
+---
+
+The app reads its settings from environment variables. The Helm chart sets them for you from its [values](/hello-kubernetes/docs/configure/values/). Use them directly when you run the image another way: with `docker run`, in your own manifests, or by patching the release file [with Kustomize](/hello-kubernetes/docs/deploy/kustomize/#what-each-chart-value-changes).
+
+| Variable | Default | What it does | Chart value |
+|---|---|---|---|
+| `MESSAGE` | `Hello world!` | The message on the page. | `message` |
+| `PORT` | `8080` | The port the app listens on. | `deployment.container.port` |
+| `HANDLER_PATH_PREFIX` | none | The path the app serves under, such as `/app/hello`. Set it when the proxy passes the prefix on. | `pathPrefix`, when `rewritePath` is `false` |
+| `RENDER_PATH_PREFIX` | none | The path the page's links use, so the browser asks the proxy for the stylesheet and images under the prefix. | `pathPrefix` |
+| `KUBERNETES_NAMESPACE` | `-` | The namespace shown on the page. | set from the pod |
+| `KUBERNETES_POD_NAME` | the host name | The pod shown on the page. | set from the pod |
+| `KUBERNETES_NODE_NAME` | `-` | The node shown on the page, with its operating system and kernel. | set from the pod |
+| `CONTAINER_IMAGE` | `paulbouwer/hello-kubernetes:<version>` | The image shown on the page. | `deployment.container.image.*` |
+| `LOG_LEVEL` | `info` | The log level, such as `debug`, `info`, `warn` or `error`. At `debug`, the app logs its settings when it starts. | none |
+
+Leading and trailing slashes in the two path prefixes are optional. The page also shows the image's architecture, such as `linux/amd64`, which the app reads from itself.
+
+## The pod details
+
+The chart sets the three `KUBERNETES_` variables with the [Downward API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/). In your own manifest:
+
+```yaml title="deployment.yaml (part)"
+env:
+  - name: KUBERNETES_NAMESPACE
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.namespace
+  - name: KUBERNETES_POD_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.name
+  - name: KUBERNETES_NODE_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: spec.nodeName
+```
+
+## Run it with Docker
+
+```bash
+docker run --rm -p 8080:8080 -e MESSAGE="Hello from Docker" paulbouwer/hello-kubernetes:1.11.0
+```
+
+Open `http://localhost:8080/`. You see **Hello from Docker**, with `-` for the namespace and node, and the container ID as the pod. Press Ctrl+C to stop.
+
+## What the app serves
+
+| Path | What |
+|---|---|
+| `/` | The page. Under a prefix, `<prefix>/`. |
+| `/css/`, `/images/`, `/fonts/`, `/favicon.ico` | The stylesheet, the logo, the Ubuntu font and its licence, and the icon. |
+
+There is no separate health endpoint. The chart's probes ask for the page.
