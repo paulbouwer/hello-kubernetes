@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Image tests from .project/roadmap/1.x/testing.md: I1 to I7, and I5a.
+# Image tests from .project/roadmap/1.x/testing.md: I1 to I8, and I5a.
 #
 # Usage: test/image/run.sh IMAGE
 #
@@ -178,6 +178,36 @@ if [[ -n "$(tail -n +2 <<<"$result")" && "$(head -n1 <<<"$result")" == 200 ]]; t
   pass I7 "serves the page and the stylesheet with a read-only root filesystem"
 else
   fail I7 "with a read-only root filesystem, the page didn't load or the stylesheet returned $(head -n1 <<<"$result")"
+fi
+
+# I8: the page makes no requests to other sites (#137). The page and the
+# stylesheet reference only the app's own files, and the bundled Ubuntu font
+# and its licence load.
+i8_cid=$(docker run -d --pull never -p "127.0.0.1::8080" "$image")
+i8_port=$(docker port "$i8_cid" 8080/tcp | head -n1 | sed 's/.*://')
+i8_html=""
+for _ in $(seq 1 40); do
+  i8_html=$(curl -fs "http://127.0.0.1:$i8_port/" 2>/dev/null) && break
+  sleep 0.25
+done
+i8_css=$(curl -fs "http://127.0.0.1:$i8_port/css/main.css" || true)
+i8_external=$(
+  grep -oE '(href|src)="(https?:)?//[^"]*"' <<<"$i8_html" || true
+  grep -oE 'url\((["'"'"'])?(https?:)?//[^)]*\)|@import[^;]*' <<<"$i8_css" || true
+)
+i8_font=$(curl -s -o /dev/null -w '%{http_code} %{content_type}' "http://127.0.0.1:$i8_port/fonts/ubuntu/ubuntu-latin-300-normal.woff2")
+i8_licence=$(curl -s "http://127.0.0.1:$i8_port/fonts/ubuntu/LICENCE.txt" | head -n 3 | grep -c "UBUNTU FONT LICENCE" || true)
+docker rm -f "$i8_cid" >/dev/null
+if [[ -z "$i8_html" || -z "$i8_css" ]]; then
+  fail I8 "the page or the stylesheet didn't load"
+elif [[ -n "$i8_external" ]]; then
+  fail I8 "the page or the stylesheet references another site: $(head -n1 <<<"$i8_external")"
+elif [[ "$i8_font" != "200 font/woff2" ]]; then
+  fail I8 "the bundled font returned $i8_font"
+elif ((i8_licence == 0)); then
+  fail I8 "the Ubuntu Font Licence is not served next to the font"
+else
+  pass I8 "no references to other sites; the bundled font and its licence load"
 fi
 
 if ((failures > 0)); then
