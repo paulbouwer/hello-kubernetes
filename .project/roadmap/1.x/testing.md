@@ -125,6 +125,8 @@ The website has its own checks, in `site/tests/site.spec.ts` (`make site-test`),
 | Loads cleanly | a console error, an uncaught error, a CSP violation, or a request to another site |
 | Accessibility (axe) | a serious or critical problem; moderate and minor ones are reported |
 
+Before axe runs, the check waits for Expressive Code's script to make each code block that scrolls sideways focusable; without the wait, axe sometimes ran first and reported the block (#141). A wide table that scrolls can't be made focusable from Markdown, so keep tables narrow enough not to scroll on a desktop.
+
 It saves screenshots of each page, desktop and phone, light and dark, as a CI artifact. Testing the checks: a Google Fonts stylesheet failed every page, an image with no alt text failed as critical, and a relative link failed the build.
 
 ## End-to-end scenarios
@@ -147,7 +149,7 @@ Every scenario runs on both kind and k3d unless the "Clusters" column says other
 | E12 | Rolling upgrade | Install with `message=v1`, then `helm upgrade --set message=v2 --wait` | All pods replaced, page shows `v2`, no downtime: a background `curl` loop during the upgrade sees no non-200 responses | kind | upgrades |
 | E13 | Kubernetes version range | E1 + E6 + E7 on the oldest Kubernetes version the chart supports, 1.35 (the newest, 1.37, runs every scenario) | Same pass criteria | kind amd64, `E2E_KUBERNETES=oldest` (`make e2e-kind-oldest`) | API removals like #31 |
 | E14 | arm64 nodes | E1 + E2 on an arm64 host | Architecture shown is `linux/arm64` | both, arm64 runner. Since 4.1, every scenario runs on arm64, and E2 checks the architecture | #16 |
-| E15 | Docs still work | Run, in order, the blocks marked ```` ```bash e2e ```` in `README.md` and the website's Quick start and Deploy pages, with the local chart, image and release file in place of the published ones. A page with code groups runs once per group | Each block exits 0, and the docs' own clean-up steps remove everything | k3d, because the guides' examples use Traefik | stops #31 recurring |
+| E15 | Docs still work | Run, in order, the blocks marked ```` ```bash e2e ```` in `README.md` and the website's Quick start, Deploy pages and Show load balancing guide, with the local chart, image and release file in place of the published ones. A page with code groups runs once per group | Each block exits 0, and the docs' own clean-up steps remove everything | k3d, because the guides' examples use Traefik | stops #31 recurring |
 | E16 | HTTPRoute with rewrite | Two releases with `httpRoute.enabled=true`, `parentRefs` pointing at the test `Gateway`, `rewritePath=true`, prefixes `/app/hello-world` and `/app/custom` | Same as E5, through the Gateway. The rendered HTTPRoute has a `URLRewrite` filter and no controller-specific settings | both | Gateway API scope |
 | E17 | HTTPRoute without rewrite | One release with `httpRoute.enabled=true`, `pathPrefix=/app/hello` | Same as E6, through the Gateway; the HTTPRoute is `Accepted` in its status | both | Gateway API scope |
 | E18 | Old value names still work | Install with the old `ingress.configured=true`, `ingress.pathPrefix`, `ingress.rewritePath` and a hand-written Ingress | Same as E6 or E5, depending on `rewritePath` | kind | migration to top-level `pathPrefix`/`rewritePath` |

@@ -1,0 +1,57 @@
+---
+title: Show load balancing
+description: Run several hello-kubernetes pods across your nodes, and watch a Service send requests to each of them.
+sidebar:
+  order: 1
+  attrs:
+    data-icon: random
+---
+
+Each page shows the pod and the node that answered. With several pods, you can watch a Service spread requests across them. This guide installs four pods, sees where they run, and sends requests to them from inside the cluster.
+
+You need `kubectl`, [Helm 4](https://helm.sh/docs/intro/install/), and a cluster. With more than one node, the pods spread across them.
+
+## Install four pods
+
+```bash e2e
+helm install spread oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-lb --create-namespace \
+  --set deployment.replicaCount=4 \
+  --set service.type=ClusterIP \
+  --wait
+kubectl get pods --namespace hello-lb --output wide
+```
+
+The `NODE` column shows where each pod runs. The scheduler spreads them across nodes where it can.
+
+## Send requests through the Service
+
+Run a short-lived pod that asks the Service for the page 10 times, and prints the pod that answered each time:
+
+```bash e2e
+kubectl run lb-test --namespace hello-lb --rm -i --quiet --restart=Never --image=busybox:1.37 -- \
+  sh -c 'for i in $(seq 1 10); do wget -qO- http://hello-kubernetes-spread | grep -A1 "pod:" | tail -n1; done'
+```
+
+```text output
+      <td>hello-kubernetes-spread-7798544b7b-fvsmz</td>
+      <td>hello-kubernetes-spread-7798544b7b-s9bfh</td>
+      <td>hello-kubernetes-spread-7798544b7b-fvsmz</td>
+      <td>hello-kubernetes-spread-7798544b7b-lqzrb</td>
+      ...
+```
+
+Each request opens a new connection, and the Service sends each connection to one of the pods.
+
+## In a browser
+
+Reach the app through a `LoadBalancer` Service, an [Ingress](/hello-kubernetes/docs/deploy/ingress/) or a [Gateway](/hello-kubernetes/docs/deploy/gateway/), and refresh the page. The pod name changes, but not on every refresh. A browser keeps its connection open, and the Service balances connections, not requests. An Ingress controller or a Gateway balances each request, so the change is easier to see through one.
+
+`kubectl port-forward` always connects to one pod, so the name never changes through it.
+
+## Clean up
+
+```bash e2e
+helm uninstall spread --namespace hello-lb
+kubectl delete namespace hello-lb
+```

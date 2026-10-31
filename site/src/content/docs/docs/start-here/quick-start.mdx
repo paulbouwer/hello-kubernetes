@@ -46,7 +46,7 @@ Open `http://localhost:8080/`. You see **Hello world!**, and the namespace, pod 
 
 `port-forward` connects to one pod, so the pod name stays the same when you refresh. Through the Service's external address, each request can reach a different pod.
 
-The Service is a `LoadBalancer`, so on many clusters it also gets an external address. See [where the external address works](/hello-kubernetes/docs/deploy/kubectl/#where-the-external-address-works).
+The Service is a `LoadBalancer`, so on many clusters it also gets an external address. See [where the external address works](/hello-kubernetes/docs/deploy/kubectl/#where-the-external-address-works). To watch requests reach different pods, see [Show load balancing](/hello-kubernetes/docs/guides/load-balancing/).
 
 ## Remove it
 

@@ -88,16 +88,18 @@ gh attestation verify oci://ghcr.io/paulbouwer/charts/hello-kubernetes@<digest> 
 
 ## Upgrade
 
-Change a value, or move to a newer chart, with `helm upgrade`. `--reuse-values` keeps the values you set before:
+Change a value, or move to a newer chart, with `helm upgrade`. `--reset-then-reuse-values` starts from the new chart's defaults, then applies the values you set before:
 
 ```bash e2e
 helm upgrade custom-message oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
-  --namespace hello-kubernetes --reuse-values \
+  --namespace hello-kubernetes --reset-then-reuse-values \
   --set-string message="Upgraded!" \
   --wait
 ```
 
 The pods are replaced one at a time, and the page then shows **Upgraded!**.
+
+Use `--reset-then-reuse-values`, not `--reuse-values`. `--reuse-values` also reuses the old chart's defaults, so a value that is new in the chart is missing, and the upgrade can fail. Moving from 1.10, it does. See [Upgrading from 1.10](/hello-kubernetes/docs/reference/upgrading/).
 
 ## Uninstall
 

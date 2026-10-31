@@ -1,0 +1,46 @@
+---
+title: Test your Ingress or Gateway
+description: Use hello-kubernetes to check that an Ingress controller or a Gateway routes paths, strips prefixes and serves assets.
+sidebar:
+  order: 2
+  attrs:
+    data-icon: approve-check-circle
+---
+
+A new Ingress controller or Gateway needs a quick check: does it route a path to the right Service, strip a prefix when asked, and pass assets through? hello-kubernetes answers all three on one page. The message says which release answered, and the page's stylesheet and logo load only if the paths are right.
+
+You need `kubectl`, [Helm 4](https://helm.sh/docs/intro/install/), and the Ingress controller or Gateway to test.
+
+## Install two releases
+
+Install two releases under different paths, one that passes the prefix on and one that has it stripped. For an Ingress, set your class:
+
+```bash
+helm install pass-on oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace routing-test --create-namespace \
+  --set ingress.enabled=true --set ingress.className=<your class> \
+  --set pathPrefix=/test/pass-on --set rewritePath=false \
+  --set service.type=ClusterIP --set-string message="pass-on answered" --wait
+```
+
+For a Gateway, use `--set httpRoute.enabled=true` and `--set 'httpRoute.parentRefs[0].name=<your gateway>'` in place of the two `ingress` values. Then install a second release with `--set pathPrefix=/test/stripped --set rewritePath=true` and the message `stripped answered`. With an Ingress, a stripped prefix also needs your controller's annotation; see [Behind an Ingress](/hello-kubernetes/docs/deploy/ingress/#install-with-rewriting).
+
+## Check each result
+
+| Open | You should see | If not |
+|---|---|---|
+| `http://<address>/test/pass-on/` | **pass-on answered** | The route doesn't reach the Service. Check the class or the Gateway's `allowedRoutes`. |
+| `http://<address>/test/stripped/` | **stripped answered** | The prefix wasn't stripped, so the app returned 404. Check the rewrite annotation or `URLRewrite` support. |
+| Both pages | the Kubernetes logo and the dark theme | A plain, unstyled page means the assets didn't load: the proxy routes the page, but not the paths under it. |
+| `http://<address>/test/other/` | a 404 from your controller | Something matches paths too widely. |
+
+The table on each page also shows the pod and node that answered, so you can check that the controller reaches pods on every node.
+
+## Clean up
+
+```bash
+helm uninstall pass-on stripped --namespace routing-test
+kubectl delete namespace routing-test
+```
+
+The e2e tests use these same checks on Traefik, the NGINX Ingress Controller and NGINX Gateway Fabric.

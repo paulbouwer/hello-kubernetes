@@ -26,7 +26,8 @@ scenario() {
 
   local site=site/src/content/docs/docs pass doc groups group
   for file in README.md $site/start-here/quick-start.mdx $site/deploy/helm.mdx \
-    $site/deploy/kubectl.mdx $site/deploy/ingress.mdx $site/deploy/gateway.mdx; do
+    $site/deploy/kubectl.mdx $site/deploy/ingress.mdx $site/deploy/gateway.mdx \
+    $site/guides/load-balancing.mdx; do
     doc=$(basename "$(dirname "$file")")-$(basename "${file%.*}")
     groups=$(grep -oE '^```bash e2e=[a-z0-9-]+' "$repo/$file" | sed 's/.*=//' | awk '!seen[$0]++' || true)
     for group in ${groups:-all}; do
@@ -54,7 +55,7 @@ scenario() {
       done
     done
   done
-  ((count >= 22)) || die "ran only $count blocks; are the e2e markers still in the docs?"
+  ((count >= 25)) || die "ran only $count blocks; are the e2e markers still in the docs?"
 
   # The docs' own clean-up steps must leave nothing behind.
   local left

@@ -65,4 +65,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-30-reused-local-clusters](2026-10-30-reused-local-clusters/plan.md) | Check a reused cluster's Kubernetes version and image IDs, and make make e2e-clean stop cloud-provider-kind. | done |
 | [2026-10-31-bundled-font](2026-10-31-bundled-font/plan.md) | Bundle the Ubuntu font and its licence in the image, so the app's page makes no request to Google Fonts. | done |
 | [2026-10-31-site-scaffold](2026-10-31-site-scaffold/plan.md) | Scaffold the website with Astro, Starlight and Preact, its identity and code block theme, the Pages workflow, and the required site checks. | done |
-| [2026-10-31-user-docs](2026-10-31-user-docs/plan.md) | Move the user docs from the README and docs/ to the website, with E15 running the site's marked commands. | in-progress |
+| [2026-10-31-user-docs](2026-10-31-user-docs/plan.md) | Move the user docs from the README and docs/ to the website, with E15 running the site's marked commands. | done |
