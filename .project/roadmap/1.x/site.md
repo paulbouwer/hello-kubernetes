@@ -1,171 +1,192 @@
 ---
 title: Website
-description: GitHub Pages site with Astro and Starlight, landing page, docs style, config builder, llms.txt and agent experience.
+description: GitHub Pages site with Astro and Starlight that holds the user docs, with a landing page, a live preview, a config builder and llms.txt.
 type: plan
 status: active
 areas: [site]
 created: 2026-10-22
-updated: 2026-10-23
+updated: 2026-10-31
 ---
 
 # Website
 
-A product-style website for hello-kubernetes and its configuration, hosted on GitHub Pages, with a focus on agent experience (AX): making the repo and site easy for AI agents as well as people to read and use. This builds on [deploy.md](deploy.md) (rendered YAML, Kustomize patches, the chart values table) and E15 in [testing.md](testing.md) (running the docs' commands in CI).
+A product-style website for hello-kubernetes, hosted on GitHub Pages. It helps people understand what hello-kubernetes gives them, deploy it, and configure it, and it is easy for AI agents to read too.
 
-## Summary
+The decisions below were agreed with the maintainer on 2026-10-31, question by question ([#135](https://github.com/paulbouwer/hello-kubernetes/issues/135)). They replace the plan of 2026-10-23, which built the site from copies of `docs/*.md`.
 
-- **Astro with the Starlight docs theme**, built by a GitHub Actions workflow and published to `paulbouwer.github.io/hello-kubernetes`.
-- **Landing page modelled on [herdr.dev](https://herdr.dev/)**, as a custom Astro page in the same project, sharing fonts and colours with the docs.
-- **Docs style modelled on [Herdr's docs](https://herdr.dev/docs/install/) and [microsandbox](https://docs.microsandbox.dev/sandboxes/overview)**: terminal-style command frames, synced Helm | kubectl | Kustomize tabs, and a consistent page structure.
-- **One copy of the docs.** A `prepare-docs` step copies `docs/*.md` into the site before each build.
-- **Stand-out features:** a config builder and a live preview of the app's page, both running in the browser.
-- **AX:** `llms.txt` linking to raw markdown at the release tag, `llms-full.txt`, a hidden note for agents on each page, `AGENTS.md` in the repo, and a `values.schema.json` for the chart.
+## Decisions
+
+| # | Decision | Why |
+|---|---|---|
+| 1 | **The site owns the user docs.** User docs are MDX pages in `site/`. `docs/` and `CONTRIBUTING.md` keep the contributor docs: the dev environment, building images, testing, local clusters and how the site is built. The README stays the GitHub front door. | Plain Markdown copied into the site can't hold synced tabs, rich code blocks or the live preview. |
+| 2 | **Astro with Starlight**, on GitHub Pages. The microsandbox look is a theme we build. | Mintlify, which microsandbox uses, hosts the site itself, not on github.io. Starlight is what Herdr uses, supports MDX, synced tabs and themed code blocks, and is Node like the app. |
+| 3 | **The site map** below, with guides, an upgrade page, and separate Ingress and Gateway pages. | Written for the people who use hello-kubernetes: demos, teaching and testing a cluster. |
+| 4 | **The live site builds from `main`, and shows the latest release only.** Every PR builds the site in CI and keeps it as an artifact. The site goes live with 6.2. | Its pages describe the published chart, images and release file, which exist only after a release. |
+| 5 | **Identity:** a text wordmark, `hello-kubernetes` in the code font; the app's charcoal and greys with Kubernetes blue (`#326CE5`) as the one accent; light, dark and Auto; Archivo, Inter and JetBrains Mono, self-hosted. | Related to the app without using the Kubernetes logo as the site's own, which the CNCF's trademark rules discourage. No third-party requests. |
+| 6 | **Code blocks like microsandbox's.** | See [Code blocks](#code-blocks). |
+| 7 | **Playwright, from its official container image pinned by digest,** for screenshots: of reference sites and our pages during the work, and of the app for the README at each release (`make screenshot`). | The image is verified by its digest (AGENTS.md rule 7), works the same locally and in CI, and keeps several hundred MB of browsers out of the devcontainer. |
+| 8 | **The landing page** below: Herdr's layout, with an interactive mock-up and no stats row. | Herdr's page is the reference. A stats row adds API calls to every build and numbers that go stale. |
+| 9 | **The config builder** gives the `helm install` command, `values.yaml` and Kustomize, not the rendered YAML, and CI checks it against the chart. | Rendering the manifests in the browser would mean a second copy of the chart's templates. |
+| 10 | **The live preview** renders the app's real template in a sandboxed `iframe`. The builder uses **Preact**. The app's image bundles the Ubuntu font (5.1). | See [Live preview](#live-preview). |
+| 11 | **Agents read Markdown generated from the built pages:** `llms.txt`, `llms-full.txt` and a `.md` copy of each page. | The MDX source contains components, which read poorly for an agent. |
+| 12 | **The site is tested in CI** by a required `site` job, and E15 reads the MDX pages, with groups for alternative tabs. Accessibility problems block a merge only when serious or critical. | See [Testing](#testing). |
+| 13 | **The defaults** below: Pagefind search, no analytics, English only, `paulbouwer.github.io/hello-kubernetes`. | Standard, and no third-party services. |
+| 14 | **Six items**, 5.1–5.6, in the order in the [1.x work plan](../../work/2026-10-26-roadmap-1x/plan.md#5-website). | The landing page's mock-up needs the preview, so the preview comes first. |
+
+A **Content Security Policy** in a `<meta>` tag is tried in 5.2, and kept only if Astro's generated hashes work with Starlight without workarounds. It would stop a compromised dependency from loading code or sending data elsewhere, and enforce "no third-party requests". As a `<meta>` tag it can't stop framing (`frame-ancestors`) or send reports, because GitHub Pages can't send custom headers.
 
 ## References
 
-Checked in October 2026.
+Taken from screenshots of the live sites with Playwright on 2026-10-31. We match their style with our own CSS and components; their code and images aren't ours to reuse.
 
-| Site | Built with | What to take from it |
+| Site | Built with | What we take from it |
 |---|---|---|
-| [herdr.dev](https://herdr.dev/) | Hand-written HTML and CSS | The landing page: short headline, copyable install command, stats row, a large clickable product mock-up built in HTML, short feature blocks, closing install command. Light and dark modes; Archivo, Inter and JetBrains Mono fonts. |
-| [herdr.dev/docs](https://herdr.dev/docs/install/) | Astro + Starlight, custom styling | Commands in terminal-style frames. The install page goes: one section per method, then Verify, Update, Requirements. `llms.txt` links to raw markdown on GitHub at the release tag. Docs are copied into the site by a `prepare-docs.mjs` script. |
-| [docs.microsandbox.dev](https://docs.microsandbox.dev/sandboxes/overview) | Mintlify (hosted service) | Code tabs per language, copy and "Ask Assistant" buttons on each code block, a hidden note on every page pointing agents to `/llms.txt`, every page available as `.md`. |
+| [microsandbox docs](https://docs.microsandbox.dev/sandboxes/overview) | Mintlify | **Code blocks:** one rounded frame with a thin border tinted in the accent colour, tabs in the frame's header with the active tab underlined in the accent, the copy button in the header's right corner, a near-black background in dark mode and a faint tint in light mode. A small icon next to each page in the sidebar. A hidden note for agents on every page. |
+| [Herdr docs](https://herdr.dev/docs/install/) | Astro + Starlight | The install page's order: one section per method, then Verify, Update and Requirements. Dark, Light and Auto. Search in the header. |
+| [Herdr landing page](https://herdr.dev/) | Hand-written HTML and CSS | A two-tone headline (white, then grey), pill tabs above the command box, a visual `$` prompt that isn't copied, a Copy button, a line under the command and a link to all the ways to install, and a large interactive mock-up with "Try one:" chips that change it. |
 
-Both Herdr and microsandbox serve `llms.txt` and `llms-full.txt`.
+## Site map
 
-### Other Starlight sites
+```text
+/                           Landing page
+/docs/
+  Start here
+    Overview                What it is, what the page shows, what people use it for
+    Quick start             kubectl | Helm tabs: deploy, reach, remove
+  Deploy
+    With Helm               install from the OCI chart, pin a version, upgrade, uninstall
+    With kubectl            the release file, where LoadBalancer works, port-forward
+    With Kustomize          the release file as a base, with patches
+    Behind an Ingress       NGINX and Traefik, with and without rewriting
+    Behind a Gateway        HTTPRoute, URLRewrite, Traefik and NGINX Gateway Fabric
+  Configure
+    Config builder          options to helm, values.yaml and Kustomize, with the live preview
+    Values reference        every value, from values.schema.json
+    Path prefixes           what pathPrefix and rewritePath do, with a diagram
+    Security defaults       non-root, read-only filesystem, restricted Pod Security
+  Guides
+    Show load balancing     several pods across nodes, and the pod name changing
+    Test your Ingress or Gateway   use hello-kubernetes to check a controller works
+  Reference
+    Container image         tags, platforms, checking signatures and SBOMs
+    App settings            the environment variables, for running without the chart
+    Upgrading from 1.10     renamed values, the numeric user, the new defaults
+  For AI agents             llms.txt, the schema, using the docs from an agent
+```
 
-Each reports Starlight as its generator.
+Contributing, the dev environment, CI and how the site is built stay in `docs/` and `CONTRIBUTING.md`. The footer links to them on GitHub.
 
-| Site | Why it's worth a look | `llms.txt` |
-|---|---|---|
-| [starlight.astro.build](https://starlight.astro.build/) | Starlight's own site and default layout | — |
-| [biomejs.dev](https://biomejs.dev/) | Polished product landing page on top of the docs | — |
-| [v2.tauri.app](https://v2.tauri.app/) | Strong landing page, lots of guides and reference pages | ✓ |
-| [openai.github.io/openai-agents-js](https://openai.github.io/openai-agents-js/) | Hosted on github.io under a project path, the same setup as here | ✓ |
-| [knip.dev](https://knip.dev/) | A small open-source tool with a clean, simple site; closest in scale | — |
-| [docs.astro.build](https://docs.astro.build/) | Starlight at large scale, with translations and search | — |
+Deploy pages follow Herdr's install page: the method, then **Verify** (a command and its expected result), **Upgrade**, **Uninstall** and **Requirements**.
 
-More on the [showcase page](https://starlight.astro.build/resources/showcase/).
+The old `docs/deploy-using-helm.md`, `docs/deploy-with-ingress.md` and `docs/deploy-using-kubectl-and-kustomize.md` become short pages that point to the matching site pages, so existing links still lead somewhere.
 
-## Choosing a site generator
+## Look
 
-| Option | Product feel | Upkeep | AX / llms.txt | Notes |
-|---|---|---|---|---|
-| **Astro + Starlight** | High; custom landing page plus docs | npm dependencies to keep current | Plugin generates `llms.txt`, `llms-full.txt` | What Herdr uses; interactive pieces are easy; Node, like the app |
-| **Mintlify** | Highest out of the box | Low; it's a hosted service | Built in, including per-page `.md` | Hosts the site itself, so not on github.io, and ties the docs to one vendor |
-| **VitePress** | High (hero landing page built in) | npm, but fewer packages | Community plugin | Vue-based, very fast, a little less flexible |
-| **Hugo** (e.g. Hextra theme) | Good with a theme | Lowest: one binary, no packages | Custom output templates | Go templates, like Helm |
-| **Docusaurus** | High | Heaviest (React) | Plugin | More than this project needs |
-| **MkDocs Material** | Good, docs-first | Python | Plugin | Reportedly in maintenance mode since late 2025 (successor: Zensical); check first |
-| **Jekyll** (GitHub's built-in) | Dated | No build workflow needed | Manual | Ruby, few plugins |
-| **Plain HTML/CSS/JS** | Whatever you build | No dependencies | Hand-written | Docs end up duplicated rather than built from `docs/*.md` |
+### Identity
 
-**Recommended: Astro + Starlight.** It's what Herdr uses, it can match microsandbox's main docs features (tabs, code frames, copy buttons), and it builds to static files for GitHub Pages.
+- **Wordmark:** `hello-kubernetes` in JetBrains Mono. The Kubernetes logo appears only where the app is shown: the live preview and the screenshot.
+- **Colours:** the app's charcoal (`#333`) and greys, and Kubernetes blue (`#326CE5`) for links, buttons and the active tab.
+- **Modes:** light, dark and Auto.
+- **Fonts:** Archivo for headings, Inter for body text, JetBrains Mono for code, from `@fontsource` packages. Each is under the SIL Open Font Licence 1.1, and ships with its licence file.
 
-**Not recommended: Mintlify**, despite the polish. It hosts the site itself rather than on github.io, and the docs would depend on one vendor.
+### Code blocks
 
-**Low-maintenance alternative: Hugo**, if keeping dependencies to a minimum matters more. The trade-off is more hand-built theming and generating `llms.txt` with custom templates.
+Built on Starlight's code blocks (Expressive Code), themed in our colours:
+
+- **Code groups:** one frame, with Helm, kubectl and Kustomize tabs in its header, synced across pages and remembered.
+- **The frame:** rounded corners, a thin border tinted blue, a subtle background in light and dark, and the copy button in the header.
+- **Commands:** a terminal icon in the header, and no `$` prompt in the copied text.
+- **Files:** the file name in the header, such as `values.yaml`.
+- **Output:** a quieter "Output" frame under the command that produces it.
+- **Highlighted lines** for the setting being explained.
+
+There is no "Ask Assistant" button, which would need a hosted AI service.
 
 ## Landing page
 
-A custom Astro page (`site/src/pages/index.astro`) rather than Starlight's built-in splash layout, so it can look like Herdr's while sharing fonts, colours and the build with the docs. Top to bottom:
+A custom Astro page (`site/src/pages/index.astro`), sharing fonts and colours with the docs. Top to bottom:
 
-1. **Headline and command.** A short two-line headline, a one-sentence description, and the install command with a copy button, switchable between `kubectl apply` and `helm install`. A line underneath with platforms (amd64 · arm64) and the licence.
-2. **Stats row.** Docker Hub pulls, GitHub stars and supported platforms, updated at build time.
-3. **Product mock-up.** The live app preview (below) inside a browser frame, next to a terminal pane showing `kubectl get pods`. Changing options in the config builder updates both, the way Herdr's mock-up responds to clicks. Built in HTML, not a screenshot, so it stays sharp and accurate.
-4. **Feature blocks.** Short headings with a line or two each, e.g. "Shows which pod answered", "Works behind an ingress", "Runs as non-root", "Helm, kubectl or Kustomize".
-5. **Closing call to action.** The install command again, with links to the docs and the config builder.
+1. **Header:** the wordmark, *Docs*, *Config builder*, *GitHub*, and the theme switch.
+2. **Hero:** "**Hello, Kubernetes.**" in white, then "**See which pod answered.**" in grey, and one sentence on what it is. Pill tabs, `kubectl | Helm`, above a command box with a `$` prompt and a Copy button. Under it: "Paste it into a terminal with access to your cluster." and "All the ways to deploy →".
+3. **Mock-up:** a browser frame with the live preview, next to a terminal showing `kubectl get pods -o wide`. Chips such as *Default*, *Your message*, *Behind an Ingress* and *4 pods across nodes* change the preview, the terminal output and the hero's command together.
+4. **Features:** "Shows which pod answered" · "Works behind an Ingress or a Gateway" · "Secure by default" · "Helm, kubectl or Kustomize" · "amd64 and arm64".
+5. **Closing:** the command again, and links to the docs and the config builder.
 
-Also: light and dark modes, an Open Graph image and description for link previews, and structured data (JSON-LD), as Herdr has.
-
-## Docs
-
-### Style
-
-- **Theme Starlight to match the landing page**: fonts, colours and the light/dark toggle.
-- **Terminal-style frames** for commands, with copy buttons (Starlight's built-in Expressive Code does this).
-- **Synced tabs**: Helm | kubectl | Kustomize. Choosing a tab on one page selects it on every page, the way microsandbox switches languages (Starlight `<Tabs syncKey="method">`).
-- **Callouts** for warnings, e.g. the probe path when `rewritePath: false`.
-
-### Page structure
-
-Deploy pages follow Herdr's install page:
-
-1. **Deploy**: one section per method (Helm, kubectl, Kustomize), or synced tabs.
-2. **Verify**: a command and its expected result, e.g. `curl -s localhost:8080 | grep "Hello world!"`.
-3. **Upgrade.**
-4. **Uninstall**: `helm uninstall` or `kubectl delete`, and deleting the namespace.
-5. **Requirements**: Kubernetes version, Helm 4, platforms.
-
-### Pages
-
-- **Get started:** the README quick start, including clean-up (from `community.md`).
-- **Deploy:** with Helm, with plain YAML, with Kustomize, and with an ingress, from `docs/` and `deploy.md`.
-- **Configuration reference:** every chart value, generated from `values.schema.json`.
-- **Container image:** tags, architectures, digests, and debugging with `kubectl debug`, from `image.md`.
-- **Using with AI agents:** links to `llms.txt`, `AGENTS.md` and the schema.
-
-### One copy of the docs
-
-A `site/scripts/prepare-docs.mjs` step copies `docs/*.md` into Starlight's content folder before each build, adding the frontmatter Starlight needs, as Herdr does. The docs stay readable on GitHub, and the site never has its own copies. The copied files are build output, so add them to `.gitignore`.
+Also an Open Graph image with the wordmark and the app, per-page titles and descriptions, and structured data (JSON-LD).
 
 ## Config builder
 
-Pick a message, ingress or LoadBalancer, a path prefix and replicas, and the page outputs:
+A hand-designed form for the options people change: the message, replicas, the service type and port, an Ingress or a Gateway (class, host, prefix, rewriting), and the image tag. Labels, descriptions, defaults and allowed values come from `values.schema.json`. "All values" links to the values reference.
+
+It gives:
 
 - the `helm install` command
-- a `values.yaml`
-- the Kustomize patch from `deploy.md`
-- plain YAML.
+- `values.yaml`
+- a `kustomization.yaml` on the release file, with any extra files, such as an Ingress
+- the `helm template` command, for the rendered YAML
 
-It runs entirely in the browser, built from `values.schema.json` so the form and the chart can't drift apart. It drives the landing page mock-up as well as its own docs page.
+**A CI test keeps it true to the chart.** It generates the builder's output for a set of option combinations, with the same code the page runs. `helm template` must accept the values and produce what was chosen. `kubectl kustomize` on the generated Kustomize, with the release file rendered locally, must match `helm template` for the same options.
 
-## Live preview of the app
+## Live preview
 
-The app's page is a handlebars template (`src/app/views`), and handlebars runs in the browser. The site can render the real view with the chosen message and sample pod and node details, so people see the result before deploying. Using the real template means the preview stays accurate when the page changes.
+- **The real template:** at build time, the site compiles `src/app/views/*.handlebars` and the app's `main.css`.
+- **The context, built as `server.js` builds it:** the message, namespace, a realistic pod name, a node, and the image and its architecture. "Send another request" shows another pod's name when there are several replicas.
+- **Isolated:** an `<iframe sandbox>` with no permissions, so no script runs and the frame has its own opaque origin. It is built with `srcdoc`, with the CSS, the Ubuntu font and the logo inlined, so it makes no requests. The message is escaped by Handlebars, and the sandbox stops scripts even if it weren't.
+- **A CI test** renders the page through the preview's code and through the real app container, for the same settings, and compares the HTML.
+
+**The app's font (5.1):** the app's page loaded Ubuntu from Google Fonts, which sends every visitor's browser to Google and fails in clusters with no internet access. The image bundles the font instead. Ubuntu is under the Ubuntu Font Licence 1.0, which allows bundling unmodified fonts if the copyright notice and the licence ship with them, so the image includes the licence file.
 
 ## Agent experience (AX)
 
 | Where | What |
 |---|---|
-| Site | `llms.txt` at the site root, in the [llmstxt.org](https://llmstxt.org/) format. Following Herdr: a title, the current release, a short note telling agents to open only the pages they need and to come back to this index rather than following links in the HTML pages, then links to the **raw markdown on GitHub at the release tag** (e.g. `https://raw.githubusercontent.com/paulbouwer/hello-kubernetes/v1.11.0/docs/deploy-using-helm.md`). Agents get the docs for that exact version, with no per-page markdown to generate. |
-| Site | `llms.txt` also lists `values.schema.json` as the configuration reference, as Herdr lists its config JSON. |
-| Site | `llms-full.txt`: all docs in one markdown file. |
-| Site | A hidden note at the top of each page pointing agents to `/llms.txt`, as microsandbox does (a Starlight component override). |
-| Repo | `AGENTS.md` at the root: how to build, test and render the chart, the repo layout, and conventions such as pinning actions to SHAs. It's the cross-tool convention, and agents read it automatically. |
-| Chart | `values.schema.json`. Helm validates values against it, agents and editors get descriptions and allowed values, and it generates the config builder, the configuration reference page and the values table in `deploy.md`. One schema replaces three hand-maintained copies. |
-| Docs | Commands that need no prompts, each followed by an expected result, so a person or agent can confirm each step worked. E15 in `testing.md` runs these in CI, which keeps them correct. |
-| Release | Stable URLs (`releases/latest/download/hello-kubernetes.yaml`, image digests in the release notes) that agents can reference reliably. |
+| Site | `/llms.txt`, in the [llmstxt.org](https://llmstxt.org/) format: the release, a note telling agents to open only the pages they need and to come back to this index, and a link to each page's Markdown. Generated from the built pages, for example by the `starlight-llms-txt` plugin, if it is maintained and its output for tabs is clean; otherwise by a tested script of our own. |
+| Site | `/llms-full.txt`: all the docs in one file. |
+| Site | A `.md` copy of every page, and a "Copy page as Markdown" button. |
+| Site | `values.schema.json`, served next to `llms.txt` and listed in it as the configuration reference. |
+| Site | A hidden note at the top of each page pointing agents to `/llms.txt`. |
+| Site | The "For AI agents" page, which links to `AGENTS.md` for agents working on the repo. |
+| Versions | The site is the latest release. `llms.txt` says that older versions' docs are in the repo at their tag. |
 
-The release workflow should regenerate `llms.txt` with the new tag, so its links always point at the latest release's docs.
+## Testing
+
+- **E15** reads the MDX pages and the README. `` ```bash e2e `` marks a block, and `` ```bash e2e=kubectl `` puts it in a group: one flow from start to clean-up, such as one tab's deploy, check and remove. Each group runs on its own, and must leave nothing behind.
+- **The `site` CI job**, a required check:
+  - `astro check` and `astro build`
+  - internal links and anchors (`starlight-links-validator`); external links aren't checked, to keep the build reliable
+  - Playwright on every page, light and dark: fail on a console error, a CSP violation, or a request to another site
+  - axe accessibility checks on the main pages: fail on serious and critical problems, report the rest
+- **The builder and preview drift tests** run where the app image is built.
+
+## Defaults
+
+| Topic | Default |
+|---|---|
+| Search | Starlight's built-in Pagefind, with no third-party service |
+| Analytics | None |
+| Feedback | "Edit this page" links to the MDX on GitHub, and a footer link to open an issue |
+| Also built | A sitemap, a 404 page, and a phone-width layout for every page |
+| Languages | English only |
+| Build | Node from the tool table, `npm ci` with a lockfile in `site/`, the 7-day cooldown, and Dependabot for `site/` |
+| Domain | `paulbouwer.github.io/hello-kubernetes`, with Astro's `base` set to `/hello-kubernetes/` |
+| Pages | The maintainer sets the repo's Pages source to GitHub Actions at 6.2 |
+| README | A short pitch, the screenshot, the kubectl quick start, and links to the site and `CONTRIBUTING.md` |
+| Writing | The repo's plain-English rules (AGENTS.md), on every page |
+| Reviewing a PR | `npm run dev` in the devcontainer on port 4321, forwarded to the host, and screenshots in light, dark, desktop and phone width, kept as a CI artifact |
 
 ## Hosting and build
 
-- **Workflow:** `.github/workflows/pages.yaml` using `actions/upload-pages-artifact` and `actions/deploy-pages`, pinned to commit SHAs like the other workflows, with least-privilege `permissions:` (`pages: write`, `id-token: write`).
-- **Base path:** project sites are served under `/hello-kubernetes/`, so set Astro's `base`. A custom domain can come later.
+- **Workflow:** `.github/workflows/pages.yaml`, with `actions/upload-pages-artifact` and `actions/deploy-pages`, pinned to commit SHAs, with least-privilege `permissions:`. It builds on PRs and on pushes to `main`, and deploys only from `main`.
 - **Layout:**
 
   ```text
-  site/                       # Astro + Starlight project
-    astro.config.mjs          # base path, Starlight and llms.txt config
-    scripts/prepare-docs.mjs  # copies ../docs/*.md into src/content/docs/
-    src/pages/index.astro     # custom landing page
-    src/content/docs/         # generated by prepare-docs (gitignored), plus site-only pages
-    src/components/           # config builder, app preview, landing mock-up
-    src/styles/               # shared fonts and colours for landing page and docs
-  docs/                       # existing docs, still readable on GitHub
-  deploy/helm/hello-kubernetes/values.schema.json
-  AGENTS.md
+  site/
+    astro.config.mjs          # base path, Starlight, Preact, llms.txt, CSP
+    package.json, package-lock.json
+    src/pages/index.astro     # the landing page
+    src/content/docs/         # the user docs, in MDX
+    src/components/           # the config builder, the live preview, the landing mock-up
+    src/styles/               # fonts, colours and the code block theme
+    tests/                    # Playwright checks, and the builder and preview drift tests
+  docs/                       # the contributor docs, and pointers for the old user docs
   ```
-
-- **Dependencies:** add `site/` to `dependabot.yml` (npm) alongside the app.
-
-## Suggested order
-
-1. `AGENTS.md` and `values.schema.json`. Useful immediately, with or without a site.
-2. Scaffold Starlight in `site/` with `prepare-docs`, the existing docs and the Pages workflow.
-3. Docs styling: theme, terminal frames, synced tabs, Verify/Upgrade/Uninstall/Requirements structure.
-4. `llms.txt` with tagged raw links, `llms-full.txt`, and the hidden agent note.
-5. Landing page.
-6. Config builder, live preview and the landing page mock-up.
