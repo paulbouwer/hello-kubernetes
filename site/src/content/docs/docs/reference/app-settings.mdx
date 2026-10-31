@@ -9,17 +9,17 @@ sidebar:
 
 The app reads its settings from environment variables. The Helm chart sets them for you from its [values](/hello-kubernetes/docs/configure/values/). Use them directly when you run the image another way: with `docker run`, in your own manifests, or by patching the release file [with Kustomize](/hello-kubernetes/docs/deploy/kustomize/#what-each-chart-value-changes).
 
-| Variable | Default | What it does | Chart value |
-|---|---|---|---|
-| `MESSAGE` | `Hello world!` | The message on the page. | `message` |
-| `PORT` | `8080` | The port the app listens on. | `deployment.container.port` |
-| `HANDLER_PATH_PREFIX` | none | The path the app serves under, such as `/app/hello`. Set it when the proxy passes the prefix on. | `pathPrefix`, when `rewritePath` is `false` |
-| `RENDER_PATH_PREFIX` | none | The path the page's links use, so the browser asks the proxy for the stylesheet and images under the prefix. | `pathPrefix` |
-| `KUBERNETES_NAMESPACE` | `-` | The namespace shown on the page. | set from the pod |
-| `KUBERNETES_POD_NAME` | the host name | The pod shown on the page. | set from the pod |
-| `KUBERNETES_NODE_NAME` | `-` | The node shown on the page, with its operating system and kernel. | set from the pod |
-| `CONTAINER_IMAGE` | `paulbouwer/hello-kubernetes:<version>` | The image shown on the page. | `deployment.container.image.*` |
-| `LOG_LEVEL` | `info` | The log level, such as `debug`, `info`, `warn` or `error`. At `debug`, the app logs its settings when it starts. | none |
+| Variable | Default | What it does |
+|---|---|---|
+| `MESSAGE` | `Hello world!` | The message on the page. Chart value: `message`. |
+| `PORT` | `8080` | The port the app listens on. Chart value: `deployment.container.port`. |
+| `HANDLER_PATH_PREFIX` | none | The path the app serves under, such as `/app/hello`. Set it when the proxy passes the prefix on. Chart value: `pathPrefix`, when `rewritePath` is `false`. |
+| `RENDER_PATH_PREFIX` | none | The path the page's links use, so the browser asks the proxy for the stylesheet and images under the prefix. Chart value: `pathPrefix`. |
+| `KUBERNETES_NAMESPACE` | `-` | The namespace shown on the page. The chart sets it from the pod. |
+| `KUBERNETES_POD_NAME` | the host name | The pod shown on the page. The chart sets it from the pod. |
+| `KUBERNETES_NODE_NAME` | `-` | The node shown on the page, with its operating system and kernel. The chart sets it from the pod. |
+| `CONTAINER_IMAGE` | the app's image | The image shown on the page. Chart value: `deployment.container.image.*`. |
+| `LOG_LEVEL` | `info` | The log level, such as `debug`, `info`, `warn` or `error`. At `debug`, the app logs its settings when it starts. |
 
 Leading and trailing slashes in the two path prefixes are optional. The page also shows the image's architecture, such as `linux/amd64`, which the app reads from itself.
 

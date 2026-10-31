@@ -2,7 +2,7 @@
 title: User docs on the website
 description: Move the user docs from the README and docs/ to the website, with E15 running the site's marked commands.
 type: plan
-status: in-progress
+status: done
 areas: [site]
 issues: [141]
 created: 2026-10-31
@@ -24,7 +24,7 @@ This is work item 5.3 in the [1.x work plan](../2026-10-26-roadmap-1x/plan.md#5-
 | A | Overview, Quick start; With Helm, With kubectl, With Kustomize, Behind an Ingress, Behind a Gateway; Values reference; Licences | The README rewrite, pointer pages for the old `docs/deploy-*.md`, E15 and C17 reading the site, the chart's and the release file's doc links, the sidebar icons, and no footer |
 | B | Path prefixes, Security defaults; Show load balancing, Test your Ingress or Gateway; Container image, App settings, Upgrading from 1.10 | |
 
-The Values reference moved into PR A, because C17 checks it, and the old Helm guide it came from became a pointer page.
+The Values reference moved into PR A, because C17 checks it, and the old Helm guide it came from became a pointer page. PR A is #142; PR B is on `docs/141-reference-pages`.
 
 ## Decisions
 
@@ -35,6 +35,10 @@ The Values reference moved into PR A, because C17 checks it, and the old Helm gu
 | Sidebar icons | The Helm and Kubernetes pages use the black marks from CNCF artwork (commit `be95cf9`), drawn in the text colour, at the maintainer's suggestion. They are trademarks, used under the Linux Foundation guidelines only to name the tool. Other pages use Starlight's icons. |
 | Footer | Removed, at the maintainer's request. The GitHub link in the header leads to issues and contributing. The font licences page became **Licences**, a sidebar item that covers the fonts, the icons and the copied Starlight code. |
 | Quick start | `port-forward` connects to one pod, so the page no longer says the pod name changes on refresh. Showing that is the Show load balancing guide (PR B). |
+| Upgrades | A 1.10.1 release, upgraded on k3d to this chart with `--reuse-values`, failed: `UPGRADE FAILED: …/httproute.yaml`, because the old values have no `httpRoute`. `--reset-then-reuse-values` worked and kept the message. Every page now uses it, and Upgrading from 1.10 explains why (PR B). |
+| Old path values | Moved from Behind an Ingress to Upgrading from 1.10, so every Deploy page ends with Requirements (PR B). |
+| Load balancing guide | Sends requests from a `busybox:1.37` pod inside the cluster, because `port-forward` stays on one pod. E15 runs it (PR B). |
+| Wide tables | axe reported the App settings table, which scrolled sideways and can't take keyboard focus. It now has three columns (PR B). |
 | Links that go live at the release | The README, the chart's Artifact Hub link and the release file's header point to `paulbouwer.github.io/hello-kubernetes`, which deploys at 6.2. |
 
 ## Tracking
