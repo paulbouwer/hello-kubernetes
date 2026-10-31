@@ -57,11 +57,13 @@ EOF
 }
 
 # Fetches the page at /hello/, resolves each stylesheet and image URL the way a
-# browser does, and checks that each one loads through the proxy.
+# browser does, and checks that each one loads through the proxy. For each
+# stylesheet, it does the same for the url(...) references in it, such as the
+# bundled fonts, resolved against the stylesheet's own URL.
 # check SCENARIO DESCRIPTION
 check() {
   local name="$1" description="$2" page="http://127.0.0.1:$port/hello/"
-  local html urls url status problems=()
+  local html urls url status css_url css_resolved css_urls=0 problems=()
   if ! html=$(curl -fsS "$page"); then
     echo "FAIL $name: $description: the page did not load"
     failures=$((failures + 1))
@@ -80,9 +82,17 @@ check() {
     resolved=$(node -e 'console.log(new URL(process.argv[1], process.argv[2]).href)' "$url" "$page")
     status=$(curl -s -o /dev/null -w '%{http_code}' "$resolved")
     [[ "$status" == 200 ]] || problems+=("$url -> $resolved returned $status")
+    if [[ "$status" == 200 && "$resolved" == *.css ]]; then
+      for css_url in $(curl -fsS "$resolved" | grep -oE "url\([^)]+\)" | sed -E "s/^url\([\"']?//; s/[\"']?\)$//" | grep -vE '^data:' || true); do
+        css_resolved=$(node -e 'console.log(new URL(process.argv[1], process.argv[2]).href)' "$css_url" "$resolved")
+        status=$(curl -s -o /dev/null -w '%{http_code}' "$css_resolved")
+        [[ "$status" == 200 ]] || problems+=("$css_url in $url -> $css_resolved returned $status")
+        css_urls=$((${css_urls:-0} + 1))
+      done
+    fi
   done
   if ((${#problems[@]} == 0)); then
-    echo "PASS $name: $description ($(echo $urls | tr ' ' ','))"
+    echo "PASS $name: $description ($(echo $urls | tr ' ' ','), and ${css_urls:-0} url() references in the stylesheet)"
   else
     echo "FAIL $name: $description: ${problems[*]}"
     failures=$((failures + 1))

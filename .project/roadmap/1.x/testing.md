@@ -72,6 +72,7 @@ These check the image itself and guard against the problems found in the review 
 | I5 | Starts and serves on every published platform, and reports it correctly | For `linux/amd64` and `linux/arm64`: `docker run --platform <p> -d -p 8080:8080 IMG`, then `curl -fsS localhost:8080/` and check the page shows `<p>` as the architecture (proves the app reports each platform at runtime) | #16, #40 |
 | I6 | Respects `PORT` | `docker run -e PORT=9090 -p 9090:9090 IMG` and `curl -fsS localhost:9090/` | #34 |
 | I7 | Works with a read-only root filesystem | `docker run --read-only --tmpfs /tmp IMG` and `curl -fsS localhost:8080/` | chart `readOnlyRootFilesystem` default |
+| I8 | Makes no requests to other sites | Fetch the page and `css/main.css`; neither may reference another site (`http://`, `https://`, `//` or `@import`). The bundled `fonts/ubuntu/ubuntu-latin-300-normal.woff2` returns 200 as `font/woff2`, and `fonts/ubuntu/LICENCE.txt` is the Ubuntu Font Licence | the Google Fonts link coming back (#137) |
 
 ## Published images
 
@@ -86,6 +87,8 @@ These check the image itself and guard against the problems found in the review 
 | P1 | Serves the app at `/hello/` and strips the path | none | #38 |
 | P2 | Passes `/hello/` through | `RENDER_PATH_PREFIX` and `HANDLER_PATH_PREFIX` both `/hello` | the chart's recommended setup breaking |
 | P3 | Serves the app at `/hello/` and strips the path | both only `/` | asset URLs becoming `//css/…` |
+
+For each stylesheet, the proxy tests also resolve its `url(…)` references, such as the bundled fonts, against the stylesheet's own URL, and check that each loads (#137).
 
 ## Chart tests
 
@@ -172,13 +175,13 @@ test/
       e02-page-details.sh
       ...
   image/
-    run.sh                   # I1–I7
+    run.sh                   # I1–I8
 ```
 
 `Makefile` targets:
 
 ```make
-test-image:   ## image tests (I1–I7)
+test-image:   ## image tests (I1–I8)
 e2e-kind:     ## build image, run e2e on kind
 e2e-k3d:      ## build image, run e2e on k3d
 e2e:          ## both
@@ -193,7 +196,7 @@ I'd write the tests as plain Bash with a small assert library rather than adding
 
 | Job | Runner | Runs |
 |---|---|---|
-| `image-tests (amd64)` | `ubuntu-latest` | builds the image natively, then `test/image/run.sh` (I1–I7, I5a) and `test/proxy/run.sh` (P1–P3) |
+| `image-tests (amd64)` | `ubuntu-latest` | builds the image natively, then `test/image/run.sh` (I1–I8, I5a) and `test/proxy/run.sh` (P1–P3) |
 | `image-tests (arm64)` | `ubuntu-24.04-arm` | the same, on a native arm64 runner |
 | `e2e (kind, amd64)` | `ubuntu-latest` | runs `test/chart/run.sh` (C1–C17), builds a single-platform image, then `test/e2e/run.sh kind` with the default chart |
 | `e2e (k3d, amd64)` | `ubuntu-latest` | the same on k3d |
@@ -236,7 +239,7 @@ Steps 1 and 3 were done together in #87 (2.5): the harness, the kind and k3d con
 | 2 | NGINX Ingress Controller on kind, Traefik Middleware, E5, E6, E18 (proves #30/#38/#44 fixes and the value migration) | **M** |
 | 3 | k3d config and running the same scenarios on k3d | **S** |
 | 4 | Gateway API: CRDs, NGINX Gateway Fabric, Traefik Gateway provider, Gateways, E16, E17 | **M** |
-| 5 | Image tests I1–I7 | **S** |
+| 5 | Image tests I1–I8 | **S** |
 | 6 | CI workflow with the amd64 + arm64 matrix | **M** |
 | 7 | E8–E10, E12–E14 | **M** |
 | 8 | E15 docs-as-tests | **S–M** |
