@@ -5,7 +5,7 @@ type: goal
 status: active
 areas: [app, image, deploy, ci, site]
 created: 2026-10-23
-updated: 2026-10-23
+updated: 2026-10-31
 ---
 
 # Goal
@@ -59,8 +59,8 @@ The architecture shown in the app must be the image's real platform.
 
 ### Documentation, website and agent experience
 
-- **Documentation** for every deployment option, in the README and `docs/`.
-- **A website** on GitHub Pages, built from the same docs, with a config builder and a preview of the app's page.
+- **Documentation** for every deployment option, on the website, with a short quick start in the README. Contributor docs stay in `docs/` and `CONTRIBUTING.md`.
+- **A website** on GitHub Pages that holds the user docs, with a config builder and a preview of the app's page.
 - **Agent experience (AX):**
   - `llms.txt` and `llms-full.txt` on the website
   - `AGENTS.md` in the repo
