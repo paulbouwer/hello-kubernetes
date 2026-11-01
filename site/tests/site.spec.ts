@@ -68,7 +68,12 @@ for (const scheme of ['light', 'dark'] as const) {
           null,
           { timeout: 5000 },
         );
-        const results = await new AxeBuilder({ page }).analyze();
+        // The config builder's preview is the app's own page, in a sandboxed
+        // iframe where no script runs, so axe can't run inside it and would
+        // wait until it timed out. Legacy mode, with iframes off, runs axe in
+        // the page only. The site has no other frames, and the frame element
+        // itself, such as its title, is still checked.
+        const results = await new AxeBuilder({ page }).setLegacyMode(true).options({ iframes: false }).analyze();
         // One known exception: Starlight's search button shows "Search Ctrl K"
         // and is named "Search". axe reports the keyboard hint as a label
         // mismatch, but the label, "Search", is in the name, as WCAG 2.5.3

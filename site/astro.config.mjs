@@ -13,6 +13,9 @@ export default defineConfig({
   // No Content Security Policy: tried in #139, Astro's generated hashes don't
   // cover Starlight's inline scripts, and code blocks need inline styles. The
   // Playwright checks block requests to other sites instead.
+  // The config builder imports the app's templates, CSS, font and logo, and the
+  // chart's schema, from outside site/, so the dev server must serve the repo.
+  vite: { server: { fs: { allow: ['..'] } } },
   integrations: [
     starlight({
       title: 'hello-kubernetes',

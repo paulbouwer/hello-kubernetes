@@ -1,0 +1,15 @@
+---
+title: Config builder
+description: Choose the options you need, and get the helm install command, a values.yaml or a Kustomize setup, with a live preview of the page.
+tableOfContents: false
+sidebar:
+  order: 1
+  attrs:
+    data-icon: setting
+---
+
+import ConfigBuilder from '../../../../components/ConfigBuilder.tsx';
+
+Choose the options you need. The output updates as you type, and the preview shows the page your pods will serve. The builder only writes the output: run it yourself, on your cluster.
+
+<ConfigBuilder client:load />

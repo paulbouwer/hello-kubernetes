@@ -7,7 +7,7 @@ sidebar:
     data-icon: list-format
 ---
 
-Helm checks these against the chart's `values.schema.json` on every install and upgrade, so a misspelled key or a wrong type stops the install. To see them from the chart itself, run `helm show values oci://ghcr.io/paulbouwer/charts/hello-kubernetes`.
+Helm checks these against the chart's `values.schema.json` on every install and upgrade, so a misspelled key or a wrong type stops the install. To see them from the chart itself, run `helm show values oci://ghcr.io/paulbouwer/charts/hello-kubernetes`. For the values most people change, the [config builder](/hello-kubernetes/docs/configure/builder/) writes the command or the file for you.
 
 | Value | Type | Default | Description |
 |---|---|---|---|
