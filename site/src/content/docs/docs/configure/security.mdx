@@ -1,0 +1,55 @@
+---
+title: Security defaults
+description: How the chart and the image run hello-kubernetes with no privileges, and meet the restricted Pod Security Standard.
+sidebar:
+  order: 4
+  attrs:
+    data-icon: padlock
+---
+
+hello-kubernetes needs no privileges. With the chart's defaults, its pods meet the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted), so they run in a namespace that enforces it.
+
+## The chart
+
+| Setting | Value | Why |
+|---|---|---|
+| `runAsNonRoot` | `true` | The kubelet refuses to start the container as root. |
+| `runAsUser`, `runAsGroup` | `1000` | The image's user, as a number, so the kubelet can check it. Older images name the user, so setting it here lets them pass too. |
+| `seccompProfile` | `RuntimeDefault` | The container runtime's default system call filter. |
+| `allowPrivilegeEscalation` | `false` | A process can't gain more privileges than its parent. |
+| `capabilities` | drop `ALL` | The app needs no Linux capabilities. |
+| `readOnlyRootFilesystem` | `true` | Nothing can change the app's files. The chart mounts an `emptyDir` at `/tmp`, the only place the app writes. |
+
+The pod settings are in `deployment.podSecurityContext`, and the container settings in `deployment.container.securityContext`. If you change them, keep the `/tmp` mount, and check your namespace's Pod Security level.
+
+The container also waits 5 seconds before it stops (`preStop`), so that a rolling upgrade doesn't drop requests while the Service and the Ingress or Gateway stop sending it traffic.
+
+Like every pod, it mounts its ServiceAccount's token by default. The app doesn't use it, and the chart gives the ServiceAccount no permissions.
+
+## The image
+
+- **The user:** `1000:1000`, set as a number in the image, not a name.
+- **The files:** owned by root, so the app can read them but not change them.
+- **Nothing extra:** npm, npx, corepack and yarn are removed from the image. The app runs with `node server.js`.
+- **The base:** `node:24-alpine`, pinned by digest, and updated by Dependabot.
+- **Scanned:** CI scans the image on every PR, and fails on a fixable HIGH or CRITICAL vulnerability.
+
+The published images have an SBOM and signed provenance. To check them, see [Container image](/hello-kubernetes/docs/reference/container-image/#check-an-image).
+
+## Check it on your cluster
+
+Label a namespace to enforce the restricted level, and install into it:
+
+```bash
+kubectl create namespace hello-restricted
+kubectl label namespace hello-restricted pod-security.kubernetes.io/enforce=restricted
+helm install hello oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --namespace hello-restricted --set service.type=ClusterIP --wait
+kubectl exec --namespace hello-restricted deployment/hello-kubernetes-hello -- id
+```
+
+```text output
+uid=1000(node) gid=1000(node) groups=1000(node)
+```
+
+The install shows no Pod Security warnings, and the app runs as user 1000. Remove it with `helm uninstall hello --namespace hello-restricted` and `kubectl delete namespace hello-restricted`.

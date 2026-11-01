@@ -1,0 +1,78 @@
+---
+// How a request for /app/hello/ travels from the browser, through the proxy,
+// to the app, with rewritePath false or true. Plain HTML, so it follows the
+// theme and reads in order without the picture.
+interface Props {
+  rewrite: boolean;
+}
+const { rewrite } = Astro.props;
+const forwarded = rewrite ? '/' : '/app/hello/';
+---
+
+<figure class="hk-path">
+  <figcaption><code>rewritePath: {String(rewrite)}</code>{rewrite ? '' : ' (recommended)'}</figcaption>
+  <ol>
+    <li>
+      <span class="hk-path-who">Browser</span>
+      <span class="hk-path-what">asks for <code>/app/hello/</code></span>
+    </li>
+    <li>
+      <span class="hk-path-who">Ingress or Gateway</span>
+      <span class="hk-path-what">{rewrite ? 'strips the prefix, and passes on' : 'passes on'} <code>{forwarded}</code></span>
+    </li>
+    <li>
+      <span class="hk-path-who">App</span>
+      <span class="hk-path-what">
+        serves at <code>{forwarded}</code>, and links its assets as <code>/app/hello/css/main.css</code>
+      </span>
+    </li>
+  </ol>
+</figure>
+
+<style>
+  .hk-path {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border: 1px solid var(--hk-code-border, var(--sl-color-gray-5));
+    border-radius: 0.5rem;
+  }
+  .hk-path figcaption {
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  .hk-path ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .hk-path li {
+    flex: 1 1 10rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    background: var(--sl-color-gray-6);
+    position: relative;
+  }
+  .hk-path li + li::before {
+    content: '→';
+    position: absolute;
+    left: -0.55rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sl-color-accent-high);
+    font-weight: 700;
+  }
+  .hk-path-who {
+    font-weight: 600;
+    color: var(--sl-color-white);
+  }
+  .hk-path-what {
+    font-size: var(--sl-text-sm);
+  }
+</style>

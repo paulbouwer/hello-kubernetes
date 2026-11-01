@@ -57,6 +57,17 @@ for (const scheme of ['light', 'dark'] as const) {
 
       test(`${path} has no serious accessibility problems`, async ({ page }) => {
         await page.goto(path, { waitUntil: 'networkidle' });
+        // Expressive Code's script makes each code block that scrolls sideways
+        // keyboard-focusable, after it measures the block. Wait for it, so axe
+        // doesn't run first and report the block as unreachable.
+        await page.waitForFunction(
+          () =>
+            [...document.querySelectorAll('.expressive-code pre')].every(
+              (pre) => pre.scrollWidth <= pre.clientWidth || pre.hasAttribute('tabindex'),
+            ),
+          null,
+          { timeout: 5000 },
+        );
         const results = await new AxeBuilder({ page }).analyze();
         // One known exception: Starlight's search button shows "Search Ctrl K"
         // and is named "Search". axe reports the keyboard hint as a label

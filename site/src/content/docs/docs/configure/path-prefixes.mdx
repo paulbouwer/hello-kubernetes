@@ -1,0 +1,44 @@
+---
+title: Path prefixes
+description: What pathPrefix and rewritePath do, and which to choose behind an Ingress, a Gateway or your own proxy.
+sidebar:
+  order: 3
+  attrs:
+    data-icon: forward-slash
+---
+
+import PathDiagram from '../../../../components/PathDiagram.astro';
+
+Behind an Ingress or a Gateway, several apps often share one address, each under its own path. `pathPrefix` puts hello-kubernetes under a path such as `/app/hello`. `rewritePath` says which side removes that path: the proxy, or nobody.
+
+## What each setting does
+
+<PathDiagram rewrite={false} />
+
+<PathDiagram rewrite={true} />
+
+In both cases, the page links its stylesheet and images under the prefix, so the browser asks the proxy for them by the full path.
+
+| `rewritePath` | The proxy | Works with |
+|---|---|---|
+| `false` (recommended) | passes the path on unchanged | every Ingress controller and Gateway, with no annotations |
+| `true` (the 1.x default) | strips the prefix | an HTTPRoute, which uses the standard `URLRewrite` filter. An Ingress needs your controller's rewrite annotation. |
+
+Choose `rewritePath=false` unless you have a reason not to. The default changes to `false` in 2.0, so set it now and nothing changes for you then.
+
+## Set them
+
+```bash
+helm install hello oci://ghcr.io/paulbouwer/charts/hello-kubernetes \
+  --set pathPrefix=/app/hello --set rewritePath=false \
+  --set ingress.enabled=true --set ingress.className=traefik \
+  --set service.type=ClusterIP
+```
+
+Leading and trailing slashes are optional: `app/hello`, `/app/hello` and `/app/hello/` are the same prefix. The chart sets the Ingress or HTTPRoute path, the app's own path and the probes' path together.
+
+For the full steps, see [Behind an Ingress](/hello-kubernetes/docs/deploy/ingress/) or [Behind a Gateway](/hello-kubernetes/docs/deploy/gateway/). Without the chart, the app reads two [settings](/hello-kubernetes/docs/reference/app-settings/): `HANDLER_PATH_PREFIX`, the path it serves under, and `RENDER_PATH_PREFIX`, the path its links use.
+
+## Your own proxy
+
+With your own proxy or Ingress, set `pathPrefix` and `rewritePath`, but leave `ingress.enabled` and `httpRoute.enabled` off. Point your proxy at the Service `hello-kubernetes-<release name>`, port `80`.

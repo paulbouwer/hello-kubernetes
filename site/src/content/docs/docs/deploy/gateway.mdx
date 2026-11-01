@@ -87,7 +87,7 @@ If the page doesn't load, check that the Gateway accepted the route. `kubectl de
 
 ## Upgrade
 
-Change a value with `helm upgrade --reuse-values`, as [with Helm](/hello-kubernetes/docs/deploy/helm/#upgrade). Changing `pathPrefix` moves the route's path and the app's own path together.
+Change a value with `helm upgrade --reset-then-reuse-values`, as [with Helm](/hello-kubernetes/docs/deploy/helm/#upgrade). Changing `pathPrefix` moves the route's path and the app's own path together.
 
 ## Uninstall
 

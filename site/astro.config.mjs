@@ -28,6 +28,8 @@ export default defineConfig({
         { label: 'Start here', items: [{ autogenerate: { directory: 'docs/start-here' } }] },
         { label: 'Deploy', items: [{ autogenerate: { directory: 'docs/deploy' } }] },
         { label: 'Configure', items: [{ autogenerate: { directory: 'docs/configure' } }] },
+        { label: 'Guides', items: [{ autogenerate: { directory: 'docs/guides' } }] },
+        { label: 'Reference', items: [{ autogenerate: { directory: 'docs/reference' } }] },
         'docs/licences',
       ],
       plugins: [starlightLinksValidator({ errorOnLocalLinks: true })],
