@@ -123,6 +123,12 @@ A custom Astro page (`site/src/pages/index.astro`), sharing fonts and colours wi
 
 Also an Open Graph image with the wordmark and the app, per-page titles and descriptions, and structured data (JSON-LD).
 
+**Built in 5.6 (#148)**, with three choices from the maintainer: the `kubectl | Helm` switch uses rounded rectangles, not pills; the header's Docs and Config builder links are on the landing page only; and the Open Graph image is drawn by `make og-image` and committed (`site/public/og.png`).
+
+- **The chips** (`site/src/lib/scenarios.mjs`): Default shows the quick start's commands, which a test keeps equal to the page; the others show the builder's Helm command, in a brief form with no `--version` or default namespace, and run through the drift tests. With kubectl, a chip's options need Kustomize, so the page points to the config builder.
+- **The terminal** shows `kubectl get pods -o custom-columns=NAME:…,STATUS:…,NODE:…`, not `-o wide`: it fits the panel and shows each pod's node. The pod that answered the preview is highlighted, and the browser's reload button sends another request.
+- **Light:** the chips' data is worked out at build time, so the page loads a 4 KB island. The preview's assets (about 360 KB) load only when the mock-up comes into view.
+
 ## Config builder
 
 A hand-designed form for the options people change: the message, replicas, the service type and port, an Ingress or a Gateway (class, host, prefix, rewriting), and the image tag. Labels, descriptions, defaults and allowed values come from `values.schema.json`. "All values" links to the values reference.

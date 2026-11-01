@@ -8,6 +8,17 @@ const path = '/hello-kubernetes/docs/configure/builder/';
 
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] });
 
+// Astro removes an island's ssr attribute once it has hydrated. Until then, a
+// click does nothing, so each test waits for it before it uses the page.
+test.beforeEach(async ({ page }) => {
+  const goto = page.goto.bind(page);
+  page.goto = async (url, options) => {
+    const response = await goto(url, options);
+    await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
+    return response;
+  };
+});
+
 test('the preview follows the options, in an empty sandbox, with no requests', async ({ page }) => {
   await page.goto(path, { waitUntil: 'networkidle' });
   const requests: string[] = [];

@@ -3,9 +3,9 @@
 //
 //   S1 The preview renders the same HTML as the app's container, for the same
 //      settings: the defaults, a message with HTML in it, and a path prefix.
-//   S2 For each set of options, helm template accepts the builder's --set
-//      flags and its values.yaml, both render the same, and the result has
-//      what was chosen.
+//   S2 For each set of options, including the landing page's chips, helm
+//      template accepts the builder's --set flags and its values.yaml, both
+//      render the same, and the result has what was chosen.
 //   S3 For each set of options, kubectl kustomize on the builder's Kustomize
 //      output, with the release file rendered here, matches helm template
 //      with the release name demo. Only the namespace field, the Namespace
@@ -22,6 +22,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { parseAllDocuments } from 'yaml';
 import * as builder from '../src/lib/builder.mjs';
 import * as preview from '../src/lib/preview.mjs';
+import { scenarios } from '../src/lib/scenarios.mjs';
 
 const root = new URL('../../', import.meta.url).pathname;
 const chart = `${root}deploy/helm/hello-kubernetes`;
@@ -131,6 +132,8 @@ const cases = [
   { name: 'a Gateway, GHCR and a tag', expose: 'gateway', gatewayName: 'my-gateway', registry: 'ghcr', tag: '1.11' },
   { name: 'your own proxy, no rewriting', pathPrefix: '/app/hello', replicas: 1 },
   { name: 'the default namespace, GHCR', namespace: 'default', registry: 'ghcr', replicas: 0 },
+  // The landing page's chips.
+  ...scenarios(schema).map((s) => ({ ...s.options, name: `the landing page chip ${s.label}` })),
 ];
 
 const documents = (text) =>

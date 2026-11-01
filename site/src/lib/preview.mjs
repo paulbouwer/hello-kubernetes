@@ -51,23 +51,6 @@ export function inlineAssets(html, assets) {
     .replace(/<img src="[^"]*images\/kubernetes\.png"\/>/, () => `<img src="${assets.logo}" alt=""/>`);
 }
 
-// Realistic names for the preview: a pod name as a Deployment makes them,
-// and a node for each pod.
-const letters = 'bcdfghjklmnpqrstvwxz2456789';
-function pick(seed, length) {
-  let value = '';
-  let n = seed;
-  for (let i = 0; i < length; i++) {
-    n = (n * 1103515245 + 12345) % 2147483648;
-    value += letters[n % letters.length];
-  }
-  return value;
-}
-
-export function podName(release, index) {
-  return `hello-kubernetes-${release}-${pick(7, 10)}-${pick(index + 11, 5)}`;
-}
-
-export function nodeName(index) {
-  return `worker-${(index % 3) + 1}`;
-}
+// Realistic names for the preview, in their own module, so the landing page
+// can use them without loading Handlebars.
+export { podName, nodeName } from './pods.mjs';

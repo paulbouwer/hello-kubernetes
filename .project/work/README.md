@@ -68,3 +68,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-31-user-docs](2026-10-31-user-docs/plan.md) | Move the user docs from the README and docs/ to the website, with E15 running the site's marked commands. | done |
 | [2026-11-01-agent-docs](2026-11-01-agent-docs/plan.md) | Publish llms.txt, llms-full.txt, a Markdown copy of every page, the chart's schema, a hidden note and a For AI agents page. | done |
 | [2026-11-01-config-builder](2026-11-01-config-builder/plan.md) | Add the config builder, with Helm and Kustomize output, and a live preview of the app's page, both checked against the chart and the app in CI. | done |
+| [2026-11-01-landing-page](2026-11-01-landing-page/plan.md) | Add the landing page, with the headline, the command, a mock-up that chips change, the features, an Open Graph image and structured data. | done |

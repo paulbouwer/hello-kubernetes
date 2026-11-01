@@ -8,34 +8,12 @@ import * as builder from '../lib/builder.mjs';
 import * as preview from '../lib/preview.mjs';
 import schema from '../../../deploy/helm/hello-kubernetes/values.schema.json';
 import chartYaml from '../../../deploy/helm/hello-kubernetes/Chart.yaml?raw';
-import layout from '../../../src/app/views/layouts/main.handlebars?raw';
-import home from '../../../src/app/views/home.handlebars?raw';
-import css from '../../../src/app/static/css/main.css?raw';
-import logo from '../../../src/app/static/images/kubernetes.png?inline';
-import cyrillicExt from '../../../src/app/static/fonts/ubuntu/ubuntu-cyrillic-ext-300-normal.woff2?inline';
-import cyrillic from '../../../src/app/static/fonts/ubuntu/ubuntu-cyrillic-300-normal.woff2?inline';
-import greekExt from '../../../src/app/static/fonts/ubuntu/ubuntu-greek-ext-300-normal.woff2?inline';
-import greek from '../../../src/app/static/fonts/ubuntu/ubuntu-greek-300-normal.woff2?inline';
-import latinExt from '../../../src/app/static/fonts/ubuntu/ubuntu-latin-ext-300-normal.woff2?inline';
-import latin from '../../../src/app/static/fonts/ubuntu/ubuntu-latin-300-normal.woff2?inline';
+import { previewPage } from '../lib/preview-assets';
 import '../styles/builder.css';
 
 type Options = ReturnType<typeof builder.defaultOptions>;
 
 const version = chartYaml.match(/^appVersion:\s*"?([^"\s]+)"?/m)![1];
-const render = preview.createRenderer({ layout, home });
-const assets = {
-  css,
-  logo,
-  fonts: {
-    'ubuntu-cyrillic-ext-300-normal.woff2': cyrillicExt,
-    'ubuntu-cyrillic-300-normal.woff2': cyrillic,
-    'ubuntu-greek-ext-300-normal.woff2': greekExt,
-    'ubuntu-greek-300-normal.woff2': greek,
-    'ubuntu-latin-ext-300-normal.woff2': latinExt,
-    'ubuntu-latin-300-normal.woff2': latin,
-  } as Record<string, string>,
-};
 
 // The schema's description of a value, for the help text under a field.
 const p = schema.properties;
@@ -137,18 +115,15 @@ export default function ConfigBuilder() {
   const pod = replicas ? request % replicas : 0;
   const page = useMemo(() => {
     const image = `${builder.repositories[o.registry as keyof typeof builder.repositories]}:${o.tag || version}`;
-    const html = render(
-      preview.pageContext({
-        MESSAGE: o.message,
-        KUBERNETES_NAMESPACE: o.namespace,
-        KUBERNETES_POD_NAME: preview.podName(o.release, pod),
-        KUBERNETES_NODE_NAME: preview.nodeName(pod),
-        CONTAINER_IMAGE: image,
-        nodeOS: 'Linux 6.8.0',
-        arch,
-      }),
-    );
-    return preview.inlineAssets(html, assets);
+    return previewPage({
+      MESSAGE: o.message,
+      KUBERNETES_NAMESPACE: o.namespace,
+      KUBERNETES_POD_NAME: preview.podName(o.release, pod),
+      KUBERNETES_NODE_NAME: preview.nodeName(pod),
+      CONTAINER_IMAGE: image,
+      nodeOS: 'Linux 6.8.0',
+      arch,
+    });
   }, [o.message, o.namespace, o.release, o.registry, o.tag, pod, arch]);
 
   // The app's page is laid out for a desktop. It fills a wide frame at full

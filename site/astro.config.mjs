@@ -20,9 +20,22 @@ export default defineConfig({
     starlight({
       title: 'hello-kubernetes',
       description: 'A small web app to deploy on a Kubernetes cluster. It shows which pod answered.',
+      // The Open Graph image for every page (make og-image draws it). Starlight
+      // already sets each page's title and description.
+      head: [
+        { tag: 'meta', attrs: { property: 'og:image', content: 'https://paulbouwer.github.io/hello-kubernetes/og.png' } },
+        { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+        { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+        {
+          tag: 'meta',
+          attrs: { property: 'og:image:alt', content: "hello-kubernetes: the app's page, which shows the pod that answered" },
+        },
+        { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+      ],
       customCss: ['./src/styles/theme.css', './src/styles/code.css'],
       components: {
         PageTitle: './src/components/PageTitle.astro',
+        SocialIcons: './src/components/SocialIcons.astro',
         Sidebar: './src/components/Sidebar.astro',
       },
       social: [

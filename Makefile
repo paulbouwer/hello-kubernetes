@@ -121,6 +121,12 @@ site-drift: ## check the config builder against the chart, and the live preview 
 	docker build -q -t hello-kubernetes:drift -f src/app/Dockerfile src/app >/dev/null
 	cd site && npm ci --no-audit --no-fund && IMAGE=hello-kubernetes:drift node tests/drift.mjs
 
+.PHONY: og-image
+og-image: ## draw the website's Open Graph image into site/public/og.png
+	cd site && npm ci --no-audit --no-fund
+	docker run --rm --ipc=host -u "$$(id -u):$$(id -g)" -e HOME=/tmp \
+		-v "$(CURDIR):/repo" -w /repo/site $(PLAYWRIGHT_IMAGE) node scripts/og-image.mjs
+
 .PHONY: screenshot
 screenshot: cluster-k3d ## screenshot the app on a k3d cluster into hello-kubernetes.png, for the README
 	PLAYWRIGHT_IMAGE=$(PLAYWRIGHT_IMAGE) test/screenshot.sh
