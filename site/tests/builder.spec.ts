@@ -24,9 +24,9 @@ test('the preview follows the options, in an empty sandbox, with no requests', a
   const requests: string[] = [];
   page.on('request', (request) => requests.push(request.url()));
 
-  const frame = page.locator('.hk-preview-frame iframe');
+  const frame = page.locator('.hk-browser-page iframe');
   await expect(frame).toHaveAttribute('sandbox', '');
-  const app = page.frameLocator('.hk-preview-frame iframe');
+  const app = page.frameLocator('.hk-browser-page iframe');
   await expect(app.locator('#message')).toHaveText('Hello world!');
 
   await page.fill('#hk-message', '<b>Bold</b> & <script>alert(1)</script>');
@@ -47,7 +47,7 @@ test('the preview follows the options, in an empty sandbox, with no requests', a
 
 test('"Send another request" shows another pod, with more than one replica', async ({ page }) => {
   await page.goto(path);
-  const app = page.frameLocator('.hk-preview-frame iframe');
+  const app = page.frameLocator('.hk-browser-page iframe');
   const pod = () => app.locator('#info tr:nth-child(2) td').innerText();
   const first = await pod();
   await page.getByRole('button', { name: 'Send another request' }).click();
@@ -56,7 +56,7 @@ test('"Send another request" shows another pod, with more than one replica', asy
   await page.fill('#hk-replicas', '1');
   await expect(page.getByRole('button', { name: 'Send another request' })).toBeDisabled();
   await page.fill('#hk-replicas', '0');
-  await expect(page.locator('.hk-preview-frame')).toContainText('no pod answers');
+  await expect(page.locator('.hk-browser-page')).toContainText('no pod answers');
 });
 
 test('the output follows the options, and each copy button copies it', async ({ page }) => {
@@ -93,4 +93,20 @@ test('the builder notes the settings that need care', async ({ page }) => {
   await expect(page.locator('.hk-notes')).toContainText('set the Service type to ClusterIP');
   await page.check('input[name="hk-expose"][value="gateway"]');
   await expect(page.locator('.hk-notes')).toContainText('Name your Gateway');
+});
+
+test('the preview’s address follows the host, the port and the path prefix', async ({ page }) => {
+  await page.goto(path);
+  const url = page.locator('.hk-browser-url');
+  await expect(url).toHaveText('http://hello.example.com/');
+  await page.fill('#hk-service-port', '8080');
+  await expect(url).toHaveText('http://hello.example.com:8080/');
+  await page.check('input[name="hk-expose"][value="ingress"]');
+  await page.fill('#hk-ingress-host', 'hello.my-cluster.test');
+  await page.fill('#hk-prefix', 'app/hello/');
+  await expect(url).toHaveText('http://hello.my-cluster.test/app/hello/');
+  await page.check('input[name="hk-expose"][value="gateway"]');
+  await expect(url).toHaveText('http://hello.example.com/app/hello/');
+  await page.fill('#hk-hostname', 'gw.my-cluster.test');
+  await expect(url).toHaveText('http://gw.my-cluster.test/app/hello/');
 });

@@ -4,6 +4,7 @@
 // change all three together. The chips are in src/lib/scenarios.mjs. The
 // preview's assets load only when the mock-up comes into view.
 import { useEffect, useRef, useState } from 'preact/hooks';
+import BrowserFrame from './BrowserFrame';
 import { nodeName, podName } from '../lib/pods.mjs';
 import '../styles/landing.css';
 
@@ -74,16 +75,6 @@ export default function LandingDemo(props: { chips: Chip[]; version: string }) {
     return () => observer.disconnect();
   }, []);
 
-  // The app's 800 by 600 page, scaled to the width of the browser frame.
-  const frame = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.8);
-  useEffect(() => {
-    if (!frame.current) return;
-    const observer = new ResizeObserver(([entry]) => setScale(Math.min(1, entry.contentRect.width / 800)));
-    observer.observe(frame.current);
-    return () => observer.disconnect();
-  }, []);
-
   const replicas = chip.replicas;
   const pod = request % replicas;
   const page = previewPage?.({
@@ -124,42 +115,7 @@ export default function LandingDemo(props: { chips: Chip[]; version: string }) {
       </div>
 
       <div class="hk-land-mockup" ref={mockup}>
-        <div class="hk-land-browser">
-          <div class="hk-land-bar">
-            <span class="hk-land-dots" aria-hidden="true">
-              <i></i>
-              <i></i>
-              <i></i>
-            </span>
-            <span class="hk-land-url">{chip.url}</span>
-            <button
-              type="button"
-              class="hk-land-reload"
-              title="Send another request"
-              aria-label="Send another request"
-              onClick={() => setRequest(request + 1)}
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" />
-              </svg>
-            </button>
-          </div>
-          <div class="hk-land-page" ref={frame} style={{ height: `${600 * scale}px` }}>
-            {page ? (
-              <iframe
-                title="The hello-kubernetes page"
-                sandbox=""
-                srcdoc={page}
-                scrolling="no"
-                width={800}
-                height={600}
-                style={{ transform: `scale(${scale})` }}
-              />
-            ) : (
-              <p>Loading the preview…</p>
-            )}
-          </div>
-        </div>
+        <BrowserFrame url={chip.url} page={page} onReload={() => setRequest(request + 1)} />
         <div class="hk-land-terminal" tabIndex={0} aria-label="Terminal output">
           {chip.terminal.map((l) => (
             <>

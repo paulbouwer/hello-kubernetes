@@ -53,19 +53,19 @@ test('the preview’s assets load only when the mock-up comes into view', async 
   await page.goto(base, { waitUntil: 'networkidle' });
   expect(assets).toEqual([]);
   await page.locator('.hk-land-mockup').scrollIntoViewIfNeeded();
-  await expect(page.frameLocator('.hk-land-page iframe').locator('#message')).toHaveText('Hello world!');
+  await expect(page.frameLocator('.hk-browser-page iframe').locator('#message')).toHaveText('Hello world!');
   expect(assets).toHaveLength(1);
-  await expect(page.locator('.hk-land-page iframe')).toHaveAttribute('sandbox', '');
+  await expect(page.locator('.hk-browser-page iframe')).toHaveAttribute('sandbox', '');
 });
 
 test('each chip changes the command, the terminal and the preview together', async ({ page }) => {
   await page.goto(base);
-  const app = page.frameLocator('.hk-land-page iframe');
+  const app = page.frameLocator('.hk-browser-page iframe');
   const box = page.locator('.hk-land-install .hk-land-command code');
   for (const chip of chips.filter((c) => c.id !== 'default')) {
     await page.getByRole('button', { name: chip.label }).click();
     await expect(box).toHaveText(chip.helm);
-    await expect(page.locator('.hk-land-url')).toHaveText(chip.url);
+    await expect(page.locator('.hk-browser-url')).toHaveText(chip.url);
     await expect(page.locator('.hk-land-terminal pre').first()).toHaveText(chip.terminal[0].output + '\n');
     await expect(app.locator('#message')).toHaveText(chip.message || 'Hello world!');
   }
@@ -74,7 +74,7 @@ test('each chip changes the command, the terminal and the preview together', asy
 test('reloading the preview shows another pod, highlighted in the terminal', async ({ page }) => {
   await page.goto(base);
   await page.getByRole('button', { name: '4 pods across nodes' }).click();
-  const pod = page.frameLocator('.hk-land-page iframe').locator('#info tr:nth-child(2) td');
+  const pod = page.frameLocator('.hk-browser-page iframe').locator('#info tr:nth-child(2) td');
   await expect(pod).toHaveText(/hello-kubernetes-demo-/);
   const first = await pod.innerText();
   await expect(page.locator('.hk-land-answered')).toContainText(first);

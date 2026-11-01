@@ -30,6 +30,7 @@ Made on 2026-11-01. The maintainer chose the command, the header links and the i
 | Mock-up | The browser and the terminal are the same width. The terminal shows `kubectl get pods -o custom-columns=…`, which fits and shows each pod's node, in place of `-o wide`; its font scales with the screen, so it never scrolls. The pod that answered is highlighted. |
 | Order | The headline, then the chips, then the command, then the mock-up, so the chips stay in place as the command changes length. |
 | Features | The headline's two tones: white titles in Archivo, grey text in the body font. Each icon is a large watermark off the box's corner, at 3% over the box. |
+| Browser window | One component, `BrowserFrame.tsx`, for the landing page and the config builder, at the maintainer's request, so the preview looks and works the same in both. In the builder, the address follows the host, the port and the path prefix, and the reload button sends another request. |
 | Closing | "Get started", with the quick start and config builder buttons, and no command. |
 | Size | The chips' commands and terminal output are worked out at build time. The island is 4 KB; the preview's assets load when the mock-up comes into view. |
 | Title | Starlight's page title is left out on the landing page, so it has one headline. |
