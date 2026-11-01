@@ -82,6 +82,23 @@ helm install demo oci://ghcr.io/paulbouwer/charts/hello-kubernetes --wait
 </CodeGroup>
 ````
 
+## The config builder and the live preview
+
+The Config builder page is a Preact island, `site/src/components/ConfigBuilder.tsx`. Its logic is in two plain JavaScript modules, so the tests run the same code in Node:
+
+- `site/src/lib/builder.mjs` turns the options into the `helm install` command, `values.yaml`, the Kustomize files and the `helm template` command.
+- `site/src/lib/preview.mjs` renders the app's own templates, `src/app/views/`, with a context built as `src/app/server.js` builds it. The page imports the templates, the CSS, the font and the logo from `src/app/`, and inlines them into a sandboxed `iframe`.
+
+`make site-drift` builds the app image and runs `site/tests/drift.mjs`:
+
+| Test | Checks |
+|---|---|
+| S1 | The preview renders the same HTML as the app's container, for the defaults, a message with HTML in it, and a path prefix. |
+| S2 | For 8 sets of options, `helm template` accepts the builder's `--set` flags and its `values.yaml`, both render the same, and the result has what was chosen. |
+| S3 | For the same sets, `kubectl kustomize` on the builder's Kustomize output, with the release file rendered locally, matches `helm template` with the release name `demo`. Only the namespace field, the Namespace object and the order of env vars may differ. A failure names the field. |
+
+If you change the app's templates, `server.js`, or the chart, run `make site-drift`. CI runs it in the `site` job.
+
 ## Files for agents
 
 After `astro build`, `site/scripts/build-markdown.mjs` writes a Markdown copy of each docs page (`/docs/deploy/helm/` has `/docs/deploy/helm.md`), `llms.txt`, `llms-full.txt` and the chart's `values.schema.json` into `site/dist`. It works from the built HTML, so a new page or code group needs no change to it. The release in `llms.txt` comes from the chart's `appVersion`. `make site-dev` doesn't write these files, so "View as Markdown" works only on a built site: `make site`, then `cd site && npm run preview`.

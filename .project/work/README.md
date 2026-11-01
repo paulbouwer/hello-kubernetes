@@ -67,3 +67,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-10-31-site-scaffold](2026-10-31-site-scaffold/plan.md) | Scaffold the website with Astro, Starlight and Preact, its identity and code block theme, the Pages workflow, and the required site checks. | done |
 | [2026-10-31-user-docs](2026-10-31-user-docs/plan.md) | Move the user docs from the README and docs/ to the website, with E15 running the site's marked commands. | done |
 | [2026-11-01-agent-docs](2026-11-01-agent-docs/plan.md) | Publish llms.txt, llms-full.txt, a Markdown copy of every page, the chart's schema, a hidden note and a For AI agents page. | done |
+| [2026-11-01-config-builder](2026-11-01-config-builder/plan.md) | Add the config builder, with Helm and Kustomize output, and a live preview of the app's page, both checked against the chart and the app in CI. | done |

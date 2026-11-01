@@ -116,6 +116,11 @@ site-test: site ## browser checks of the built site; screenshots go to site/test
 	docker run --rm --ipc=host --network host -u "$$(id -u):$$(id -g)" -e HOME=/tmp \
 		-v "$(CURDIR):/repo" -w /repo/site $(PLAYWRIGHT_IMAGE) npx playwright test
 
+.PHONY: site-drift
+site-drift: ## check the config builder against the chart, and the live preview against the app image
+	docker build -q -t hello-kubernetes:drift -f src/app/Dockerfile src/app >/dev/null
+	cd site && npm ci --no-audit --no-fund && IMAGE=hello-kubernetes:drift node tests/drift.mjs
+
 .PHONY: screenshot
 screenshot: cluster-k3d ## screenshot the app on a k3d cluster into hello-kubernetes.png, for the README
 	PLAYWRIGHT_IMAGE=$(PLAYWRIGHT_IMAGE) test/screenshot.sh

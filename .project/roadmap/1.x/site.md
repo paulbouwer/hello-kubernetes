@@ -143,6 +143,10 @@ It gives:
 - **Isolated:** an `<iframe sandbox>` with no permissions, so no script runs and the frame has its own opaque origin. It is built with `srcdoc`, with the CSS, the Ubuntu font and the logo inlined, so it makes no requests. The message is escaped by Handlebars, and the sandbox stops scripts even if it weren't.
 - **A CI test** renders the page through the preview's code and through the real app container, for the same settings, and compares the HTML.
 
+**Built in 5.5 (#146):** the page imports the app's templates, CSS, font and logo from `src/app/`, and renders them with Handlebars 4.7.10, the app's version. Like express-handlebars, it trims each template and each result; without that, the HTML differed in whitespace. The preview's node shows `Linux 6.8.0`, with an amd64 or arm64 choice, since the app reads these from the machine. The six font files are inlined, so the builder's script is about 430 KB; 5.6 should load the preview's assets only when the preview is shown. In the Markdown copy, the builder is a note that points agents to the values reference and the schema.
+
+**The builder (5.5):** `rewritePath` starts at `false`, the recommended setting, and choosing an Ingress or a Gateway switches a `LoadBalancer` Service to `ClusterIP`. The Kustomize output uses the release file's names (`hello-kubernetes-demo`), a JSON patch for the Service and a strategic merge patch for the Deployment, so env vars merge by name. Its Ingress and HTTPRoute carry the chart's labels.
+
 **The app's font (5.1):** the app's page loaded Ubuntu from Google Fonts, which sends every visitor's browser to Google and fails in clusters with no internet access. The image bundles the font instead. Ubuntu is under the Ubuntu Font Licence 1.0, which allows bundling unmodified fonts if the copyright notice and the licence ship with them, so the image includes the licence file.
 
 ## Agent experience (AX)

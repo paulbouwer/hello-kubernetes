@@ -48,6 +48,23 @@ function simplify(tree) {
     node.value = '';
     delete node.children;
   }
+  // An interactive island, such as the config builder, becomes a note: its
+  // form and its default output read as noise in Markdown.
+  for (const island of selectAll('astro-island', tree)) {
+    island.tagName = 'p';
+    island.properties = {};
+    island.children = [
+      t(
+        'This page has an interactive tool that works only in a browser. An agent can build the same output from the Values reference and values.schema.json, listed in llms.txt.',
+      ),
+    ];
+  }
+  // Comments, such as the ones Astro leaves, are dropped.
+  (function dropComments(node) {
+    if (!node.children) return;
+    node.children = node.children.filter((child) => child.type !== 'comment');
+    node.children.forEach(dropComments);
+  })(tree);
   // A code block: its title (a file name, or "Terminal"), and its lines.
   for (const block of selectAll('.expressive-code', tree)) {
     const figure = select('figure', block);

@@ -7,11 +7,13 @@
 #   anchor), then loads every page in Playwright, in light and dark mode: it
 #   fails on a console error, a request to another site, or a serious or
 #   critical accessibility problem (axe). A required check. The built site and
-#   the screenshots of each page are kept as artifacts, for review.
+#   the screenshots of each page are kept as artifacts, for review. Then
+#   make site-drift checks the config builder's output against the chart, and
+#   the live preview against the app's image, built here.
 # - deploy: publishes the built site to GitHub Pages, on a push to main.
 #
-# Node comes from test/ci/install-tools.sh, and Playwright from its image,
-# pinned by digest in the Makefile.
+# Node, Helm and kubectl come from test/ci/install-tools.sh, and Playwright
+# from its image, pinned by digest in the Makefile.
 name: Website
 
 on:
@@ -41,11 +43,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Node.js
-        run: test/ci/install-tools.sh node
+      - name: Install Node.js, Helm and kubectl
+        run: test/ci/install-tools.sh node helm kubectl
 
       - name: Build and check the site
         run: make site-test
+
+      - name: Check the config builder and the preview against the chart and the app
+        run: make site-drift
 
       - name: Keep the screenshots
         if: always()
