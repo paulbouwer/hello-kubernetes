@@ -15,14 +15,15 @@ export const quickStart = {
   helm: 'helm install demo oci://ghcr.io/paulbouwer/charts/hello-kubernetes --wait',
 };
 
-// The options for each chip, on top of the builder's defaults.
+// The options for each chip, on top of the builder's defaults. The URLs use
+// example.com, which is reserved for documentation.
 const chips = [
-  { id: 'default', label: 'Default', options: {}, url: 'http://localhost/' },
+  { id: 'default', label: 'Default', options: {}, url: 'http://hello.example.com/' },
   {
     id: 'message',
     label: 'Your message',
     options: { message: 'Hello from my cluster!' },
-    url: 'http://localhost/',
+    url: 'http://hello.example.com/',
   },
   {
     id: 'ingress',
@@ -34,13 +35,13 @@ const chips = [
       pathPrefix: '/app/hello',
       rewritePath: false,
     },
-    url: 'http://localhost/app/hello/',
+    url: 'http://hello.example.com/app/hello/',
   },
   {
     id: 'spread',
     label: '4 pods across nodes',
     options: { replicas: 4 },
-    url: 'http://localhost/',
+    url: 'http://hello.example.com/',
   },
 ];
 

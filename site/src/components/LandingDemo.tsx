@@ -1,4 +1,4 @@
-// The landing page's interactive part: the command box under the headline,
+// The landing page's interactive part: the Helm command under the headline,
 // and the mock-up of a browser and a terminal, with "Try one:" chips that
 // change all three together. The chips are in src/lib/scenarios.mjs. The
 // preview's assets load only when the mock-up comes into view.
@@ -39,7 +39,7 @@ function CopyButton(props: { text: string }) {
 }
 
 // The command, with a $ prompt that shows but isn't copied.
-export function CommandBox(props: { command: string }) {
+function CommandBox(props: { command: string }) {
   return (
     <div class="hk-land-command">
       <pre tabIndex={0}>
@@ -50,15 +50,11 @@ export function CommandBox(props: { command: string }) {
   );
 }
 
-export default function LandingDemo(props: { chips: Chip[]; kubectl: string; version: string }) {
-  const { chips, kubectl, version } = props;
+export default function LandingDemo(props: { chips: Chip[]; version: string }) {
+  const { chips, version } = props;
   const [chipId, setChipId] = useState('default');
-  const [method, setMethod] = useState<'kubectl' | 'helm'>('kubectl');
   const [request, setRequest] = useState(0);
   const chip = chips.find((c) => c.id === chipId)!;
-  const isDefault = chip.id === 'default';
-  const command = method === 'helm' ? chip.helm : kubectl;
-  const builderLink = `${base}docs/configure/builder/`;
 
   // Load the preview's assets when the mock-up comes into view.
   const mockup = useRef<HTMLDivElement>(null);
@@ -102,25 +98,11 @@ export default function LandingDemo(props: { chips: Chip[]; kubectl: string; ver
   return (
     <div class="hk-land-demo">
       <div class="hk-land-install">
-        <div class="hk-land-methods" role="group" aria-label="Install with">
-          {(['kubectl', 'helm'] as const).map((m) => (
-            <button type="button" aria-pressed={method === m} onClick={() => setMethod(m)}>
-              {m === 'helm' ? 'Helm' : 'kubectl'}
-            </button>
-          ))}
-        </div>
-        <CommandBox command={command} />
-        {method === 'kubectl' && !isDefault ? (
-          <p class="hk-land-under">
-            This shows the default install. To set “{chip.label}” with kubectl, use the Kustomize setup in the{' '}
-            <a href={builderLink}>config builder →</a>
-          </p>
-        ) : (
-          <p class="hk-land-under">
-            Paste it into a terminal with access to your cluster.{' '}
-            <a href={`${base}docs/start-here/overview/#where-to-start`}>All the ways to deploy →</a>
-          </p>
-        )}
+        <CommandBox command={chip.helm} />
+        <p class="hk-land-under">
+          Paste it into a terminal with access to your cluster.{' '}
+          <a href={`${base}docs/start-here/overview/#where-to-start`}>All the ways to deploy →</a>
+        </p>
       </div>
 
       <div class="hk-land-try">
@@ -133,7 +115,6 @@ export default function LandingDemo(props: { chips: Chip[]; kubectl: string; ver
             onClick={() => {
               setChipId(c.id);
               setRequest(0);
-              if (c.id !== 'default') setMethod('helm');
             }}
           >
             {c.label}

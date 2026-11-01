@@ -19,15 +19,17 @@ This is work item 5.6 in the [1.x work plan](../2026-10-26-roadmap-1x/plan.md#5-
 
 ## Decisions
 
-Made on 2026-11-01. The maintainer chose the first three.
+Made on 2026-11-01. The maintainer chose the command, the header links and the image before the build, and the cosmetic changes after reviewing it.
 
 | Decision | Result |
 |---|---|
-| The command switch | `kubectl` and `Helm` as rounded rectangles, not pills, so the no-pills rule holds everywhere. |
+| The command | Helm only, with no `kubectl | Helm` switch (first built as rounded rectangles, not pills). "All the ways to deploy" leads to kubectl and Kustomize. |
 | Header links | Docs and Config builder, on the landing page only, through a `SocialIcons` override. |
 | Open Graph image | `make og-image` draws `site/public/og.png` with the pinned Playwright image, from the real preview; the PNG is committed. Every page links it, with `twitter:card` set to `summary_large_image`. |
-| Chips | Default, Your message, Behind an Ingress, and 4 pods across nodes. Default shows the quick start's commands; the others show the builder's Helm command in a brief form. The drift tests run every chip. |
-| Terminal | `kubectl get pods -o custom-columns=…`, which fits and shows each pod's node, in place of `-o wide`. The pod that answered is highlighted. |
+| Chips | Default, Your message, Behind an Ingress, and 4 pods across nodes. Default shows the quick start's Helm command; the others show the builder's, in a brief form. The drift tests run every chip. The address bar shows `hello.example.com`, reserved for documentation. |
+| Mock-up | The browser and the terminal are the same width. The terminal shows `kubectl get pods -o custom-columns=…`, which fits and shows each pod's node, in place of `-o wide`; its font scales with the screen, so it never scrolls. The pod that answered is highlighted. |
+| Features | Plain titles in the text colour; each icon is a large watermark off the box's corner, a shade off the box. |
+| Closing | "Get started", with the quick start and config builder buttons, and no command. |
 | Size | The chips' commands and terminal output are worked out at build time. The island is 4 KB; the preview's assets load when the mock-up comes into view. |
 | Title | Starlight's page title is left out on the landing page, so it has one headline. |
 | Structured data | A `SoftwareApplication` with the chart's version, the licence and the repo. |

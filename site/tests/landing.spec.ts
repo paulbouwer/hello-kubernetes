@@ -1,4 +1,4 @@
-// Checks the landing page: its commands are the quick start's, the chips
+// Checks the landing page: its command is the quick start's, the chips
 // change the command, the terminal and the preview together, the preview's
 // assets load only when the mock-up comes into view, and the page carries its
 // Open Graph image and structured data. The header has the Docs and Config
@@ -34,15 +34,13 @@ test.beforeEach(async ({ page }) => {
   };
 });
 
-test('the commands are the quick start’s, and Copy leaves out the prompt', async ({ page }) => {
+test('the command is the quick start’s Helm command, and Copy leaves out the prompt', async ({ page }) => {
   await page.goto(base);
   const box = page.locator('.hk-land-install .hk-land-command code');
-  await expect(box).toHaveText(quickStart('kubectl'));
-  await page.locator('.hk-land-install .hk-land-copy').click();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(quickStart('kubectl'));
-  await page.getByRole('button', { name: 'Helm', exact: true }).click();
   await expect(box).toHaveText(quickStart('helm'));
-  await expect(page.locator('.hk-land-closing code')).toHaveText(quickStart('kubectl'));
+  await page.locator('.hk-land-install .hk-land-copy').click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(quickStart('helm'));
+  await expect(page.getByRole('link', { name: 'All the ways to deploy →' })).toBeVisible();
 });
 
 test('the preview’s assets load only when the mock-up comes into view', async ({ page }) => {
@@ -50,7 +48,8 @@ test('the preview’s assets load only when the mock-up comes into view', async 
   page.on('request', (r) => {
     if (r.url().includes('preview-assets')) assets.push(r.url());
   });
-  await page.setViewportSize({ width: 1440, height: 400 });
+  // A short phone screen, so the mock-up starts well below the fold.
+  await page.setViewportSize({ width: 390, height: 300 });
   await page.goto(base, { waitUntil: 'networkidle' });
   expect(assets).toEqual([]);
   await page.locator('.hk-land-mockup').scrollIntoViewIfNeeded();
@@ -70,9 +69,6 @@ test('each chip changes the command, the terminal and the preview together', asy
     await expect(page.locator('.hk-land-terminal pre').first()).toHaveText(chip.terminal[0].output + '\n');
     await expect(app.locator('#message')).toHaveText(chip.message || 'Hello world!');
   }
-  // kubectl can't set a chip's options in one command, so the page says how.
-  await page.getByRole('button', { name: 'kubectl', exact: true }).click();
-  await expect(page.locator('.hk-land-under')).toContainText('config builder');
 });
 
 test('reloading the preview shows another pod, highlighted in the terminal', async ({ page }) => {

@@ -1,12 +1,12 @@
 ---
-// The landing page: the headline, the command, the mock-up with "Try one:"
-// chips, the features and a closing call to action, in Herdr's layout
+// The landing page: the headline, the Helm command, the mock-up with "Try
+// one:" chips, the features and a closing call to action, in Herdr's layout
 // (.project/roadmap/1.x/site.md#landing-page). The command box and the
 // mock-up are one Preact island, src/components/LandingDemo.tsx.
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import { Icon } from '@astrojs/starlight/components';
-import LandingDemo, { CommandBox } from '../components/LandingDemo.tsx';
-import { landingChips, quickStart } from '../lib/scenarios.mjs';
+import LandingDemo from '../components/LandingDemo.tsx';
+import { landingChips } from '../lib/scenarios.mjs';
 import schema from '../../../deploy/helm/hello-kubernetes/values.schema.json';
 import chartYaml from '../../../deploy/helm/hello-kubernetes/Chart.yaml?raw';
 
@@ -86,7 +86,7 @@ const features = [
     </section>
 
     <section>
-      <LandingDemo chips={chips} kubectl={quickStart.kubectl} version={version} client:load />
+      <LandingDemo chips={chips} version={version} client:load />
     </section>
 
     <section aria-labelledby="hk-land-features-title">
@@ -95,8 +95,8 @@ const features = [
         {
           features.map((f) => (
             <li>
+              <Icon name={f.icon} size="11rem" class="hk-land-watermark" />
               <h3>
-                <Icon name={f.icon} size="1.25rem" />
                 <a href={`${base}${f.href}`}>{f.title}</a>
               </h3>
               <p>{f.text}</p>
@@ -107,8 +107,7 @@ const features = [
     </section>
 
     <section class="hk-land-closing">
-      <h2>Deploy it in one command.</h2>
-      <CommandBox command={quickStart.kubectl} client:load />
+      <h2>Get started</h2>
       <div class="hk-land-links">
         <a class="primary" href={`${base}docs/start-here/quick-start/`}>Read the quick start</a>
         <a href={`${base}docs/configure/builder/`}>Open the config builder</a>
