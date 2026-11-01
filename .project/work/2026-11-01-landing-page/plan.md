@@ -28,7 +28,8 @@ Made on 2026-11-01. The maintainer chose the command, the header links and the i
 | Open Graph image | `make og-image` draws `site/public/og.png` with the pinned Playwright image, from the real preview; the PNG is committed. Every page links it, with `twitter:card` set to `summary_large_image`. |
 | Chips | Default, Your message, Behind an Ingress, and 4 pods across nodes. Default shows the quick start's Helm command; the others show the builder's, in a brief form. The drift tests run every chip. The address bar shows `hello.example.com`, reserved for documentation. |
 | Mock-up | The browser and the terminal are the same width. The terminal shows `kubectl get pods -o custom-columns=…`, which fits and shows each pod's node, in place of `-o wide`; its font scales with the screen, so it never scrolls. The pod that answered is highlighted. |
-| Features | Plain titles in the text colour; each icon is a large watermark off the box's corner, a shade off the box. |
+| Order | The headline, then the chips, then the command, then the mock-up, so the chips stay in place as the command changes length. |
+| Features | The headline's two tones: white titles in Archivo, grey text in the body font. Each icon is a large watermark off the box's corner, at 3% over the box. |
 | Closing | "Get started", with the quick start and config builder buttons, and no command. |
 | Size | The chips' commands and terminal output are worked out at build time. The island is 4 KB; the preview's assets load when the mock-up comes into view. |
 | Title | Starlight's page title is left out on the landing page, so it has one headline. |

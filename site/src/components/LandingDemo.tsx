@@ -1,4 +1,5 @@
-// The landing page's interactive part: the Helm command under the headline,
+// The landing page's interactive part: "Try one:" chips, then the Helm command,
+// so the chips stay in place as the command changes length, then
 // and the mock-up of a browser and a terminal, with "Try one:" chips that
 // change all three together. The chips are in src/lib/scenarios.mjs. The
 // preview's assets load only when the mock-up comes into view.
@@ -97,14 +98,6 @@ export default function LandingDemo(props: { chips: Chip[]; version: string }) {
 
   return (
     <div class="hk-land-demo">
-      <div class="hk-land-install">
-        <CommandBox command={chip.helm} />
-        <p class="hk-land-under">
-          Paste it into a terminal with access to your cluster.{' '}
-          <a href={`${base}docs/start-here/overview/#where-to-start`}>All the ways to deploy →</a>
-        </p>
-      </div>
-
       <div class="hk-land-try">
         <span>Try one:</span>
         {chips.map((c) => (
@@ -120,6 +113,14 @@ export default function LandingDemo(props: { chips: Chip[]; version: string }) {
             {c.label}
           </button>
         ))}
+      </div>
+
+      <div class="hk-land-install">
+        <CommandBox command={chip.helm} />
+        <p class="hk-land-under">
+          Paste it into a terminal with access to your cluster.{' '}
+          <a href={`${base}docs/start-here/overview/#where-to-start`}>All the ways to deploy →</a>
+        </p>
       </div>
 
       <div class="hk-land-mockup" ref={mockup}>
