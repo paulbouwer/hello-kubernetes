@@ -25,7 +25,7 @@ Made on 2026-11-01. The maintainer agreed the design before the build.
 |---|---|
 | Options | Release name and namespace; message and replicas; Service type and port; Service only, Ingress (class, host) or Gateway (name, namespace, host name); path prefix and rewriting; registry and tag. Labels and help text come from the schema. |
 | Output | `helm install` with `--set` flags (`--set-string` for text), `values.yaml` with its install command, Kustomize on the pinned release file, and `helm template`. Each has a copy button. |
-| Layout | The form on the left; the preview and the output on the right, sticky, so both stay in view while you fill in the form. Stacked on a phone. |
+| Layout | One column, at the maintainer's request after a first two-column version made the preview small and wrapped the commands: the form, with each section's fields side by side; then the preview at full width, at full size on a desktop and scaled down only on a narrow screen, in a frame tall enough that it never scrolls; then the output at full width. |
 | Preview | The app's own templates and CSS, rendered with the app's Handlebars version, trimmed as express-handlebars does, in an `iframe` with an empty `sandbox` and `srcdoc`, with the CSS, font and logo inlined. |
 | Shared code | `site/src/lib/builder.mjs` and `preview.mjs` are plain JavaScript, so the drift test runs them in Node. |
 | Drift tests | `site/tests/drift.mjs` (`make site-drift`), in the `site` job: S1 preview vs app container, S2 builder vs `helm template`, S3 Kustomize vs `helm template`. |

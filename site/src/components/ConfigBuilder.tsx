@@ -151,12 +151,17 @@ export default function ConfigBuilder() {
     return preview.inlineAssets(html, assets);
   }, [o.message, o.namespace, o.release, o.registry, o.tag, pod, arch]);
 
-  // Scale the 800 by 560 page to the width of its frame.
+  // The app's page is laid out for a desktop. It fills a wide frame at full
+  // size, and is scaled down to fit a narrow one. The frame is tall enough for
+  // the whole page, so it never scrolls.
+  const pageWidth = 800;
+  const pageHeight = 600;
   const frame = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.6);
+  const [width, setWidth] = useState(pageWidth);
+  const scale = Math.min(1, width / pageWidth);
   useEffect(() => {
     if (!frame.current) return;
-    const observer = new ResizeObserver(([entry]) => setScale(entry.contentRect.width / 800));
+    const observer = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
     observer.observe(frame.current);
     return () => observer.disconnect();
   }, []);
@@ -166,7 +171,7 @@ export default function ConfigBuilder() {
 
   return (
     <div class="hk-builder not-content">
-      <div class="hk-builder-top">
+      <div class="hk-builder-body">
         <form class="hk-form" onSubmit={(e) => e.preventDefault()}>
           <fieldset>
             <legend>Release</legend>
@@ -284,14 +289,15 @@ export default function ConfigBuilder() {
                 Send another request
               </button>
             </div>
-            <div class="hk-preview-frame" ref={frame} style={{ height: `${560 * scale}px` }}>
+            <div class="hk-preview-frame" ref={frame} style={{ height: `${pageHeight * scale}px` }}>
               {replicas ? (
                 <iframe
                   title="Preview of the hello-kubernetes page"
                   sandbox=""
                   srcdoc={page}
-                  width={800}
-                  height={560}
+                  width={Math.max(width, pageWidth)}
+                  height={pageHeight}
+                  scrolling="no"
                   style={{ transform: `scale(${scale})` }}
                 />
               ) : (

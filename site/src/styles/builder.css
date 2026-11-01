@@ -5,28 +5,26 @@
   font-size: var(--sl-text-sm);
 }
 
-.hk-builder-top {
+.hk-builder-body {
   display: grid;
+  /* minmax(0, ...), so the 800px preview page can't widen the column on a phone. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
 }
-@media (min-width: 60rem) {
-  .hk-builder-top {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-    align-items: start;
-  }
-  .hk-side {
-    position: sticky;
-    top: calc(var(--sl-nav-height) + 1rem);
-    max-height: calc(100vh - var(--sl-nav-height) - 2rem);
-    overflow-y: auto;
-  }
-}
 
+/* The fields of each section sit side by side where there is room. */
 .hk-form fieldset {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  column-gap: 1.5rem;
   margin: 0 0 1rem;
   padding: 0 0 0.75rem;
   border: 0;
   border-bottom: 1px solid var(--sl-color-hairline);
+}
+.hk-form .hk-choice,
+.hk-form .hk-check {
+  grid-column: 1 / -1;
 }
 .hk-form legend {
   margin-bottom: 0.5rem;
