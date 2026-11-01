@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "check": "astro check",
     "build": "astro build",
+    "postbuild": "node scripts/build-markdown.mjs",
     "preview": "astro preview"
   },
   "dependencies": {
@@ -26,6 +27,12 @@
     "@astrojs/check": "0.9.12",
     "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.64.1",
-    "typescript": "6.0.3"
+    "hast-util-select": "6.0.4",
+    "rehype-parse": "9.0.1",
+    "rehype-remark": "10.0.1",
+    "remark-gfm": "4.0.1",
+    "remark-stringify": "11.0.0",
+    "typescript": "6.0.3",
+    "unified": "11.0.5"
   }
 }

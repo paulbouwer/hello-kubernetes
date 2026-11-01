@@ -13,15 +13,15 @@ const forwarded = rewrite ? '/' : '/app/hello/';
   <figcaption><code>rewritePath: {String(rewrite)}</code>{rewrite ? '' : ' (recommended)'}</figcaption>
   <ol>
     <li>
-      <span class="hk-path-who">Browser</span>
+      <span class="hk-path-who">Browser<span class="sr-only">: </span></span>
       <span class="hk-path-what">asks for <code>/app/hello/</code></span>
     </li>
     <li>
-      <span class="hk-path-who">Ingress or Gateway</span>
+      <span class="hk-path-who">Ingress or Gateway<span class="sr-only">: </span></span>
       <span class="hk-path-what">{rewrite ? 'strips the prefix, and passes on' : 'passes on'} <code>{forwarded}</code></span>
     </li>
     <li>
-      <span class="hk-path-who">App</span>
+      <span class="hk-path-who">App<span class="sr-only">: </span></span>
       <span class="hk-path-what">
         serves at <code>{forwarded}</code>, and links its assets as <code>/app/hello/css/main.css</code>
       </span>

@@ -127,7 +127,9 @@ The website has its own checks, in `site/tests/site.spec.ts` (`make site-test`),
 
 Before axe runs, the check waits for Expressive Code's script to make each code block that scrolls sideways focusable; without the wait, axe sometimes ran first and reported the block (#141). A wide table that scrolls can't be made focusable from Markdown, so keep tables narrow enough not to scroll on a desktop.
 
-It saves screenshots of each page, desktop and phone, light and dark, as a CI artifact. Testing the checks: a Google Fonts stylesheet failed every page, an image with no alt text failed as critical, and a relative link failed the build.
+It saves screenshots of each page, desktop and phone, light and dark, as a CI artifact.
+
+`site/tests/agents.spec.ts` checks the files for agents (#144): `llms.txt` has the release, the notes and an entry for every docs page, and every link in it returns 200; each Markdown copy has a title and description, no HTML or component markup outside code, and no links to HTML pages; the quick start's code group has a labelled block for each tab; `llms-full.txt` has every page; and each docs page has the hidden note and a copy button that copies the page. Deleting a `.md` copy and adding a `<div>` to another failed four checks, naming the page. Testing the checks: a Google Fonts stylesheet failed every page, an image with no alt text failed as critical, and a relative link failed the build.
 
 ## End-to-end scenarios
 

@@ -82,6 +82,10 @@ helm install demo oci://ghcr.io/paulbouwer/charts/hello-kubernetes --wait
 </CodeGroup>
 ````
 
+## Files for agents
+
+After `astro build`, `site/scripts/build-markdown.mjs` writes a Markdown copy of each docs page (`/docs/deploy/helm/` has `/docs/deploy/helm.md`), `llms.txt`, `llms-full.txt` and the chart's `values.schema.json` into `site/dist`. It works from the built HTML, so a new page or code group needs no change to it. The release in `llms.txt` comes from the chart's `appVersion`. `make site-dev` doesn't write these files, so "View as Markdown" works only on a built site: `make site`, then `cd site && npm run preview`.
+
 ## Dependencies
 
 The site's packages are pinned in `site/package.json` and `site/package-lock.json`. Add or update a package with npm's `--before` option, so that every package, including its dependencies, was released at least 7 days ago (AGENTS.md rule 8):
