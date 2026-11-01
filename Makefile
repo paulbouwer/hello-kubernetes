@@ -114,7 +114,7 @@ site-dev: ## serve the website at http://localhost:4321/hello-kubernetes/, reloa
 .PHONY: site-test
 site-test: site ## browser checks of the built site; screenshots go to site/test-results/screenshots
 	docker run --rm --ipc=host --network host -u "$$(id -u):$$(id -g)" -e HOME=/tmp \
-		-v "$(CURDIR)/site:/site" -w /site $(PLAYWRIGHT_IMAGE) npx playwright test
+		-v "$(CURDIR):/repo" -w /repo/site $(PLAYWRIGHT_IMAGE) npx playwright test
 
 .PHONY: screenshot
 screenshot: cluster-k3d ## screenshot the app on a k3d cluster into hello-kubernetes.png, for the README

@@ -19,6 +19,7 @@ export default defineConfig({
       description: 'A small web app to deploy on a Kubernetes cluster. It shows which pod answered.',
       customCss: ['./src/styles/theme.css', './src/styles/code.css'],
       components: {
+        PageTitle: './src/components/PageTitle.astro',
         Sidebar: './src/components/Sidebar.astro',
       },
       social: [
@@ -30,9 +31,17 @@ export default defineConfig({
         { label: 'Configure', items: [{ autogenerate: { directory: 'docs/configure' } }] },
         { label: 'Guides', items: [{ autogenerate: { directory: 'docs/guides' } }] },
         { label: 'Reference', items: [{ autogenerate: { directory: 'docs/reference' } }] },
+        'docs/agents',
         'docs/licences',
       ],
-      plugins: [starlightLinksValidator({ errorOnLocalLinks: true })],
+      // The files for agents are written after the build (scripts/build-markdown.mjs),
+      // so the validator can't see them. The Playwright checks load every one.
+      plugins: [
+        starlightLinksValidator({
+          errorOnLocalLinks: true,
+          exclude: ['/hello-kubernetes/llms.txt', '/hello-kubernetes/llms-full.txt', '/hello-kubernetes/values.schema.json'],
+        }),
+      ],
     }),
     preact(),
   ],

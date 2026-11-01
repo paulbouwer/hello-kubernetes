@@ -1,0 +1,37 @@
+---
+title: For AI agents
+description: How an AI agent can read these docs as Markdown, find the right page, and check chart values against the schema.
+sidebar:
+  attrs:
+    data-icon: puzzle
+---
+
+The docs are written for people, and published for agents too. An agent can read them as plain Markdown, without the site's layout, tabs or scripts.
+
+## What's published
+
+| File | What it has |
+|---|---|
+| [`/llms.txt`](/hello-kubernetes/llms.txt) | An index in the [llms.txt](https://llmstxt.org/) format: one line for each page, with its description and a link to its Markdown copy. |
+| A `.md` copy of each page | The page as Markdown, next to it: `/docs/deploy/helm/` has `/docs/deploy/helm.md`. Each code group lists every tab, such as **kubectl** and **Helm**, with its own code block. |
+| [`/llms-full.txt`](/hello-kubernetes/llms-full.txt) | Every page in one file, in sidebar order. |
+| [`/values.schema.json`](/hello-kubernetes/values.schema.json) | The JSON Schema that Helm checks the chart's values against. It has a description of every value. |
+
+Every page also has a **Copy page as Markdown** button under its title, to paste a page into a chat.
+
+## Using them from an agent
+
+- **Start from `llms.txt`.** Open only the pages the task needs, and come back to the index for others. It is much smaller than `llms-full.txt`.
+- **Check values against the schema** before running `helm install`. Helm rejects unknown keys and wrong types, so a value that isn't in the schema fails the install.
+- **Mind the version.** The site has the docs for the latest release only. `llms.txt` names it. For an older release, read the docs in the repo at that release's tag.
+
+For example, ask your agent:
+
+```text
+Read https://paulbouwer.github.io/hello-kubernetes/llms.txt, then deploy
+hello-kubernetes behind my Traefik Ingress at /app/hello.
+```
+
+## Agents that work on the repo
+
+These docs are for using hello-kubernetes. An agent that changes the app, the chart or the site should read [`AGENTS.md`](https://github.com/paulbouwer/hello-kubernetes/blob/main/AGENTS.md) in the repo first. It has the scope, the rules, and how each change is planned, built and checked.

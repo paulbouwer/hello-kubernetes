@@ -1,0 +1,80 @@
+---
+// Starlight's page title, with two things for the docs pages: a note that
+// points agents to the Markdown copy of the page and to llms.txt, hidden from
+// people, and a button that copies the page as Markdown. The copies are
+// written after the build by scripts/build-markdown.mjs.
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+
+const base = import.meta.env.BASE_URL;
+const path = Astro.url.pathname;
+const isDoc = path.startsWith(`${base}docs/`);
+const markdown = path.replace(/\/$/, '.md');
+---
+
+{
+  isDoc && (
+    <div data-agent-note hidden>
+      For AI agents: a Markdown copy of this page is at {new URL(markdown, Astro.site).href}. The index of every
+      page, for the latest release, is at {new URL(`${base}llms.txt`, Astro.site).href}.
+    </div>
+  )
+}
+<Default />
+{
+  isDoc && (
+    <div class="hk-page-actions">
+      <button type="button" class="hk-copy-page" data-markdown={markdown}>
+        <span class="hk-copy-label">Copy page as Markdown</span>
+      </button>
+      <a href={markdown}>View as Markdown</a>
+      <span class="hk-copy-status" role="status" aria-live="polite"></span>
+    </div>
+  )
+}
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>('.hk-copy-page')) {
+    button.addEventListener('click', async () => {
+      const status = button.parentElement?.querySelector('.hk-copy-status');
+      try {
+        const response = await fetch(button.dataset.markdown!);
+        if (!response.ok) throw new Error(String(response.status));
+        await navigator.clipboard.writeText(await response.text());
+        if (status) status.textContent = 'Copied';
+      } catch {
+        if (status) status.textContent = 'Could not copy. Use View as Markdown.';
+      }
+      setTimeout(() => status && (status.textContent = ''), 3000);
+    });
+  }
+</script>
+
+<style>
+  .hk-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    font-size: var(--sl-text-sm);
+  }
+  .hk-copy-page {
+    padding: 0.25rem 0.625rem;
+    border: 1px solid var(--hk-code-border);
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--sl-color-text);
+    font: inherit;
+    cursor: pointer;
+  }
+  .hk-copy-page:hover {
+    border-color: var(--sl-color-accent);
+    color: var(--sl-color-accent-high);
+  }
+  .hk-page-actions a {
+    color: var(--sl-color-gray-3);
+  }
+  .hk-copy-status {
+    color: var(--sl-color-gray-3);
+  }
+</style>

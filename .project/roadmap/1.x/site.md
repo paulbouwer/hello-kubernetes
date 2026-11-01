@@ -157,6 +157,8 @@ It gives:
 | Site | The "For AI agents" page, which links to `AGENTS.md` for agents working on the repo. |
 | Versions | The site is the latest release. `llms.txt` says that older versions' docs are in the repo at their tag. |
 
+**Built in 5.4 (#144)** by `site/scripts/build-markdown.mjs`, after `astro build`, not by `starlight-llms-txt`. That plugin is maintained, and its tabs output is clean, but its `llms.txt` has a fixed layout: it links only to its own full and small bundles, with no Markdown copy per page and no place for the release, the version note or the schema. The script uses the same unified pipeline as the plugin (rehype-parse, rehype-remark, remark-gfm), over the built HTML. It reads the sidebar for the order, turns each code group into labelled blocks, labels files and output, and points links at the `.md` copies. A docs page at `/docs/deploy/helm/` has its copy at `/docs/deploy/helm.md`. The copy button and the hidden note are in a `PageTitle` override; the note uses `hidden`, so neither people nor screen readers meet it.
+
 ## Testing
 
 - **E15** reads the MDX pages and the README. `` ```bash e2e `` marks a block, and `` ```bash e2e=kubectl `` puts it in a group: one flow from start to clean-up, such as one tab's deploy, check and remove. Each group runs on its own, and must leave nothing behind.
