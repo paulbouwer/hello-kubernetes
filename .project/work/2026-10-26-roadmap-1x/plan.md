@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [app, image, deploy, ci, site, operations]
 created: 2026-10-26
-updated: 2026-10-31
+updated: 2026-11-02
 ---
 
 # 1.x roadmap
@@ -122,7 +122,7 @@ The [workstream 4 review](workstream-04-review.md) records the outcome, the find
 
 #### 5. Website
 
-Re-planned with the maintainer on 2026-10-31 (#135): the site owns the user docs, and workstream 5 has six items. See [site.md](../../roadmap/1.x/site.md#decisions).
+Re-planned with the maintainer on 2026-10-31 (#135): the site owns the user docs, with six build items. The workstream 5 review adds 5.7. See [site.md](../../roadmap/1.x/site.md#decisions).
 
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
@@ -132,6 +132,7 @@ Re-planned with the maintainer on 2026-10-31 (#135): the site owns the user docs
 | 5.4 | feat(site): add llms.txt and Markdown copies of every page | enhancement, area:site | 5.3 | — | [work package](../2026-11-01-agent-docs/plan.md), [site.md](../../roadmap/1.x/site.md#agent-experience-ax) |
 | 5.5 | feat(site): add the live preview and the config builder | enhancement, area:site | 4.3, 5.1, 5.3 | — | [work package](../2026-11-01-config-builder/plan.md), [site.md](../../roadmap/1.x/site.md#config-builder) |
 | 5.6 | feat(site): add the landing page | enhancement, area:site | 5.5 | — | [work package](../2026-11-01-landing-page/plan.md), [site.md](../../roadmap/1.x/site.md#landing-page) |
+| 5.7 | fix(site): escape builder values for Helm's --set parser | bug, area:site | 5.5 | — | [workstream 5 review](workstream-05-review.md#finding-to-address) |
 
 - 5.1 bundles the Ubuntu font and its licence in the image, removes the Google Fonts link, and adds an image test that the page makes no external requests. It is small and independent, so it comes first.
 - 5.2 sets up Astro, Starlight and Preact in `site/`, the identity and the code block theme, the Pages workflow (build on PRs, deploy from `main`), the required `site` CI job, Playwright from its pinned image with `make screenshot`, the CSP trial, Dependabot for `site/`, and port 4321 in `forwardPorts`.
@@ -139,6 +140,9 @@ Re-planned with the maintainer on 2026-10-31 (#135): the site owns the user docs
 - 5.4 adds `llms.txt`, `llms-full.txt`, a `.md` copy of each page, "Copy page", the schema, the hidden note for agents, and the agents page.
 - 5.5 adds the sandboxed live preview, the config builder, and their CI drift tests.
 - 5.6 adds the landing page, its mock-up and chips, and the Open Graph image.
+- 5.7 comes from the workstream 5 review. It escapes the builder's `--set` values for Helm's parser, so commas, backslashes and braces in a message survive, adds those messages to the drift tests, comparing the rendered `MESSAGE` with the original text, and gives the Overview table real headers. It must land before 6.2.
+
+The [workstream 5 review](workstream-05-review.md) records the outcome, the finding fixed in 5.7, the 6.2 release gates and the follow-ups after 1.11.
 
 #### 6. Release
 
@@ -232,7 +236,7 @@ This check applies to 2.x, 4.1 and 4.2. Save the output from `release-1.11` befo
 | 3. CI and publishing | Every `uses:` line is pinned to a 40-character SHA. Every workflow has a `permissions:` block. The scan fails on an image with a known fixable finding, and a wrong checksum stops the Trivy install. A publish to a test tag gives a manifest list with amd64 and arm64 (`docker buildx imagetools inspect`), with SBOM and provenance attached. A failed e2e job blocks the publish. |
 | 4. Chart and deployment | `helm lint` and `helm template` pass under Helm 4. `values.schema.json` rejects a wrong type and an unknown value. The scenarios for the issue pass on kind and k3d. The pods run in a namespace with restricted Pod Security. `kubectl apply -f` of the release YAML works on kind. Every command in the changed docs runs with no prompts, and gives the result the doc describes (E15). |
 | 5. Website | The required `site` job passes: the build, internal links and anchors, the Playwright checks for console errors, CSP violations and third-party requests, and axe with no serious or critical problems. The builder's output matches `helm template`, and the preview matches the app. E15 runs the site's marked blocks. Each link in `llms.txt` resolves to a `.md` page. The image makes no external requests. |
-| 6. Release | All 1.11 sub-issues are Done. The arm64 e2e job passes with the default chart, and no e2e scenario has an `EXPECTED_FAILURE` marker. After the merge into `main`, the 10 old Trivy alerts are closed by the scan on `main`, and Trivy in the scan workflow is the newest release that meets the 7-day cooldown. The `v1.11.0` publish run passes, both registries have `1.11.0`, `1.11` and `1` for amd64 and arm64, and `SCAN=1 make verify-published` passes for `1.11.0` on Docker Hub and on GHCR. If the first Docker Hub provenance signing gets a 404, run the failed job again (#102). A test PR whose branch is named for a closed issue, with an open `security` issue linked, gets the `security` label and that issue's milestone from the labels workflow (#95). The daily scan on `main` runs the new workflow, which stops the daily failure of the old one, and its daily scan of the published `:1` image runs (the workflow was re-enabled on 2026-10-29). After the merge into `main`, the issue forms, the security link, the PR template, `SECURITY.md` and the PR labels workflow work (from #59), and Dependabot runs for each ecosystem with no config errors (from #73). The release notes are grouped by label and include the credits. The publish run creates a draft release with `hello-kubernetes.yaml` attached, and pushes the chart `1.11.0` to `oci://ghcr.io/paulbouwer/charts/hello-kubernetes` with a signed attestation (#119). The GHCR chart package is public, and the chart repository is on artifacthub.io, with its `repositoryID` in `deploy/helm/artifacthub-repo.yml` (both done 2026-10-30). The maintainer publishes the draft release. The release pushes the Artifact Hub metadata, `1.11.0` appears on Artifact Hub with a verified publisher and no test versions, and #23 is closed. The maintainer can then ask the Artifact Hub maintainers for the official badge, because an unofficial `hello-kubernetes` chart is also listed. Before the tag, `src/app/package.json` is `1.11.0`, matching the chart. `paulbouwer/hello-kubernetes:1` and `:1.10` point at the 1.11.0 digest. The maintainer sets the repo's Pages source to GitHub Actions, and the site deploys from `main` to `paulbouwer.github.io/hello-kubernetes`, where the pages, `llms.txt`, the `.md` copies and the schema load. `make screenshot` updates the README's screenshot for the release. The release asset URL works with `kubectl apply`. |
+| 6. Release | All 1.11 sub-issues are Done. The arm64 e2e job passes with the default chart, and no e2e scenario has an `EXPECTED_FAILURE` marker. After the merge into `main`, the 10 old Trivy alerts are closed by the scan on `main`, and Trivy in the scan workflow is the newest release that meets the 7-day cooldown. The `v1.11.0` publish run passes, both registries have `1.11.0`, `1.11` and `1` for amd64 and arm64, and `SCAN=1 make verify-published` passes for `1.11.0` on Docker Hub and on GHCR. If the first Docker Hub provenance signing gets a 404, run the failed job again (#102). A test PR whose branch is named for a closed issue, with an open `security` issue linked, gets the `security` label and that issue's milestone from the labels workflow (#95). The daily scan on `main` runs the new workflow, which stops the daily failure of the old one, and its daily scan of the published `:1` image runs (the workflow was re-enabled on 2026-10-29). After the merge into `main`, the issue forms, the security link, the PR template, `SECURITY.md` and the PR labels workflow work (from #59), and Dependabot runs for each ecosystem with no config errors (from #73). The release notes are grouped by label and include the credits. The publish run creates a draft release with `hello-kubernetes.yaml` attached, and pushes the chart `1.11.0` to `oci://ghcr.io/paulbouwer/charts/hello-kubernetes` with a signed attestation (#119). The GHCR chart package is public, and the chart repository is on artifacthub.io, with its `repositoryID` in `deploy/helm/artifacthub-repo.yml` (both done 2026-10-30). The maintainer publishes the draft release. The release pushes the Artifact Hub metadata, `1.11.0` appears on Artifact Hub with a verified publisher and no test versions, and #23 is closed. The maintainer can then ask the Artifact Hub maintainers for the official badge, because an unofficial `hello-kubernetes` chart is also listed. Before the tag, `src/app/package.json` is `1.11.0`, matching the chart. `paulbouwer/hello-kubernetes:1` and `:1.10` point at the 1.11.0 digest. The maintainer sets the repo's Pages source to GitHub Actions, and the site deploys from `main` to `paulbouwer.github.io/hello-kubernetes`, where the base path, docs, `.md` copies, `llms.txt`, schema, images and 404 page work (workstream 5 review). `make screenshot` updates the README's screenshot for the release. The release asset URL works with `kubectl apply`. E09 waits, within a limit, until more than one pod answers, instead of sending a fixed 20 requests, and still fails on request errors or if routing never spreads (workstream 5 review). E15 checks cleanup after each flow, for Services, ServiceAccounts, Middlewares and namespaces as well as Deployments (workstream 5 review). The release notes say to upgrade from 1.10 with `--reset-then-reuse-values`, because `--reuse-values` fails; the published chart's upgrade from 1.10.1 keeps custom values. The Container image page's `gh attestation verify` command passes against the published 1.11.0 image. |
 | 7. After 1.11 | Each deprecation image passes the checks in [review.md](../../roadmap/1.x/review.md#deprecation-images-for-the-old-tags): `/` returns 200, the original message text is present, and the probes pass on kind. The original image stays reachable under the `-original` tag. |
 
 ## Epic body
@@ -297,6 +301,7 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 - 5.4 feat(site): add llms.txt and Markdown copies of every page
 - 5.5 feat(site): add the live preview and the config builder
 - 5.6 feat(site): add the landing page
+- 5.7 fix(site): escape builder values for Helm's --set parser
 
 ### 6. Release
 - 6.1 docs(project): write and approve the deprecation plan for the old tags
@@ -323,6 +328,7 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 - **Before automatic PR labelling goes live in 6.2:** tracked as 3.4 (#95), from the [workstream 1 review](workstream-01-review.md#finding-to-address).
 - **Before arm64 CI:** placed in 3.3 and 4.1, and a release gate in 6.2, from the [workstream 2 review](workstream-02-review.md#follow-up-before-arm64-ci).
 - **From the workstream 3 review:** no new major defect. Its release gates are in 4.1 and 6.2, and its minor issues are placed in 4.1 and 4.4, from the [workstream 3 review](workstream-03-review.md#minor-issues).
+- **From the workstream 5 review:** the builder fix is 5.7, and its release gates are in 6.2. **After 1.11:** reduce the preview's assets (about 360 KB, loaded lazily) if profiling shows a need, and give the copy buttons a fallback when the clipboard is denied, from the [workstream 5 review](workstream-05-review.md#important-release-gates).
 - **After 1.11: CI efficiency.** Run the image and e2e tests only when their inputs change, as proposed in the [workstream 3 efficiency review](workstream-03-efficiency-review.md). Design it once all the 1.11 workflows exist (decided 2026-10-30).
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
