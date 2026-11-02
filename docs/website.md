@@ -16,7 +16,7 @@ Open `http://localhost:4321/hello-kubernetes/`. The path matters: GitHub Pages s
 |---|---|
 | `make site` | Installs the packages from the lockfile, then runs `astro check` and `astro build` into `site/dist`. The build fails on a broken internal link or anchor. |
 | `make site-test` | `make site`, then loads every page in Playwright, in light and dark mode. It fails on a console error, a request to another site, or a serious or critical accessibility problem (axe), and saves screenshots of every page, desktop and phone, in `site/test-results/screenshots/`. |
-| `make screenshot` | Starts the k3d cluster (`make cluster-k3d`), installs the chart, and saves a screenshot of the app to `hello-kubernetes.png`, for the README. Run it for each release. |
+| `make screenshot` | Starts the k3d cluster (`make cluster-k3d`), installs the chart, and saves a screenshot of the app to `hello-kubernetes.png`, for the README. The node line's kernel, which is your own machine's, is shown as its major version only, such as `Linux 7.x`. Run it for each release. |
 
 Playwright runs from its official image, pinned by digest in the `Makefile`, so you don't install it. CI runs `make site-test` in the `site` job of `.github/workflows/pages.yaml`, a required check, and keeps the screenshots as an artifact on each PR.
 

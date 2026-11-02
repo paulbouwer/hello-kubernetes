@@ -11,10 +11,12 @@ sidebar:
 
 | Registry | Image |
 |---|---|
+| GitHub Container Registry (recommended) | `ghcr.io/paulbouwer/hello-kubernetes` |
 | Docker Hub | `paulbouwer/hello-kubernetes` |
-| GitHub Container Registry | `ghcr.io/paulbouwer/hello-kubernetes` |
 
-Both have the same images. The chart uses Docker Hub by default; set `deployment.container.image.repository` to use GHCR.
+Both have the same images, with the same SBOM and signed provenance. We recommend GHCR: it has no Docker Hub pull limits, and its images sit next to the source and the release that built them.
+
+The chart uses Docker Hub by default in 1.x. To use GHCR, set `deployment.container.image.repository` to `ghcr.io/paulbouwer/hello-kubernetes`, or choose it in the [config builder](/hello-kubernetes/docs/configure/builder/). In 2.0, GHCR becomes the default.
 
 ## Tags
 

@@ -28,10 +28,12 @@ for _ in $(seq 1 40); do
   sleep 0.25
 done
 
+# site/scripts/app-screenshot.mjs takes it, with the node line's kernel shown
+# as its major version only, such as "Linux 7.x".
+(cd "$repo/site" && npm ci --no-audit --no-fund >/dev/null)
 docker run --rm --ipc=host --network host -u "$(id -u):$(id -g)" -e HOME=/tmp \
-  -v "$(dirname "$out"):/out" "$PLAYWRIGHT_IMAGE" \
-  npx -y playwright@1.64.1 screenshot --full-page --viewport-size=640,480 --wait-for-timeout=1000 \
-  "http://127.0.0.1:$port/" "/out/$(basename "$out")" >/dev/null
+  -v "$repo:/repo" -v "$(dirname "$out"):/out" -w /repo/site "$PLAYWRIGHT_IMAGE" \
+  node scripts/app-screenshot.mjs "http://127.0.0.1:$port/" "/out/$(basename "$out")"
 
 helm uninstall hello-world --namespace "$namespace" >/dev/null
 kubectl delete namespace "$namespace" --wait=false >/dev/null
