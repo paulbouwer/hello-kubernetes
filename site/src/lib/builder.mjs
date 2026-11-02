@@ -98,16 +98,24 @@ export function setFlags(values, path = '') {
   return flags;
 }
 
-function command(verb, o, version, extra) {
-  const lines = [`helm ${verb} ${o.release} ${chartRef}`, `--version ${version} --namespace ${o.namespace}`];
-  if (verb === 'install') lines[1] += ' --create-namespace';
+// brief, for the landing page: no --version, and no --namespace for the
+// default namespace, as in the quick start.
+function command(verb, o, version, extra, brief = false) {
+  const lines = [`helm ${verb} ${o.release} ${chartRef}`];
+  const scope = [];
+  if (!brief) scope.push(`--version ${version}`);
+  if (!brief || o.namespace !== 'default') {
+    scope.push(`--namespace ${o.namespace}`);
+    if (verb === 'install') scope.push('--create-namespace');
+  }
+  if (scope.length) lines.push(scope.join(' '));
   lines.push(...extra);
   if (verb === 'install') lines.push('--wait');
   return lines.join(' \\\n  ');
 }
 
-export function helmInstall(o, schema, version) {
-  return command('install', o, version, setFlags(chartValues(o, schema)));
+export function helmInstall(o, schema, version, { brief = false } = {}) {
+  return command('install', o, version, setFlags(chartValues(o, schema)), brief);
 }
 
 export function valuesYaml(o, schema) {

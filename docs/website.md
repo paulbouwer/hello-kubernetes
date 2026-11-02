@@ -99,6 +99,10 @@ The Config builder page is a Preact island, `site/src/components/ConfigBuilder.t
 
 If you change the app's templates, `server.js`, or the chart, run `make site-drift`. CI runs it in the `site` job.
 
+## The landing page
+
+`site/src/pages/index.astro`, with the command box and the mock-up in `site/src/components/LandingDemo.tsx`. The chips are in `site/src/lib/scenarios.mjs`, and the drift tests run each one. To change the Open Graph image, change `site/scripts/og-image.mjs` or the app's page, run `make og-image`, and commit `site/public/og.png`.
+
 ## Files for agents
 
 After `astro build`, `site/scripts/build-markdown.mjs` writes a Markdown copy of each docs page (`/docs/deploy/helm/` has `/docs/deploy/helm.md`), `llms.txt`, `llms-full.txt` and the chart's `values.schema.json` into `site/dist`. It works from the built HTML, so a new page or code group needs no change to it. The release in `llms.txt` comes from the chart's `appVersion`. `make site-dev` doesn't write these files, so "View as Markdown" works only on a built site: `make site`, then `cd site && npm run preview`.

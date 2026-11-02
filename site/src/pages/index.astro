@@ -1,19 +1,134 @@
 ---
-// A temporary landing page, until 5.6 adds the real one.
+// The landing page: the headline, the Helm command, the mock-up with "Try
+// one:" chips, the features and a closing call to action, in Herdr's layout
+// (.project/roadmap/1.x/site.md#landing-page). The command box and the
+// mock-up are one Preact island, src/components/LandingDemo.tsx.
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import { LinkButton } from '@astrojs/starlight/components';
+import { Icon } from '@astrojs/starlight/components';
+import LandingDemo from '../components/LandingDemo.tsx';
+import { landingChips } from '../lib/scenarios.mjs';
+import schema from '../../../deploy/helm/hello-kubernetes/values.schema.json';
+import chartYaml from '../../../deploy/helm/hello-kubernetes/Chart.yaml?raw';
+
+const base = import.meta.env.BASE_URL;
+const version = chartYaml.match(/^appVersion:\s*"?([^"\s]+)"?/m)![1];
+// The chips' commands and terminal output, worked out here, at build time.
+const chips = landingChips(schema, version);
+const description =
+  'A small web app to deploy on a Kubernetes cluster. Its page shows the namespace, pod and node that answered, so you can see your cluster at work.';
+
+// Structured data for search engines.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'hello-kubernetes',
+  description,
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Kubernetes (linux/amd64, linux/arm64)',
+  softwareVersion: version,
+  license: 'https://github.com/paulbouwer/hello-kubernetes/blob/main/LICENSE',
+  url: new URL(base, Astro.site).href,
+  codeRepository: 'https://github.com/paulbouwer/hello-kubernetes',
+  author: { '@type': 'Person', name: 'Paul Bouwer' },
+};
+
+const features = [
+  {
+    icon: 'random',
+    title: 'Shows which pod answered',
+    text: 'The page names the namespace, pod and node, so you can watch a Service spread requests.',
+    href: 'docs/guides/load-balancing/',
+  },
+  {
+    icon: 'right-arrow',
+    title: 'Works behind an Ingress or a Gateway',
+    text: 'The chart creates an Ingress or an HTTPRoute under any path prefix.',
+    href: 'docs/configure/path-prefixes/',
+  },
+  {
+    icon: 'padlock',
+    title: 'Secure by default',
+    text: 'Non-root, read-only, and within the restricted Pod Security Standard.',
+    href: 'docs/configure/security/',
+  },
+  {
+    icon: 'setting',
+    title: 'Helm, kubectl or Kustomize',
+    text: 'One chart, one release file, and the config builder for the rest.',
+    href: 'docs/configure/builder/',
+  },
+  {
+    icon: 'laptop',
+    title: 'amd64 and arm64',
+    text: 'One image for both, signed, with an SBOM, on Docker Hub and GHCR.',
+    href: 'docs/reference/container-image/',
+  },
+] as const;
 ---
 
 <StarlightPage
   frontmatter={{
     title: 'Hello, Kubernetes.',
-    description: 'A small web app to deploy on a Kubernetes cluster. It shows which pod answered.',
+    description,
     template: 'splash',
+    pagefind: false,
+    head: [{ tag: 'script', attrs: { type: 'application/ld+json' }, content: JSON.stringify(jsonLd) }],
   }}
+  hasSidebar={false}
 >
-  <p>
-    hello-kubernetes is a small web app to deploy on a Kubernetes cluster. Its page shows a message,
-    and the namespace, pod and node that answered.
-  </p>
-  <LinkButton href={`${import.meta.env.BASE_URL}docs/start-here/overview/`}>Read the docs</LinkButton>
+  <div class="hk-land not-content">
+    <section class="hk-land-hero">
+      <h1>Hello, Kubernetes. <span>See which pod answered.</span></h1>
+      <p class="hk-land-lead">
+        A small web app to deploy on your cluster. Its page shows the namespace, pod and node that answered each request.
+      </p>
+    </section>
+
+    <section>
+      <LandingDemo chips={chips} version={version} client:load />
+    </section>
+
+    <section aria-labelledby="hk-land-features-title">
+      <h2 id="hk-land-features-title" class="sr-only">Features</h2>
+      <ul class="hk-land-features">
+        {
+          features.map((f) => (
+            <li>
+              <Icon name={f.icon} size="11rem" class="hk-land-watermark" />
+              <h3>
+                <a href={`${base}${f.href}`}>{f.title}</a>
+              </h3>
+              <p>{f.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="hk-land-closing">
+      <h2>Get started</h2>
+      <div class="hk-land-links">
+        <a class="primary" href={`${base}docs/start-here/quick-start/`}>Read the quick start</a>
+        <a href={`${base}docs/configure/builder/`}>Open the config builder</a>
+      </div>
+    </section>
+  </div>
 </StarlightPage>
+
+<style is:global>
+  /* The landing page is wider than a docs page. */
+  :root {
+    --sl-content-width: 72rem;
+  }
+  /* Starlight's title panel, which PageTitle leaves empty here. */
+  .content-panel:has([data-hk-landing]) {
+    display: none;
+  }
+  .hk-land-features h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .hk-land-features h3 a:hover {
+    color: var(--sl-color-accent-high);
+  }
+</style>

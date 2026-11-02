@@ -97,42 +97,9 @@
 .hk-preview-bar select {
   width: auto;
 }
-.hk-preview-bar button,
 .hk-tabs button {
   font: inherit;
   cursor: pointer;
-}
-.hk-preview-bar button {
-  padding: 0.375rem 0.625rem;
-  border: 1px solid var(--hk-code-border);
-  border-radius: 0.375rem;
-  background: transparent;
-  color: var(--sl-color-text);
-}
-.hk-preview-bar button:hover:not(:disabled) {
-  border-color: var(--sl-color-accent);
-  color: var(--sl-color-accent-high);
-}
-.hk-preview-bar button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-.hk-preview-frame {
-  overflow: hidden;
-  border: 1px solid var(--hk-code-border);
-  border-radius: 0.5rem;
-  background: #333333;
-}
-.hk-preview-frame iframe {
-  display: block;
-  border: 0;
-  transform-origin: 0 0;
-}
-.hk-preview-frame p {
-  margin: 0;
-  padding: 2rem;
-  color: #f2f2f2;
-  text-align: center;
 }
 
 .hk-output {

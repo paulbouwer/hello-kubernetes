@@ -1,5 +1,5 @@
 ---
-// Starlight's page title, with two things for the docs pages: a note that
+// Starlight's page title, left out on the landing page, with two things for the docs pages: a note that
 // points agents to the Markdown copy of the page and to llms.txt, hidden from
 // people, and a button that copies the page as Markdown. The copies are
 // written after the build by scripts/build-markdown.mjs.
@@ -8,6 +8,8 @@ import Default from '@astrojs/starlight/components/PageTitle.astro';
 const base = import.meta.env.BASE_URL;
 const path = Astro.url.pathname;
 const isDoc = path.startsWith(`${base}docs/`);
+// The landing page has its own headline, so Starlight's title is left out.
+const isLanding = path === base;
 const markdown = path.replace(/\/$/, '.md');
 ---
 
@@ -19,7 +21,7 @@ const markdown = path.replace(/\/$/, '.md');
     </div>
   )
 }
-<Default />
+{isLanding ? <span data-hk-landing hidden /> : <Default />}
 {
   isDoc && (
     <div class="hk-page-actions">

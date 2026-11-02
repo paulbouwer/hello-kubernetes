@@ -2,40 +2,19 @@
 // Helm and Kustomize, and a live preview of the app's page. The output comes
 // from src/lib/builder.mjs and the page from src/lib/preview.mjs, which the
 // drift tests (tests/drift.mjs) check against the chart and the app.
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import * as builder from '../lib/builder.mjs';
 import * as preview from '../lib/preview.mjs';
 import schema from '../../../deploy/helm/hello-kubernetes/values.schema.json';
 import chartYaml from '../../../deploy/helm/hello-kubernetes/Chart.yaml?raw';
-import layout from '../../../src/app/views/layouts/main.handlebars?raw';
-import home from '../../../src/app/views/home.handlebars?raw';
-import css from '../../../src/app/static/css/main.css?raw';
-import logo from '../../../src/app/static/images/kubernetes.png?inline';
-import cyrillicExt from '../../../src/app/static/fonts/ubuntu/ubuntu-cyrillic-ext-300-normal.woff2?inline';
-import cyrillic from '../../../src/app/static/fonts/ubuntu/ubuntu-cyrillic-300-normal.woff2?inline';
-import greekExt from '../../../src/app/static/fonts/ubuntu/ubuntu-greek-ext-300-normal.woff2?inline';
-import greek from '../../../src/app/static/fonts/ubuntu/ubuntu-greek-300-normal.woff2?inline';
-import latinExt from '../../../src/app/static/fonts/ubuntu/ubuntu-latin-ext-300-normal.woff2?inline';
-import latin from '../../../src/app/static/fonts/ubuntu/ubuntu-latin-300-normal.woff2?inline';
+import { previewPage } from '../lib/preview-assets';
+import BrowserFrame from './BrowserFrame';
 import '../styles/builder.css';
 
 type Options = ReturnType<typeof builder.defaultOptions>;
 
 const version = chartYaml.match(/^appVersion:\s*"?([^"\s]+)"?/m)![1];
-const render = preview.createRenderer({ layout, home });
-const assets = {
-  css,
-  logo,
-  fonts: {
-    'ubuntu-cyrillic-ext-300-normal.woff2': cyrillicExt,
-    'ubuntu-cyrillic-300-normal.woff2': cyrillic,
-    'ubuntu-greek-ext-300-normal.woff2': greekExt,
-    'ubuntu-greek-300-normal.woff2': greek,
-    'ubuntu-latin-ext-300-normal.woff2': latinExt,
-    'ubuntu-latin-300-normal.woff2': latin,
-  } as Record<string, string>,
-};
 
 // The schema's description of a value, for the help text under a field.
 const p = schema.properties;
@@ -137,34 +116,24 @@ export default function ConfigBuilder() {
   const pod = replicas ? request % replicas : 0;
   const page = useMemo(() => {
     const image = `${builder.repositories[o.registry as keyof typeof builder.repositories]}:${o.tag || version}`;
-    const html = render(
-      preview.pageContext({
-        MESSAGE: o.message,
-        KUBERNETES_NAMESPACE: o.namespace,
-        KUBERNETES_POD_NAME: preview.podName(o.release, pod),
-        KUBERNETES_NODE_NAME: preview.nodeName(pod),
-        CONTAINER_IMAGE: image,
-        nodeOS: 'Linux 6.8.0',
-        arch,
-      }),
-    );
-    return preview.inlineAssets(html, assets);
+    return previewPage({
+      MESSAGE: o.message,
+      KUBERNETES_NAMESPACE: o.namespace,
+      KUBERNETES_POD_NAME: preview.podName(o.release, pod),
+      KUBERNETES_NODE_NAME: preview.nodeName(pod),
+      CONTAINER_IMAGE: image,
+      nodeOS: 'Linux 6.8.0',
+      arch,
+    });
   }, [o.message, o.namespace, o.release, o.registry, o.tag, pod, arch]);
 
-  // The app's page is laid out for a desktop. It fills a wide frame at full
-  // size, and is scaled down to fit a narrow one. The frame is tall enough for
-  // the whole page, so it never scrolls.
-  const pageWidth = 800;
-  const pageHeight = 600;
-  const frame = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(pageWidth);
-  const scale = Math.min(1, width / pageWidth);
-  useEffect(() => {
-    if (!frame.current) return;
-    const observer = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
-    observer.observe(frame.current);
-    return () => observer.disconnect();
-  }, []);
+  // The address the page would be served at: the host from the options, or
+  // hello.example.com, which is reserved for documentation; the Service's port
+  // when the app is reached through the Service itself; and the path prefix.
+  const host =
+    (o.expose === 'ingress' && o.ingressHost) || (o.expose === 'gateway' && o.hostname) || 'hello.example.com';
+  const port = o.expose === 'none' && Number(o.servicePort) !== 80 ? `:${Number(o.servicePort)}` : '';
+  const url = `http://${host}${port}${preview.normalisePrefix(o.pathPrefix)}/`;
 
   const notes = builder.notes(o);
   const files = builder.kustomize(o, schema, version);
@@ -285,28 +254,17 @@ export default function ConfigBuilder() {
                 <option value="linux/amd64">amd64 node</option>
                 <option value="linux/arm64">arm64 node</option>
               </select>
-              <button type="button" disabled={replicas < 2} onClick={() => setRequest(request + 1)}>
-                Send another request
-              </button>
             </div>
-            <div class="hk-preview-frame" ref={frame} style={{ height: `${pageHeight * scale}px` }}>
-              {replicas ? (
-                <iframe
-                  title="Preview of the hello-kubernetes page"
-                  sandbox=""
-                  srcdoc={page}
-                  width={Math.max(width, pageWidth)}
-                  height={pageHeight}
-                  scrolling="no"
-                  style={{ transform: `scale(${scale})` }}
-                />
-              ) : (
-                <p>With 0 replicas, no pod answers.</p>
-              )}
-            </div>
+            <BrowserFrame
+              url={url}
+              page={page}
+              empty={replicas ? undefined : 'With 0 replicas, no pod answers.'}
+              reloadDisabled={replicas < 2}
+              onReload={() => setRequest(request + 1)}
+            />
             <p class="hk-help">
               {replicas > 1
-                ? `The Service sends each request to one of ${replicas} pods.`
+                ? `Reload the page: the Service sends each request to one of ${replicas} pods.`
                 : 'With one pod, every request reaches the same pod.'}
             </p>
           </div>
