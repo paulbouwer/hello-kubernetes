@@ -37,7 +37,7 @@ This is work item 6.2. The 7.1 deprecation images follow right after it, as [dep
 | E15 | Snapshots Deployments, Services, ServiceAccounts, Ingresses, HTTPRoutes, Middlewares and namespaces before and after each flow. A guide that didn't delete its namespace failed, naming the flow and the namespace and ServiceAccount it left. |
 | Version | `src/app/package.json` and its lockfile are 1.11.0, matching the chart, so the publish workflow's version check passes. |
 | GHCR | The Container image page, the Overview and the README name GHCR first, as recommended; the chart's default stays Docker Hub in 1.x. |
-| Screenshot | `make screenshot` on k3d, with the local build loaded as `paulbouwer/hello-kubernetes:1.11.0`. |
+| Screenshot | `make screenshot` on k3d, with the local build loaded as `paulbouwer/hello-kubernetes:1.11.0`. The page is real, but the node line's kernel, the maintainer's own machine's, is shown as `Linux 7.x` (maintainer, 2026-11-02). `site/scripts/app-screenshot.mjs` makes that one change, and fails if the line isn't there. |
 
 ## Tracking
 
