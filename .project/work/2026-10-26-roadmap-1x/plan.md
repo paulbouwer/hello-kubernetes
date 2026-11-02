@@ -149,7 +149,7 @@ The [workstream 5 review](workstream-05-review.md) records the outcome, the find
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
 |---|---|---|---|---|---|
 | 6.1 | docs(project): write and approve the deprecation plan for the old tags | documentation, area:operations | — | — | [deprecation.md](../../roadmap/1.x/deprecation.md), [work package](../2026-11-02-deprecation-plan/plan.md) |
-| 6.2 | chore(release): release 1.11.0 | enhancement, area:operations | all 1.11 issues | #40, #45, #46 | [review.md](../../roadmap/1.x/review.md#about-archiving-the-old-tags), [community.md](../../roadmap/1.x/community.md#how-to-give-credit) |
+| 6.2 | chore(release): release 1.11.0 | enhancement, area:operations | all 1.11 issues | #40, #45, #46 | [work package](../2026-11-02-release-1-11-0/plan.md), [review.md](../../roadmap/1.x/review.md#about-archiving-the-old-tags), [community.md](../../roadmap/1.x/community.md#how-to-give-credit) |
 
 6.1 writes the deprecation plan, and builds and tests the warning images without publishing them (decided with the maintainer, 2026-11-02). 6.2 covers the release notes with credits, the `1` and `1.11` tags pointing at 1.11.0, closing the superseded PRs and commenting on #16. `1.10` stays with 1.10.1 until 7.1 replaces it with a warning image.
 

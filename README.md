@@ -10,7 +10,7 @@ hello-kubernetes is a small web app to deploy on a Kubernetes cluster. Its page 
 
 ![Hello world! from the hello-kubernetes image](hello-kubernetes.png)
 
-The image runs on `linux/amd64` and `linux/arm64` nodes, as a non-root user. It is on Docker Hub as `paulbouwer/hello-kubernetes` and on GHCR as `ghcr.io/paulbouwer/hello-kubernetes`.
+The image runs on `linux/amd64` and `linux/arm64` nodes, as a non-root user. It is on GHCR as `ghcr.io/paulbouwer/hello-kubernetes`, which we recommend, and on Docker Hub as `paulbouwer/hello-kubernetes`.
 
 **Documentation: [paulbouwer.github.io/hello-kubernetes](https://paulbouwer.github.io/hello-kubernetes/)**
 
