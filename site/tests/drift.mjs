@@ -41,7 +41,8 @@ function result(id, name, problems) {
     console.log(`PASS ${id} ${name}`);
   }
 }
-const run = (cmd, args, options = {}) => execFileSync(cmd, args, { encoding: 'utf8', ...options });
+const run = (cmd, args, options = {}) =>
+  execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options });
 
 // The first place where two objects differ, as a path such as
 // spec.template.spec.containers.0.livenessProbe.httpGet.path.
@@ -132,6 +133,19 @@ const cases = [
   { name: 'a Gateway, GHCR and a tag', expose: 'gateway', gatewayName: 'my-gateway', registry: 'ghcr', tag: '1.11' },
   { name: 'your own proxy, no rewriting', pathPrefix: '/app/hello', replicas: 1 },
   { name: 'the default namespace, GHCR', namespace: 'default', registry: 'ghcr', replicas: 0 },
+  // Messages with characters that Helm's --set parser reads as syntax, or
+  // that the shell would expand, or that look like another type. S2 checks
+  // that the rendered MESSAGE is exactly the text typed (workstream 5 review).
+  ...[
+    'Hello, Kubernetes!',
+    'C:\\demo',
+    '{hello}',
+    'a,b\\,c {x} [0] tail\\',
+    "It's \"quoted\" $HOME `date` ~ ; & |",
+    '1.10',
+    'true',
+    'null',
+  ].map((message) => ({ name: `the message ${JSON.stringify(message)}`, message })),
   // The landing page's chips.
   ...scenarios(schema).map((s) => ({ ...s.options, name: `the landing page chip ${s.label}` })),
 ];
@@ -153,30 +167,35 @@ for (const c of cases) {
   const o = { ...base, ...c };
   const problems = [];
   // S2: --set and values.yaml render the same, with what was chosen.
-  const withFlags = run('bash', ['-c', local(builder.helmTemplate(o, schema, version))]);
-  writeFileSync(join(work, 'values.yaml'), builder.valuesYaml(o, schema));
-  const withFile = run('helm', ['template', o.release, chart, '--namespace', o.namespace, '--values', join(work, 'values.yaml')]);
-  if (withFlags !== withFile) problems.push('--set and values.yaml render differently');
-  const docs = documents(withFlags);
-  const deployment = find(docs, 'Deployment');
-  const container = deployment.spec.template.spec.containers[0];
-  const env = Object.fromEntries(container.env.map((e) => [e.name, e.value]));
-  const service = find(docs, 'Service');
-  const expectImage = `${builder.repositories[o.registry]}:${o.tag || version}`;
-  if (deployment.spec.replicas !== Number(o.replicas)) problems.push(`replicas ${deployment.spec.replicas}`);
-  if ((env.MESSAGE ?? '') !== o.message) problems.push(`MESSAGE ${JSON.stringify(env.MESSAGE)}`);
-  if (container.image !== expectImage) problems.push(`image ${container.image}`);
-  if (service.spec.type !== o.serviceType) problems.push(`Service type ${service.spec.type}`);
-  if (service.spec.ports[0].port !== Number(o.servicePort)) problems.push(`Service port ${service.spec.ports[0].port}`);
-  const ingress = find(docs, 'Ingress');
-  if ((o.expose === 'ingress') !== Boolean(ingress)) problems.push(`Ingress ${ingress ? 'present' : 'missing'}`);
-  if (ingress && (ingress.spec.ingressClassName || '') !== o.ingressClass) problems.push('Ingress class');
-  if (ingress && (ingress.spec.rules[0].host || '') !== o.ingressHost) problems.push('Ingress host');
-  const route = find(docs, 'HTTPRoute');
-  if ((o.expose === 'gateway') !== Boolean(route)) problems.push(`HTTPRoute ${route ? 'present' : 'missing'}`);
-  if (route && route.spec.parentRefs[0].name !== (o.gatewayName || 'my-gateway')) problems.push('HTTPRoute parent');
-  const prefix = preview.normalisePrefix(o.pathPrefix);
-  if ((env.RENDER_PATH_PREFIX ?? '') !== prefix) problems.push(`RENDER_PATH_PREFIX ${env.RENDER_PATH_PREFIX}`);
+  // A failing helm template is a problem with this case, not the end of the run.
+  try {
+    const withFlags = run('bash', ['-c', local(builder.helmTemplate(o, schema, version))]);
+    writeFileSync(join(work, 'values.yaml'), builder.valuesYaml(o, schema));
+    const withFile = run('helm', ['template', o.release, chart, '--namespace', o.namespace, '--values', join(work, 'values.yaml')]);
+    if (withFlags !== withFile) problems.push('--set and values.yaml render differently');
+    const docs = documents(withFlags);
+    const deployment = find(docs, 'Deployment');
+    const container = deployment.spec.template.spec.containers[0];
+    const env = Object.fromEntries(container.env.map((e) => [e.name, e.value]));
+    const service = find(docs, 'Service');
+    const expectImage = `${builder.repositories[o.registry]}:${o.tag || version}`;
+    if (deployment.spec.replicas !== Number(o.replicas)) problems.push(`replicas ${deployment.spec.replicas}`);
+    if ((env.MESSAGE ?? '') !== o.message) problems.push(`MESSAGE ${JSON.stringify(env.MESSAGE)}`);
+    if (container.image !== expectImage) problems.push(`image ${container.image}`);
+    if (service.spec.type !== o.serviceType) problems.push(`Service type ${service.spec.type}`);
+    if (service.spec.ports[0].port !== Number(o.servicePort)) problems.push(`Service port ${service.spec.ports[0].port}`);
+    const ingress = find(docs, 'Ingress');
+    if ((o.expose === 'ingress') !== Boolean(ingress)) problems.push(`Ingress ${ingress ? 'present' : 'missing'}`);
+    if (ingress && (ingress.spec.ingressClassName || '') !== o.ingressClass) problems.push('Ingress class');
+    if (ingress && (ingress.spec.rules[0].host || '') !== o.ingressHost) problems.push('Ingress host');
+    const route = find(docs, 'HTTPRoute');
+    if ((o.expose === 'gateway') !== Boolean(route)) problems.push(`HTTPRoute ${route ? 'present' : 'missing'}`);
+    if (route && route.spec.parentRefs[0].name !== (o.gatewayName || 'my-gateway')) problems.push('HTTPRoute parent');
+    const prefix = preview.normalisePrefix(o.pathPrefix);
+    if ((env.RENDER_PATH_PREFIX ?? '') !== prefix) problems.push(`RENDER_PATH_PREFIX ${env.RENDER_PATH_PREFIX}`);
+  } catch (error) {
+    problems.push(`helm template failed: ${String(error.stderr || error.message).trim().split('\n')[0]}`);
+  }
   result('S2', `helm template gives what was chosen: ${c.name}`, problems);
 
   // S3: Kustomize on the release file matches helm template.
@@ -196,7 +215,14 @@ for (const c of cases) {
     s3.push(`kubectl kustomize failed: ${String(error.stderr).trim().split('\n')[0]}`);
   }
   if (kustomized) {
-    const helm = run('bash', ['-c', local(builder.helmTemplate({ ...o, release: 'demo' }, schema, version))]);
+    let helm = '';
+    try {
+      helm = run('bash', ['-c', local(builder.helmTemplate({ ...o, release: 'demo' }, schema, version))], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    } catch (error) {
+      s3.push(`helm template failed: ${String(error.stderr || error.message).trim().split('\n')[0]}`);
+    }
     const normalise = (text) => {
       const byName = {};
       for (const d of documents(text)) {
@@ -211,7 +237,7 @@ for (const c of cases) {
     };
     const a = normalise(helm);
     const b = normalise(kustomized);
-    for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    for (const key of helm ? new Set([...Object.keys(a), ...Object.keys(b)]) : []) {
       if (!a[key]) s3.push(`only in Kustomize: ${key}`);
       else if (!b[key]) s3.push(`only in helm template: ${key}`);
       else if (!isDeepStrictEqual(a[key], b[key])) {

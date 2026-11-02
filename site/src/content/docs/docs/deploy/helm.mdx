@@ -61,6 +61,8 @@ service:
 
 With a values file, install with `--values values.yaml`. Use `--set-string` for the message, so Helm keeps it as text even if it looks like a number or `yes`. In a values file, quote it.
 
+`--set` and `--set-string` read some characters as syntax, even inside quotes: a comma starts the next value, braces make a list, and a backslash escapes the next character. Put a backslash before each of them, as in `--set-string message='Hello\, Kubernetes!'`, or put text like this in a values file. The [config builder](/hello-kubernetes/docs/configure/builder/) escapes them for you.
+
 Helm checks your values against the chart's schema on every install and upgrade. A misspelled or unknown key, a wrong type or a value that isn't allowed stops the install, with a message that names the value, for example `additional properties 'pathPrefx' not allowed`. Editors that read JSON Schema show each value's description and allowed values.
 
 Every value is in the [values reference](/hello-kubernetes/docs/configure/values/). To see them from the chart itself:

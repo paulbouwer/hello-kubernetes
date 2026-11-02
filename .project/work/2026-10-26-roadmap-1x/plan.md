@@ -132,7 +132,7 @@ Re-planned with the maintainer on 2026-10-31 (#135): the site owns the user docs
 | 5.4 | feat(site): add llms.txt and Markdown copies of every page | enhancement, area:site | 5.3 | — | [work package](../2026-11-01-agent-docs/plan.md), [site.md](../../roadmap/1.x/site.md#agent-experience-ax) |
 | 5.5 | feat(site): add the live preview and the config builder | enhancement, area:site | 4.3, 5.1, 5.3 | — | [work package](../2026-11-01-config-builder/plan.md), [site.md](../../roadmap/1.x/site.md#config-builder) |
 | 5.6 | feat(site): add the landing page | enhancement, area:site | 5.5 | — | [work package](../2026-11-01-landing-page/plan.md), [site.md](../../roadmap/1.x/site.md#landing-page) |
-| 5.7 | fix(site): escape builder values for Helm's --set parser | bug, area:site | 5.5 | — | [workstream 5 review](workstream-05-review.md#finding-to-address) |
+| 5.7 | fix(site): escape builder values for Helm's --set parser | bug, area:site | 5.5 | — | [work package](../2026-11-02-builder-set-escaping/plan.md), [workstream 5 review](workstream-05-review.md#finding-to-address) |
 
 - 5.1 bundles the Ubuntu font and its licence in the image, removes the Google Fonts link, and adds an image test that the page makes no external requests. It is small and independent, so it comes first.
 - 5.2 sets up Astro, Starlight and Preact in `site/`, the identity and the code block theme, the Pages workflow (build on PRs, deploy from `main`), the required `site` CI job, Playwright from its pinned image with `make screenshot`, the CSP trial, Dependabot for `site/`, and port 4321 in `forwardPorts`.
