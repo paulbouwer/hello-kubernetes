@@ -1,40 +1,51 @@
 const express = require('express');
-const exphbs  = require('express-handlebars');
+const { engine } = require('express-handlebars');
 const os = require("os");
 const fs = require('fs');
+const path = require('path');
 
 const pino = require('pino');
-const expressPino = require('express-pino-logger');
+const pinoHttp = require('pino-http');
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
-const expressLogger = expressPino({ logger });
+const expressLogger = pinoHttp({ logger });
 
 const app = express();
 app.use(expressLogger);
-app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.engine('handlebars', engine({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
+// Find the app's files from its own folder, so it runs from any directory.
+app.set('views', path.join(__dirname, 'views'));
 
 // Configuration
 
 var port = process.env.PORT || 8080;
 var message = process.env.MESSAGE || 'Hello world!';
-var renderPathPrefix = (
-  process.env.RENDER_PATH_PREFIX ? 
-    '/' + process.env.RENDER_PATH_PREFIX.replace(/^[\\/]+/, '').replace(/[\\/]+$/, '') :
-    ''
-);
-var handlerPathPrefix = (
-  process.env.HANDLER_PATH_PREFIX ? 
-    '/' + process.env.HANDLER_PATH_PREFIX.replace(/^[\\/]+/, '').replace(/[\\/]+$/, '') :
-    ''
-);
+// A path prefix such as "app" or "/app/" becomes "/app". An empty prefix, or
+// one that is only slashes, becomes "".
+function normalisePrefix(value) {
+  var path = (value || '').replace(/^[\\/]+/, '').replace(/[\\/]+$/, '');
+  return path ? '/' + path : '';
+}
+
+var renderPathPrefix = normalisePrefix(process.env.RENDER_PATH_PREFIX);
+var handlerPathPrefix = normalisePrefix(process.env.HANDLER_PATH_PREFIX);
+
+// Asset URLs are absolute under a render prefix, and relative without one, so
+// that the page also works behind a proxy that serves it under a path and
+// strips that path (#38).
+var assetPathPrefix = renderPathPrefix ? renderPathPrefix + '/' : '';
 
 var namespace = process.env.KUBERNETES_NAMESPACE || '-';
 var podName = process.env.KUBERNETES_POD_NAME || os.hostname();
 var nodeName = process.env.KUBERNETES_NODE_NAME || '-';
 var nodeOS = os.type() + ' ' + os.release();
-var applicationVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
+var applicationVersion = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version;
 var containerImage = process.env.CONTAINER_IMAGE || 'paulbouwer/hello-kubernetes:' + applicationVersion
-var containerImageArch = JSON.parse(fs.readFileSync('info.json', 'utf8')).containerImageArch;
+// The image's architecture, read from the running Node binary, so it is always
+// the image's and never the host's. Node's names that differ from OCI names
+// are mapped, so the page matches image manifests and node labels.
+var ociArchitectures = { x64: 'amd64', ia32: '386', ppc64: 'ppc64le' };
+var containerImageArch = process.platform + '/' + (ociArchitectures[process.arch] || process.arch);
 
 logger.debug();
 logger.debug('Configuration');
@@ -56,7 +67,7 @@ logger.debug('-----------------------------------------------------');
 
 logger.debug('Handler: static assets');
 logger.debug('Serving from base path "' + handlerPathPrefix + '"');
-app.use(handlerPathPrefix, express.static('static'))
+app.use(handlerPathPrefix, express.static(path.join(__dirname, 'static')))
 
 logger.debug('Handler: /');
 logger.debug('Serving from base path "' + handlerPathPrefix + '"');
@@ -67,7 +78,7 @@ app.get(handlerPathPrefix + '/', function (req, res) {
       pod: podName,
       node: nodeName + ' (' + nodeOS + ')',
       container: containerImage + ' (' + containerImageArch + ')',
-      renderPathPrefix: renderPathPrefix
+      assetPathPrefix: assetPathPrefix
     });
 });
 
@@ -77,6 +88,30 @@ logger.debug();
 logger.debug('Server');
 logger.debug('-----------------------------------------------------');
 
-app.listen(port, function () {
+const server = app.listen(port, function (err) {
+  if (err) {
+    logger.error(err, 'Failed to listen on port %s', port);
+    process.exit(1);
+  }
   logger.info("Listening on: http://%s:%s", podName, port);
 });
+
+// Shutdown
+
+// Stop accepting connections, close idle keep-alive connections, and exit
+// when in-flight requests finish. Exit anyway after 5 seconds.
+function shutdown(signal) {
+  logger.info('Received %s, shutting down', signal);
+  server.close(function () {
+    logger.info('Server closed');
+    process.exit(0);
+  });
+  server.closeIdleConnections();
+  setTimeout(function () {
+    logger.warn('Requests still open after 5 seconds, exiting');
+    process.exit(1);
+  }, 5000).unref();
+}
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

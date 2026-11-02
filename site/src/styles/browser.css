@@ -1,0 +1,74 @@
+/* The browser window around the live preview (src/components/BrowserFrame.tsx),
+   on the landing page and in the config builder. */
+.hk-browser {
+  border: 1px solid var(--hk-code-border);
+  border-radius: 0.625rem;
+  overflow: hidden;
+}
+.hk-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 2.5rem;
+  padding: 0 0.5rem 0 0.875rem;
+  background: var(--hk-code-header);
+  border-bottom: 1px solid var(--hk-code-border);
+}
+.hk-browser-dots {
+  display: flex;
+  gap: 0.375rem;
+}
+.hk-browser-dots i {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: var(--sl-color-gray-5);
+}
+.hk-browser-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  background: var(--hk-code-background);
+  color: var(--sl-color-gray-2);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+}
+.hk-browser-reload {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--sl-color-gray-2);
+  cursor: pointer;
+}
+.hk-browser-reload:hover {
+  background: var(--hk-code-background);
+  color: var(--sl-color-white);
+}
+.hk-browser-page {
+  overflow: hidden;
+  background: #333333;
+}
+.hk-browser-page iframe {
+  display: block;
+  border: 0;
+  transform-origin: 0 0;
+}
+.hk-browser-page p {
+  margin: 0;
+  padding: 2rem;
+  color: #f2f2f2;
+  text-align: center;
+}
+/* Sized so the output fits the panel, with no scrollbar, at every width. */
+.hk-browser-reload:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

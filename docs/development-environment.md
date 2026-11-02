@@ -1,25 +1,100 @@
 # Development environment
 
-If you have [VS Code](https://code.visualstudio.com/) and the [VS Code Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension installed, the `.devcontainer` folder will be used to provide a container based development environment for this repo.
+The `.devcontainer` folder defines a container based development environment for this repo. Open it with any tool that supports [dev containers](https://containers.dev/), for example the VS Code [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension or the [devcontainer CLI](https://github.com/devcontainers/cli):
 
-## Terminal
+```bash
+devcontainer up --workspace-folder .
+devcontainer exec --workspace-folder . bash
+```
 
-The VS Code Terminal will run a Bash shell and make the following utilities will be available:
+The container runs as the `vscode` user on Ubuntu 26.04, and builds on both `amd64` and `arm64` hosts.
 
-- curl
-- Docker cli
-- Helm 3.x
-- jq
-- kubectl 
-- vim
+## Tools
 
-The following host folders will be mounted into the VS Code dev container:
+| Tool | Version |
+| ---- | ------- |
+| Node.js | pinned in `test/ci/install-tools.sh` |
+| kubectl | pinned in `test/ci/install-tools.sh` |
+| Helm | pinned in `test/ci/install-tools.sh` |
+| Trivy | pinned in `test/ci/install-tools.sh` |
+| kind | pinned in `test/ci/install-tools.sh` |
+| k3d | pinned in `test/ci/install-tools.sh` |
+| cloud-provider-kind | pinned in `test/ci/install-tools.sh` |
+| GitHub CLI (`gh`) | latest 2.x |
+| GitHub Copilot CLI (`copilot`) | latest, updates itself |
+| Claude Code (`claude`) | stable channel, updates itself |
+| Docker | via the docker-in-docker feature |
 
-- `/var/run/docker.sock` - allow for docker builds
-- `~/.kube` - allow for access to kubeconfig file
+The tools that build, test and scan what is deployed are pinned in `test/ci/install-tools.sh`, the same table that CI uses, so a test that passes here passes in CI for the same reason. Each download is checked against a SHA-256 kept in that table, and each version was published at least 7 days before it was chosen (AGENTS.md rule 8). Node.js matches the version in the app image. To change a version, change it in the table: CI and the devcontainer both follow.
+
+The developer tools that are never deployed (`gh`, the Copilot CLI and Claude Code) track their latest release, and are checked against the checksum published with that release. Change the `gh` major version with `GH_MAJOR` in `.devcontainer/Dockerfile`. Its version lookup uses the GitHub API without a token, which allows 60 requests an hour.
+
+The container builds from the repo root, and `/.dockerignore` sends only the files the Dockerfile copies.
 
 ## Application development
 
-Port `8080` has been configured to be forwarded to your host. If you run `npm start` in the `src/app` folder in the **VS Code Remote Containers** terminal, you will be able to access the website on `http://localhost:8080`. You can change the port in the `.devcontainer/devcontainer.json` file under the `appPort` key.
+Port `8080` is forwarded to your host. Run the app from the repo root:
 
-See the **Visual Studio Code Remote Containers** [guidance](https://code.visualstudio.com/docs/remote/containers) for more details on working with this setup.
+```bash
+make run
+```
+
+Then browse to `http://localhost:8080`. Stop it with Ctrl+C.
+
+`make run` installs the dependencies from `src/app/package-lock.json` with `npm ci` when they are missing or older than the lockfile, for example after a `git pull` that changed them. Otherwise it starts the app at once. To set the app's environment variables, put them before the command, for example `PORT=9090 MESSAGE="Hi" make run`.
+
+You can also start the app directly from any directory with `node src/app/server.js`, after `npm ci` in `src/app`.
+
+## Kubernetes clusters
+
+Docker runs inside the container (docker-in-docker), so `kind` and `k3d` clusters are created there and are isolated from your host:
+
+```bash
+kind create cluster --name hello-kubernetes
+k3d cluster create hello-kubernetes
+```
+
+Their contexts are written to `~/.kube/config` inside the container. The clusters and contexts are lost when the container is rebuilt.
+
+### Try the docs on a local cluster
+
+`make cluster-kind` or `make cluster-k3d` starts a cluster that is ready for the [deployment docs](../README.md#quick-start), set up as the e2e tests set it up:
+
+| | `make cluster-kind` | `make cluster-k3d` |
+|---|---|---|
+| Ingress controller | the NGINX Ingress Controller, class `nginx`, at `http://127.0.0.1:18080` | Traefik, class `traefik`, at `http://127.0.0.1:18082` |
+| Gateway | NGINX Gateway Fabric: `hk-gateway` in `hk-gateway`, at `http://127.0.0.1:18081` | Traefik: `traefik-gateway` in `kube-system`, at `http://127.0.0.1:18082` |
+| LoadBalancer Services | get an address from `cloud-provider-kind` | need another port than 80, such as `--set service.port=8080`, because Traefik holds port 80 |
+
+It builds the image from your working tree, and loads it as the chart's default image, `paulbouwer/hello-kubernetes:<appVersion>`, so the docs' commands use your build. In that cluster, the tag is your local build, not the published image. Until that version is published, install from the local chart, `deploy/helm/hello-kubernetes`, in place of `oci://ghcr.io/paulbouwer/charts/hello-kubernetes`.
+
+The command prints the `KUBECONFIG` to export and an example to try. The cluster is kept, and running the command again reuses it. The ports are forwarded to your machine (see VS Code's Ports view). The NGINX Ingress Controller needs a host on each Ingress. Use a name that ends in `.localhost`, such as `--set ingress.host=hello.localhost`: browsers resolve every `*.localhost` name to 127.0.0.1, so `http://hello.localhost:18080/app/hello/` works with no hosts file entry. With `curl`, send it as a header: `curl -H "Host: hello.localhost" http://127.0.0.1:18080/app/hello/`.
+
+Delete both clusters with `make cluster-clean`. The e2e tests use the same clusters and ports, so `make e2e-kind` and `make e2e-k3d` reuse a running local cluster, and leave it running.
+
+### Using clusters from your host
+
+Your host's `~/.kube` folder isn't mounted by default. To use clusters defined on your host, mount it read-only in `.devcontainer/devcontainer.json` and rebuild the container:
+
+```jsonc
+"mounts": [
+  "source=${localEnv:HOME}${localEnv:USERPROFILE}/.kube,target=/home/vscode/.kube-host,type=bind,readonly"
+]
+```
+
+Then merge your host contexts into the container's own kubeconfig:
+
+```bash
+mkdir -p ~/.kube
+KUBECONFIG=~/.kube/config:~/.kube-host/config kubectl config view --flatten > /tmp/kubeconfig \
+  && mv /tmp/kubeconfig ~/.kube/config \
+  && chmod 600 ~/.kube/config
+```
+
+This copies the contexts rather than linking them, so `kind`, `k3d` and `kubectl config` only ever write to the container's file and your host config isn't changed. Run it again to pick up changes from your host. Don't add the mounted file to `KUBECONFIG` instead: `kind delete cluster` locks every file listed there and fails on the read-only one.
+
+Contexts that point at `127.0.0.1` on your host, like a local kind cluster, won't be reachable from inside the container. Remote and cloud clusters work.
+
+## Signing in
+
+Sign-ins for `gh`, `copilot` and `claude` are stored inside the container and are lost when it's rebuilt. Sign in again after a rebuild, or pass tokens in from your host, for example `GH_TOKEN` for `gh`.

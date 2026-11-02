@@ -1,0 +1,12 @@
+// Prints the deprecation notice when the container starts, so it shows in
+// kubectl logs. npm runs it as prestart, before the app; it never fails.
+console.log([
+  '',
+  '************************************************************************',
+  '* DEPRECATED: hello-kubernetes {{tag}} is unsupported and has known',
+  '* security vulnerabilities. Upgrade to ghcr.io/paulbouwer/hello-kubernetes:1.11',
+  '* or paulbouwer/hello-kubernetes:1.11.',
+  '* https://paulbouwer.github.io/hello-kubernetes/docs/reference/upgrading/',
+  '************************************************************************',
+  '',
+].join('\n'));

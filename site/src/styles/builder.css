@@ -1,0 +1,184 @@
+/* The config builder (src/components/ConfigBuilder.tsx), in the site's code
+   block style: the same frame, header and copy icon as code.css. */
+.hk-builder {
+  margin-top: 1.5rem;
+  font-size: var(--sl-text-sm);
+}
+
+.hk-builder-body {
+  display: grid;
+  /* minmax(0, ...), so the 800px preview page can't widen the column on a phone. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+/* The fields of each section sit side by side where there is room. */
+.hk-form fieldset {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  column-gap: 1.5rem;
+  margin: 0 0 1rem;
+  padding: 0 0 0.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--sl-color-hairline);
+}
+.hk-form .hk-choice,
+.hk-form .hk-check {
+  grid-column: 1 / -1;
+}
+.hk-form legend {
+  margin-bottom: 0.5rem;
+  font-family: var(--hk-font-heading);
+  font-weight: 600;
+  font-size: var(--sl-text-base);
+  color: var(--sl-color-white);
+}
+.hk-field {
+  margin-bottom: 0.75rem;
+}
+.hk-field > label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: var(--sl-color-white);
+}
+.hk-form input:not([type='radio'], [type='checkbox']),
+.hk-form select,
+.hk-preview-bar select {
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.375rem;
+  background: var(--sl-color-bg);
+  color: var(--sl-color-text);
+  font: inherit;
+}
+.hk-form input:focus-visible,
+.hk-form select:focus-visible {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 1px;
+}
+.hk-form input:invalid {
+  border-color: var(--sl-color-red);
+}
+.hk-help {
+  margin: 0.25rem 0 0;
+  color: var(--sl-color-gray-3);
+  font-size: var(--sl-text-xs);
+  line-height: 1.5;
+}
+.hk-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.hk-choice label,
+.hk-check label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--sl-color-white);
+}
+
+.hk-preview-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.hk-preview-bar > span {
+  font-family: var(--hk-font-heading);
+  font-weight: 600;
+  font-size: var(--sl-text-base);
+  color: var(--sl-color-white);
+  margin-inline-end: auto;
+}
+.hk-preview-bar select {
+  width: auto;
+}
+.hk-tabs button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.hk-output {
+  margin-top: 1rem;
+  border: 1px solid var(--hk-code-border);
+  border-radius: 0.5rem;
+  background: var(--hk-code-background);
+  overflow: hidden;
+}
+.hk-tabs {
+  display: flex;
+  overflow-x: auto;
+  min-height: var(--hk-code-header-height);
+  background: var(--hk-code-header);
+  border-bottom: 1px solid var(--hk-code-border);
+}
+.hk-tabs button {
+  padding: 0 0.875rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--sl-color-gray-3);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+  white-space: nowrap;
+}
+.hk-tabs button[aria-selected='true'] {
+  color: var(--sl-color-accent-high);
+  border-bottom-color: var(--hk-blue);
+}
+.hk-panel {
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+.hk-panel > .hk-help {
+  margin: 0 0.25rem;
+}
+.hk-file {
+  border: 1px solid var(--hk-code-border);
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+.hk-file-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.25rem 0 0.75rem;
+  height: 2.25rem;
+  background: var(--hk-code-header);
+  color: var(--sl-color-accent-high);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+}
+.hk-copy {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  background: transparent;
+  color: var(--sl-color-gray-3);
+  cursor: pointer;
+}
+.hk-copy:hover {
+  color: var(--sl-color-white);
+}
+.hk-file pre {
+  margin: 0;
+  padding: 0.75rem;
+  overflow-x: auto;
+  background: var(--hk-code-background);
+  font-family: var(--sl-font-mono);
+  font-size: var(--sl-text-xs);
+  line-height: 1.6;
+}
+.hk-notes {
+  margin: 0;
+  padding: 0.75rem 1rem 0.75rem 2rem;
+  border-top: 1px solid var(--hk-code-border);
+  color: var(--sl-color-gray-2);
+}

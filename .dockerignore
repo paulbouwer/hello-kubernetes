@@ -1,0 +1,6 @@
+# Build context for the devcontainer, which builds from the repo root
+# (.devcontainer/devcontainer.json). Send only the files its Dockerfile copies.
+# The app image builds from src/app, with its own .dockerignore.
+*
+!.devcontainer/github-latest-release.sh
+!test/ci/install-tools.sh

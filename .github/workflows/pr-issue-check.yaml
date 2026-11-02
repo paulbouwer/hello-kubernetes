@@ -1,0 +1,65 @@
+# Fails a PR that doesn't belong to exactly one open issue. The issue comes from
+# the head branch name ({type}/{issue}-...), or from an issue linked in the PR's
+# Development section, found by .github/scripts/find-pr-issue.sh, the same
+# resolver that pr-labels.yaml uses. Linking an issue doesn't start a run, so run the job again after.
+#
+# Runs on pull_request with read-only access, from the PR's own branch, so
+# it also works for the first release PR into main.
+name: PR issue check
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches: [main, "release-*"]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  issue-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check that the PR has an open issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$AUTHOR" == "dependabot[bot]" ]]; then
+            echo "Dependabot PR: no issue needed."
+            exit 0
+          fi
+          if [[ "$HEAD_REF" == release-* && "$BASE_REF" == "main" ]]; then
+            echo "Release PR into main: no issue needed."
+            exit 0
+          fi
+
+          set +e
+          issue=$(.github/scripts/find-pr-issue.sh "$PR" "$HEAD_REF")
+          status=$?
+          set -e
+          case "$status" in
+            0)
+              echo "PR is for open issue #$issue."
+              ;;
+            3)
+              echo "::error::This PR points at more than one open issue. A PR belongs to exactly one issue: rename the branch, or remove a link in the Development section, then run this check again. See CONTRIBUTING.md."
+              exit 1
+              ;;
+            *)
+              echo "::error::This PR has no open issue. Name the branch {type}/{issue}-{slug} for an open issue, or ask the maintainer to link the PR to an issue in the Development section, then run this check again. See CONTRIBUTING.md."
+              exit 1
+              ;;
+          esac

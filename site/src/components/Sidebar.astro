@@ -1,0 +1,19 @@
+---
+// Starlight's Sidebar, using our SidebarSublist, which shows an icon next to a
+// page that names one. Based on @astrojs/starlight 0.42.7
+// (dist/components/Sidebar.astro), MIT licence, copyright Astro contributors.
+// We don't replace MobileMenuFooter, so Starlight's own is the one to use.
+import MobileMenuFooter from '@astrojs/starlight/components/MobileMenuFooter.astro';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from './SidebarSublist.astro';
+
+const { sidebar } = Astro.locals.starlightRoute;
+---
+
+<SidebarPersister>
+  <SidebarSublist sublist={sidebar} />
+</SidebarPersister>
+
+<div class="md:sl-hidden">
+  <MobileMenuFooter />
+</div>

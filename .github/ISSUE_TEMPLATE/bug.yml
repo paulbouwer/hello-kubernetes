@@ -1,0 +1,47 @@
+name: Bug
+description: Something doesn't work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you see? Include error messages and logs.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce it
+      description: The steps, commands or values that show the problem.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Image tag or chart version
+      placeholder: e.g. paulbouwer/hello-kubernetes:1.10.1
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How you installed it
+      options:
+        - Helm
+        - kubectl apply
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: cluster
+    attributes:
+      label: Cluster
+      description: The Kubernetes distribution and version, and the Ingress or Gateway controller if you use one.
+      placeholder: e.g. kind v0.27, Kubernetes 1.33, F5 NGINX Ingress Controller
