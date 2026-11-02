@@ -70,3 +70,4 @@ Verification results do not go here. They go in a comment on the issue, as set o
 | [2026-11-01-config-builder](2026-11-01-config-builder/plan.md) | Add the config builder, with Helm and Kustomize output, and a live preview of the app's page, both checked against the chart and the app in CI. | done |
 | [2026-11-01-landing-page](2026-11-01-landing-page/plan.md) | Add the landing page, with the headline, the command, a mock-up that chips change, the features, an Open Graph image and structured data. | done |
 | [2026-11-02-builder-set-escaping](2026-11-02-builder-set-escaping/plan.md) | Escape the config builder's --set values for Helm's parser, and give the Overview table headers. | done |
+| [2026-11-02-deprecation-plan](2026-11-02-deprecation-plan/plan.md) | Write the deprecation plan for the old image tags, and build and test the warning images without publishing them. | in-progress |
