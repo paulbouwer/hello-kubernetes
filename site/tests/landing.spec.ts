@@ -94,6 +94,8 @@ test('the page has one headline, its Open Graph image and its structured data', 
   const data = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!);
   expect(data['@type']).toBe('SoftwareApplication');
   expect(data.softwareVersion).toBe(version);
+  // Open source, with nothing to buy: no price or offer.
+  expect(data.offers).toBeUndefined();
 });
 
 test('the header has Docs and Config builder on the landing page only', async ({ page }) => {

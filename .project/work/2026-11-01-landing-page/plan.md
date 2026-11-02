@@ -34,7 +34,7 @@ Made on 2026-11-01. The maintainer chose the command, the header links and the i
 | Closing | "Get started", with the quick start and config builder buttons, and no command. |
 | Size | The chips' commands and terminal output are worked out at build time. The island is 4 KB; the preview's assets load when the mock-up comes into view. |
 | Title | Starlight's page title is left out on the landing page, so it has one headline. |
-| Structured data | A `SoftwareApplication` with the chart's version, the licence and the repo. |
+| Structured data | A `SoftwareApplication` with the chart's version, the licence and the repo. No `offers` or price: it is open source, with nothing to buy (maintainer, 2026-11-02). |
 
 ## Tracking
 
