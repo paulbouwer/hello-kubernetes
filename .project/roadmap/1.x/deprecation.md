@@ -2,7 +2,7 @@
 title: Deprecating the old image tags
 description: How every image tag before 1.11 gets a warning on its page that points to the fix, right after 1.11.0 ships, with the originals kept and the steps tested.
 type: plan
-status: draft
+status: approved
 areas: [image, operations]
 issues: [154]
 created: 2026-11-02
@@ -17,7 +17,7 @@ Every image before 1.11 runs an unsupported Node.js on an old base, with known v
 
 So, right after 1.11.0 ships, every old tag gets an image that shows a clear warning on its page and points to the fix. Nothing else changes, so nothing that works today breaks. The originals stay reachable under a second tag, and each tag can be rolled back.
 
-This plan is work item 6.1 (#154). The maintainer signs it off before anything is pushed. Publishing is 7.1, after 6.2 ships 1.11.0.
+This plan is work item 6.1 (#154). The maintainer signed it off on 2026-11-02, before anything was pushed. Publishing is 7.1, after 6.2 ships 1.11.0.
 
 ## Decisions
 
@@ -129,4 +129,4 @@ After 6.2 has published 1.11.0, and moved `1` and `1.11` to it:
 
 ## Sign-off
 
-- [ ] The maintainer approves this plan, the banner and the notice, and the dates, for 7.1.
+- [x] The maintainer approves this plan, the banner and the notice, and the dates, for 7.1. Approved by @paulbouwer on 2026-11-02, after seeing the 1.10.1 warning image running on k3s (#154).

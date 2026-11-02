@@ -2,7 +2,7 @@
 title: Deprecation plan
 description: Write the deprecation plan for the old image tags, and build and test the warning images without publishing them.
 type: plan
-status: in-progress
+status: done
 areas: [image, operations]
 issues: [154]
 created: 2026-11-02
@@ -48,4 +48,4 @@ Made with the maintainer on 2026-11-02; the full list is in [deprecation.md](../
 | Checks | `deprecation/deprecate.sh test`: D1–D4 and K1 pass for all 13. |
 | Failure path | A patch that also changed the page failed D2. |
 | Look | Screenshots of 1.0, 1.3, 1.5 and 1.10.1, and the startup log of 1.5. |
-| Sign-off | The maintainer approves deprecation.md, on the issue and in its sign-off section. |
+| Sign-off | The maintainer approved deprecation.md on 2026-11-02, after seeing the 1.10.1 warning image running on k3s. |
