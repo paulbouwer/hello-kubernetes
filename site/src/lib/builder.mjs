@@ -76,6 +76,13 @@ function shell(value) {
   return /^[A-Za-z0-9_./:@=,+-]+$/.test(value) ? value : `'${value.replaceAll("'", `'\\''`)}'`;
 }
 
+// Text for Helm's --set parser, which reads a comma as the start of the next
+// value, braces as a list and a backslash as an escape, even with
+// --set-string. Escaping them keeps the text as typed (workstream 5 review).
+function helmText(value) {
+  return String(value).replace(/[\\,{}]/g, (c) => `\\${c}`);
+}
+
 // --set flags for the values. Text that could read as a number or a boolean
 // uses --set-string, so Helm keeps it as text.
 export function setFlags(values, path = '') {
@@ -85,12 +92,12 @@ export function setFlags(values, path = '') {
     if (Array.isArray(value)) {
       value.forEach((item, i) => {
         if (typeof item === 'object') flags.push(...setFlags(item, `${name}[${i}]`));
-        else flags.push(`--set-string ${shell(`${name}[${i}]=${item}`)}`);
+        else flags.push(`--set-string ${shell(`${name}[${i}]=${helmText(item)}`)}`);
       });
     } else if (typeof value === 'object') {
       flags.push(...setFlags(value, name));
     } else if (typeof value === 'string') {
-      flags.push(`--set-string ${shell(`${name}=${value}`)}`);
+      flags.push(`--set-string ${shell(`${name}=${helmText(value)}`)}`);
     } else {
       flags.push(`--set ${shell(`${name}=${value}`)}`);
     }

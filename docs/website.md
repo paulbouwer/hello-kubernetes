@@ -94,7 +94,7 @@ The Config builder page is a Preact island, `site/src/components/ConfigBuilder.t
 | Test | Checks |
 |---|---|
 | S1 | The preview renders the same HTML as the app's container, for the defaults, a message with HTML in it, and a path prefix. |
-| S2 | For 8 sets of options, `helm template` accepts the builder's `--set` flags and its `values.yaml`, both render the same, and the result has what was chosen. |
+| S2 | For each set of options, `helm template` accepts the builder's `--set` flags and its `values.yaml`, both render the same, and the result has what was chosen. The sets include the landing page's chips and messages with commas, backslashes, braces, quotes and shell characters, whose rendered `MESSAGE` must equal the text typed. |
 | S3 | For the same sets, `kubectl kustomize` on the builder's Kustomize output, with the release file rendered locally, matches `helm template` with the release name `demo`. Only the namespace field, the Namespace object and the order of env vars may differ. A failure names the field. |
 
 If you change the app's templates, `server.js`, or the chart, run `make site-drift`. CI runs it in the `site` job.
