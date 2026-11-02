@@ -164,6 +164,8 @@ Release work happens on a release branch (currently `release-1.11`), which merge
 - **Close the issue when its PR merges into the release branch**, by moving it to Done. Add a short comment such as "Merged into `release-1.11` in #52. This ships in 1.11.0.", so a reporter knows it isn't released yet.
 - **The milestone tracks the release.** It stays open while the release branch is in progress, and is closed when the release ships. Release notes are generated from the labels on merged PRs, not from issues.
 - **Merge PRs with a merge commit**, not a squash or rebase. That keeps each signed commit unchanged, along with contributors' commits and `Co-authored-by` trailers. This applies to the final release-branch → `main` PR too.
+- **Delete feature branches explicitly**, with `gh pr merge <n> --merge --delete-branch`. The repo's "Automatically delete head branches" setting is off, so that merging a release branch into `main` keeps the release branch. It was on until 2026-11-02, when merging #158 deleted `release-1.11`: the ruleset forbids deleting `release-*` branches, but the maintainer's admin bypass let the post-merge delete through. The branch was restored from `main`'s tip, the commit `v1.11.0` was tagged from (#156).
+- **The release branch stays after the release**, for the version's patch releases and follow-ups, and merges into `main` again for each one.
 
 ## Conventions
 
