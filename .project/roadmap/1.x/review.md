@@ -138,6 +138,8 @@ Rebuilding from a 2017–2021 commit is risky: the old base images and npm depen
 
 **4. Don't put the warning on `1` and `1.10`.** Move those tags to the real 1.11 fix, so people on those tags get the fix instead of a warning. Overwrite 1.10.1 and earlier with the warning versions.
 
+> **Changed on 2026-11-02:** `1.10` stays with 1.10.1 and gets the warning too; `1`, `1.11` and `1.11.0` point at 1.11.0. All the warning images are published at once, right after 1.11.0, not in waves. The plan is [deprecation.md](deprecation.md).
+
 **5. Order matters:**
 1. Ship 1.11 first, so the warning has something to point to.
 2. Announce it with a date: Docker Hub overview, a pinned issue, the README, and the upstream PRs to AWS CDK and the others.

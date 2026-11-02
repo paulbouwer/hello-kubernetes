@@ -1,0 +1,20 @@
+# The old tags that get a deprecation image, and the digest of the original
+# image each one points at today (read from Docker Hub on 2026-11-02, the
+# same as .project/roadmap/1.x/review.md). deprecate.sh builds every image
+# FROM these digests, never from the tag, so a moved tag can't change what is
+# built. 1.10 and 1.10.1 are the same image.
+#
+# tag     original digest                                                            user
+1.0     sha256:e2b6b91c8cad617222c76063e24569eb3d2b3234ca07488db243ab68126a69f0   root
+1.1     sha256:d058499caca5c26c9e99e586089c39b676178e0a0740434ee42ca91627d14d73   root
+1.2     sha256:a53650885c21b4f6f284380db6e67ccbeb2159a23d4515913dba31384a665357   root
+1.3     sha256:69d6e285739a79dafe37caa736e52da4eb79e58c4a4935030007272a2d952676   root
+1.4     sha256:a9fc93acfbc734827a72107bf7f759745a66ea61758863c094c36e5f4f4b810b   root
+1.5     sha256:88193b1092d70d8b0e38ea8aef69ae642366cde7be0b1bdb449f68bce51fc04d   root
+1.6     sha256:7326a73da03c660b50dc22ffb4ee54f1e5de239b5ffbd6926872e29e0a19e258   node
+1.7     sha256:b5b35951d49faeb4844d90d749513acdec96485fa3ebb9d41492dcaa71254a30   node
+1.8     sha256:6516f998c9ab0c5be8a24e4d696ec1e818ede3ec5a0710e8ff5115f0ed89e3b4   node
+1.9     sha256:be6b5ba3abdca6e01689e0d1d27b41410fb5bf5793da407108a89ef355f362f0   node
+1.10.0  sha256:08e951b9a5c4890740d2291a0f95782aca2b559bf18fb9e2a76d2146225af8b1   node
+1.10.1  sha256:2ad94733189b30844049caed7e17711bf11ed9d1116eaf10000586081451690b   node
+1.10    sha256:2ad94733189b30844049caed7e17711bf11ed9d1116eaf10000586081451690b   node
