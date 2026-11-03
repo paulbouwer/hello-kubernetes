@@ -4,7 +4,7 @@ description: Plans for each piece of work we take on, with the intent, the rules
 type: index
 status: active
 created: 2026-10-26
-updated: 2026-10-26
+updated: 2026-11-03
 ---
 
 # Work

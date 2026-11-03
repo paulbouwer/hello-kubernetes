@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [app, image, deploy, ci, site, operations]
 created: 2026-10-26
-updated: 2026-11-02
+updated: 2026-11-03
 ---
 
 # 1.x roadmap
