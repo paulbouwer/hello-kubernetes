@@ -2,7 +2,7 @@
 title: Deprecating the old image tags
 description: How every image tag before 1.11 gets a warning on its page that points to the fix, right after 1.11.0 ships, with the originals kept and the steps tested.
 type: plan
-status: approved
+status: published
 areas: [image, operations]
 issues: [154]
 created: 2026-11-02
@@ -126,6 +126,36 @@ After 6.2 has published 1.11.0, and moved `1` and `1.11` to it:
 - **The Node.js advisory:** the review's notes on the October 2026 Node.js security release come from news coverage. Check Node's own release notes before quoting versions in the announcement.
 - **Pull limits:** pushing 13 images and creating 13 tags uses the maintainer's Docker Hub account; run 7.1 when signed in.
 - **Untested here:** `publish` was never run. It changes public tags, so the first run is 7.1's. Its guards, for 1.11.0 and for the original digests, are in the script for the maintainer to review.
+
+## Published
+
+On 3 November 2026 (#165), the maintainer ran `deprecate.sh publish --yes`, after the 13 digests were checked again and all 65 checks passed on images rebuilt that day.
+
+| Date | What |
+|---|---|
+| 2026-11-03 | The 13 warning images published, and the 13 `-original` tags created. Announced in the pinned issue #167, the README, the 1.11.0 release notes and the Docker Hub overview. |
+| 2026-12-01 | Remove the `-original` tags, unless a rollback is needed. |
+| 2027-05-03 | Review whether to keep the warning images, with Docker Hub's `last_pulled` dates and the upstream fixes. |
+
+**The `-original` tags are indexes.** `docker buildx imagetools create` doesn't retag a manifest: it writes a small image index that points to it. So each `<tag>-original` has a new digest of its own, and the original manifest, with its original digest, is inside it, unchanged. Pulling `<tag>-original`, or the original digest, gives the original image. Checked for all 13 tags on 2026-11-03, with `1.5` and `1.5-original` pulled fresh: the banner and the notice are on `1.5`, and not on `1.5-original`.
+
+| Tag | Warning image | `-original` index |
+|---|---|---|
+| `1.0` | `sha256:06626f2e…44bf` | `sha256:86598edc…6a72` |
+| `1.1` | `sha256:da2c8e11…f7b5` | `sha256:0f4ed968…2dd5` |
+| `1.2` | `sha256:16f510a1…129e` | `sha256:313d8573…0fd9` |
+| `1.3` | `sha256:92ace9af…d823` | `sha256:9a6be941…e5e5` |
+| `1.4` | `sha256:201eef77…e171` | `sha256:ef4af5f6…710a` |
+| `1.5` | `sha256:c1be33c4…1ae7` | `sha256:b5c6e1b4…eeac` |
+| `1.6` | `sha256:5496c736…6d09` | `sha256:5fd71127…fa3b` |
+| `1.7` | `sha256:0df725f7…ec98` | `sha256:7ef72aac…1282` |
+| `1.8` | `sha256:56924afd…34cc` | `sha256:877df5ec…a534` |
+| `1.9` | `sha256:9899f2b5…6f28` | `sha256:ce3b27e5…f33b` |
+| `1.10.0` | `sha256:53d2a949…cc53` | `sha256:42dc3f11…d3a` |
+| `1.10.1` | `sha256:c1636f78…a0c` | `sha256:179d04a5…743` |
+| `1.10` | `sha256:93f97f9b…320` | `sha256:179d04a5…743` |
+
+`1.10` and `1.10.1` have different warning images, because each banner names its own tag. `1`, `1.11` and `1.11.0` are still 1.11.0, `sha256:1334b75b…37ad`.
 
 ## Sign-off
 

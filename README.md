@@ -2,6 +2,8 @@
 
 [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/paulbouwer/hello-kubernetes?sort=semver)](https://hub.docker.com/r/paulbouwer/hello-kubernetes) [![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/paulbouwer/hello-kubernetes?sort=semver)](https://hub.docker.com/r/paulbouwer/hello-kubernetes) [![Docker Pulls](https://img.shields.io/docker/pulls/paulbouwer/hello-kubernetes)](https://hub.docker.com/r/paulbouwer/hello-kubernetes) [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/hello-kubernetes)](https://artifacthub.io/packages/search?repo=hello-kubernetes)
 
+> **Using a tag before 1.11?** `1.0` to `1.10.1` are deprecated: they're unsupported, have known security vulnerabilities, and now show a warning. Upgrade to `1.11`. See [the pinned issue](https://github.com/paulbouwer/hello-kubernetes/issues/167).
+
 hello-kubernetes is a small web app to deploy on a Kubernetes cluster. Its page shows:
 
 - a message, **Hello world!** by default

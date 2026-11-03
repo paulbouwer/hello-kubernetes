@@ -155,6 +155,8 @@ The [workstream 5 review](workstream-05-review.md) records the outcome, the find
 
 ### After 1.11
 
+This work moved to its own epic, [#166](https://github.com/paulbouwer/hello-kubernetes/issues/166), in the `1.11.follow-ups` milestone, on 2026-11-03, when #54 closed with 1.11.0 delivered.
+
 #### 7. Deprecation and outreach
 
 | ID | Issue title | Labels | Blocked by | Resolves | Plan |
@@ -332,6 +334,6 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 - **From the workstream 3 review:** no new major defect. Its release gates are in 4.1 and 6.2, and its minor issues are placed in 4.1 and 4.4, from the [workstream 3 review](workstream-03-review.md#minor-issues).
 - **From the workstream 5 review:** the builder fix is 5.7, and its release gates are in 6.2. **After 1.11:** reduce the preview's assets (about 360 KB, loaded lazily) if profiling shows a need, and give the copy buttons a fallback when the clipboard is denied, from the [workstream 5 review](workstream-05-review.md#important-release-gates).
 - **After 1.11: CI efficiency.** Run the image and e2e tests only when their inputs change, as proposed in the [workstream 3 efficiency review](workstream-03-efficiency-review.md). Design it once all the 1.11 workflows exist (decided 2026-10-30).
-- **After 1.11: the old tags.** 7.1 publishes the warning images right after 1.11.0, removes the `-original` tags 4 weeks later, and the warning images' removal is reviewed after 6 months. In 2.0, GHCR becomes the chart's default image. See [deprecation.md](../../roadmap/1.x/deprecation.md#decisions).
+- **After 1.11: the old tags.** 7.1 (#165, under epic #166) published the warning images on 2026-11-03, the day after 1.11.0. It removes the `-original` tags on 2026-12-01, and the warning images' removal is reviewed after 6 months. In 2.0, GHCR becomes the chart's default image. See [deprecation.md](../../roadmap/1.x/deprecation.md#decisions).
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
