@@ -165,7 +165,17 @@ Release work happens on a release branch (currently `release-1.11`), which merge
 - **The milestone tracks the release.** It stays open while the release branch is in progress, and is closed when the release ships. Release notes are generated from the labels on merged PRs, not from issues.
 - **Merge PRs with a merge commit**, not a squash or rebase. That keeps each signed commit unchanged, along with contributors' commits and `Co-authored-by` trailers. This applies to the final release-branch → `main` PR too.
 - **Delete feature branches explicitly**, with `gh pr merge <n> --merge --delete-branch`. The repo's "Automatically delete head branches" setting is off, so that merging a release branch into `main` keeps the release branch. It was on until 2026-11-02, when merging #158 deleted `release-1.11`: the ruleset forbids deleting `release-*` branches, but the maintainer's admin bypass let the post-merge delete through. The branch was restored from `main`'s tip, the commit `v1.11.0` was tagged from (#156).
-- **The release branch stays after the release**, for the version's patch releases and follow-ups, and merges into `main` again for each one.
+- **The release branch stays after the release**, as the maintenance branch for its version: fixes and follow-ups for 1.11.x land on `release-1.11` first, through their own PRs, as before (decided with the maintainer, 2026-11-03).
+- **Merge it into `main` when that makes sense**, with a PR whose head is the release branch, titled for what it brings, for example `docs: merge release-1.11 into main`, and a summary of the PRs it includes:
+
+  | Change on the release branch | Into `main` |
+  |---|---|
+  | Something people read on GitHub or the website: the README, the docs, the site | soon after it lands, so what people read matches what's published |
+  | A fix that ships in a patch release | when the patch is ready, then tag the patch (for example `v1.11.1`) on `main`: the publish workflow only publishes tags on `main` |
+  | Internal records: `.project/`, plans | with the next merge |
+
+  Merge it with a merge commit, and **never** with `--delete-branch`.
+- **The next version gets its own branch.** When 1.12 work starts, branch `release-1.12` from `main`. Fixes for 1.11 still land on `release-1.11` first.
 
 ## Conventions
 
