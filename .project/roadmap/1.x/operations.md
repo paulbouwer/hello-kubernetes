@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [operations]
 created: 2026-10-23
-updated: 2026-10-29
+updated: 2026-11-03
 ---
 
 # Operations

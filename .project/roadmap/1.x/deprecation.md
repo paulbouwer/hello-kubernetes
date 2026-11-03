@@ -6,7 +6,7 @@ status: published
 areas: [image, operations]
 issues: [154]
 created: 2026-11-02
-updated: 2026-11-02
+updated: 2026-11-03
 ---
 
 # Deprecating the old image tags
