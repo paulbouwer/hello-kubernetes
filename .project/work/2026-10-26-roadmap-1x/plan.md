@@ -5,7 +5,7 @@ type: plan
 status: active
 areas: [app, image, deploy, ci, site, operations]
 created: 2026-10-26
-updated: 2026-11-02
+updated: 2026-11-03
 ---
 
 # 1.x roadmap
@@ -151,9 +151,11 @@ The [workstream 5 review](workstream-05-review.md) records the outcome, the find
 | 6.1 | docs(project): write and approve the deprecation plan for the old tags | documentation, area:operations | — | — | [deprecation.md](../../roadmap/1.x/deprecation.md), [work package](../2026-11-02-deprecation-plan/plan.md) |
 | 6.2 | chore(release): release 1.11.0 | enhancement, area:operations | all 1.11 issues | #40, #45, #46 | [work package](../2026-11-02-release-1-11-0/plan.md), [review.md](../../roadmap/1.x/review.md#about-archiving-the-old-tags), [community.md](../../roadmap/1.x/community.md#how-to-give-credit) |
 
-6.1 writes the deprecation plan, and builds and tests the warning images without publishing them (decided with the maintainer, 2026-11-02). 6.2 covers the release notes with credits, the `1` and `1.11` tags pointing at 1.11.0, closing the superseded PRs and commenting on #16. `1.10` stays with 1.10.1 until 7.1 replaces it with a warning image.
+6.2 released 1.11.0 on 2026-11-02 (#156): the images, the chart, the release file and the website are live, and every release check passed ([work package](../2026-11-02-release-1-11-0/plan.md)). 6.1 writes the deprecation plan, and builds and tests the warning images without publishing them (decided with the maintainer, 2026-11-02). 6.2 covers the release notes with credits, the `1` and `1.11` tags pointing at 1.11.0, closing the superseded PRs and commenting on #16. `1.10` stays with 1.10.1 until 7.1 replaces it with a warning image.
 
 ### After 1.11
+
+This work moved to its own epic, [#166](https://github.com/paulbouwer/hello-kubernetes/issues/166), in the `1.11.follow-ups` milestone, on 2026-11-03, when #54 closed with 1.11.0 delivered.
 
 #### 7. Deprecation and outreach
 
@@ -161,6 +163,7 @@ The [workstream 5 review](workstream-05-review.md) records the outcome, the find
 |---|---|---|---|---|---|
 | 7.1 | build(image): publish deprecation images for the old tags | enhancement, area:image | 6.1, 6.2 | — | [deprecation.md](../../roadmap/1.x/deprecation.md#the-order-in-71) |
 | 7.2 | chore(outreach): send upgrade PRs to the main upstream users | enhancement, area:operations | 6.2 | — | [review.md](../../roadmap/1.x/review.md#about-archiving-the-old-tags) |
+| 7.3 | build(release): sign the chart and images with cosign | enhancement, area:ci | 6.2 | — | [6.2 work package](../2026-11-02-release-1-11-0/plan.md#after-the-release) |
 
 ## Rules
 
@@ -312,6 +315,7 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 ### 7. Deprecation and outreach
 - 7.1 build(image): publish deprecation images for the old tags
 - 7.2 chore(outreach): send upgrade PRs to the main upstream users
+- 7.3 build(release): sign the chart and images with cosign
 
 ## Acceptance criteria
 
@@ -330,6 +334,6 @@ All of the 1.x roadmap. Breaking chart changes wait for 2.0.
 - **From the workstream 3 review:** no new major defect. Its release gates are in 4.1 and 6.2, and its minor issues are placed in 4.1 and 4.4, from the [workstream 3 review](workstream-03-review.md#minor-issues).
 - **From the workstream 5 review:** the builder fix is 5.7, and its release gates are in 6.2. **After 1.11:** reduce the preview's assets (about 360 KB, loaded lazily) if profiling shows a need, and give the copy buttons a fallback when the clipboard is denied, from the [workstream 5 review](workstream-05-review.md#important-release-gates).
 - **After 1.11: CI efficiency.** Run the image and e2e tests only when their inputs change, as proposed in the [workstream 3 efficiency review](workstream-03-efficiency-review.md). Design it once all the 1.11 workflows exist (decided 2026-10-30).
-- **After 1.11: the old tags.** 7.1 publishes the warning images right after 1.11.0, removes the `-original` tags 4 weeks later, and the warning images' removal is reviewed after 6 months. In 2.0, GHCR becomes the chart's default image. See [deprecation.md](../../roadmap/1.x/deprecation.md#decisions).
+- **After 1.11: the old tags.** 7.1 (#165, under epic #166) published the warning images on 2026-11-03, the day after 1.11.0. It removes the `-original` tags on 2026-12-01, and the warning images' removal is reviewed after 6 months. In 2.0, GHCR becomes the chart's default image. See [deprecation.md](../../roadmap/1.x/deprecation.md#decisions).
 - **The due date** of `v1.11` (2026-10-30) is not realistic for 24 issues. Look at it again when the issues exist.
 - **After the 1.x work:** enforce "only the owner creates labels" with a workflow that removes or reports labels that are not in `.github/labels.sh`, and a CODEOWNERS entry for the script. See the [labels and board plan](../2026-10-26-labels-and-board/plan.md#open).
