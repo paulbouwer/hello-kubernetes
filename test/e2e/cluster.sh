@@ -91,9 +91,12 @@ load_image() {
       # k3d image import can fail on some nodes and still exit 0, so check
       # each node, and try again. --mode direct streams the image into each
       # node, rather than through a shared file that a node can read too soon.
+      # It can also hang and never return (#174), so each attempt gets 2
+      # minutes, and is killed 10 seconds after that if it ignores the signal.
       local attempt
       for attempt in 1 2 3; do
-        k3d image import "$1" --cluster "$cluster" --mode direct >/dev/null 2>&1 || true
+        timeout --kill-after=10s 120s k3d image import "$1" --cluster "$cluster" --mode direct >/dev/null 2>&1 ||
+          echo "k3d image import attempt $attempt failed or timed out" >&2
         image_on_k3d_nodes "$1" && return 0
         echo "The image is missing from a node after import $attempt of 3" >&2
       done
