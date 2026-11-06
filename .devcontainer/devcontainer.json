@@ -10,7 +10,7 @@
   // Features
   "features": {
     // Moby packages aren't published for Ubuntu 26.04, so install Docker CE
-    "ghcr.io/devcontainers/features/docker-in-docker:2": { "moby": false }
+    "ghcr.io/devcontainers/features/docker-in-docker:4": { "moby": false }
   },
 
   // Port forwarding
