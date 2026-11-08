@@ -15,6 +15,10 @@ ARG TARGETARCH
 
 COPY .devcontainer/github-latest-release.sh /usr/local/bin/github-latest-release
 
+# xclip that copies to the host clipboard with OSC 52, through the terminal,
+# so gh can copy its one-time code
+COPY .devcontainer/osc52-clipboard.sh /usr/local/bin/xclip
+
 # Node.js, kubectl, Helm, Trivy, kind, k3d and cloud-provider-kind, at the
 # versions pinned in test/ci/install-tools.sh: the same versions as CI, each
 # checked against a SHA-256 kept in that table.

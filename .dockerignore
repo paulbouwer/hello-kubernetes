@@ -3,4 +3,5 @@
 # The app image builds from src/app, with its own .dockerignore.
 *
 !.devcontainer/github-latest-release.sh
+!.devcontainer/osc52-clipboard.sh
 !test/ci/install-tools.sh
