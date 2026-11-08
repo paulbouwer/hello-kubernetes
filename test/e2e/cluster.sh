@@ -208,7 +208,7 @@ setup_routing_kind() {
   work=$(mktemp -d)
   if ! kubectl get crd httproutes.gateway.networking.k8s.io >/dev/null 2>&1; then
     echo "Installing the Gateway API CRDs"
-    curl -fsSL "$gateway_api_url" -o "$work/gateway-api.yaml"
+    curl -fsSL --retry 3 "$gateway_api_url" -o "$work/gateway-api.yaml"
     echo "$gateway_api_sha256  $work/gateway-api.yaml" | sha256sum -c --quiet -
     kubectl apply --server-side -f "$work/gateway-api.yaml" >/dev/null
   fi

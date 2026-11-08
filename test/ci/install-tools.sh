@@ -67,9 +67,10 @@ workdir=$(mktemp -d)
 trap 'rm -rf "$workdir"' EXIT
 
 # Downloads URL to FILE in the work directory and checks its SHA-256.
+# Retries transient errors, such as a 504 from GitHub Releases.
 fetch() {
   local url="$1" file="$2" sha="$3"
-  curl -fsSL -o "$workdir/$file" "$url"
+  curl -fsSL --retry 3 -o "$workdir/$file" "$url"
   echo "$sha  $workdir/$file" | sha256sum -c --quiet - ||
     { echo "SHA-256 mismatch for $url" >&2; exit 1; }
 }
